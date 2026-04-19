@@ -13,7 +13,6 @@ background:linear-gradient(#0b0b1a,#140f2d);
 color:white;
 }
 
-/* 🔥 TOUCH FIX */
 *{
 -webkit-tap-highlight-color: transparent;
 }
@@ -23,14 +22,9 @@ cursor:pointer;
 transition: all 0.15s ease;
 }
 
-/* 🔥 CLICK EFFECT */
 button:active, .box:active, .card:active{
 transform: scale(0.95);
 opacity:0.7;
-}
-
-button:hover{
-box-shadow:0 0 10px rgba(255,0,255,0.6);
 }
 
 .header{
@@ -65,13 +59,10 @@ padding:15px;
 .video-btn{
 background: linear-gradient(45deg,#ff00cc,#3333ff);
 border:none;
-padding:12px 25px;
-border-radius:30px;
+padding:12px;
+border-radius:25px;
 color:white;
 font-size:16px;
-display:inline-flex;
-align-items:center;
-gap:8px;
 margin-bottom:10px;
 }
 
@@ -113,7 +104,6 @@ background:linear-gradient(45deg,purple,blue);
 color:white;
 }
 
-/* Gallery */
 .gallery-btn{
 border-radius:50%;
 background:linear-gradient(45deg,#ff7b00,#ff00cc);
@@ -186,42 +176,19 @@ border-radius:10px;
 <div class="chat-input">
 <input id="msg" placeholder="Type message...">
 <button class="gallery-btn" onclick="galleryClick()">📷</button>
-<button onclick="sendMsg()">Send</button>
+<button onclick="sendMessage()">Send</button>
 </div>
 </div>
 
 <!-- SERVICES -->
 <div class="services">
 
-<div class="card" onclick="selectService(200)">
-15 min private cam ₹200
-<button class="btn">BOOK</button>
-</div>
-
-<div class="card" onclick="selectService(300)">
-30 min private cam ₹300
-<button class="btn">BOOK</button>
-</div>
-
-<div class="card" onclick="selectService(200)">
-20 min voice call ₹200
-<button class="btn">BOOK</button>
-</div>
-
-<div class="card" onclick="selectService(300)">
-1 hour voice call ₹300
-<button class="btn">BOOK</button>
-</div>
-
-<div class="card" onclick="selectService(100)">
-30 min chat ₹100
-<button class="btn">BOOK</button>
-</div>
-
-<div class="card" onclick="selectService(200)">
-1 hour chat ₹200
-<button class="btn">BOOK</button>
-</div>
+<div class="card" onclick="selectService(200)">15 min private cam ₹200 <button class="btn">BOOK</button></div>
+<div class="card" onclick="selectService(300)">30 min private cam ₹300 <button class="btn">BOOK</button></div>
+<div class="card" onclick="selectService(200)">20 min voice call ₹200 <button class="btn">BOOK</button></div>
+<div class="card" onclick="selectService(300)">1 hour voice call ₹300 <button class="btn">BOOK</button></div>
+<div class="card" onclick="selectService(100)">30 min chat ₹100 <button class="btn">BOOK</button></div>
+<div class="card" onclick="selectService(200)">1 hour chat ₹200 <button class="btn">BOOK</button></div>
 
 </div>
 
@@ -264,7 +231,6 @@ document.getElementById("price").innerText="Selected Price: ₹"+p;
 
 function applyCoupon(){
 let code=document.getElementById("coupon").value;
-
 if(code.toLowerCase()=="firsttime"){
 price=50;
 document.getElementById("price").innerText="Discount Price: ₹100";
@@ -281,23 +247,6 @@ return;
 document.getElementById("qr").style.display="block";
 }
 
-/* CHAT */
-function sendMsg(){
-let msg=document.getElementById("msg").value;
-if(msg=="") return;
-
-let box=document.getElementById("chatBox");
-
-let div=document.createElement("div");
-div.className="message";
-div.innerText=msg;
-
-box.appendChild(div);
-document.getElementById("msg").value="";
-box.scrollTop=box.scrollHeight;
-}
-
-/* DUMMY FEATURES */
 function videoCall(){
 alert("Make payment first");
 }
@@ -306,16 +255,48 @@ function galleryClick(){
 alert("Make payment first");
 }
 
-/* PROOFS */
 function showProofs(){
 document.getElementById("proofSection").style.display="block";
 }
 
-/* PAYMENT */
 function paid(){
-alert("Payment received! We will contact you soon.");
+alert("Payment received!");
 }
 </script>
 
+<!-- 🔥 FIREBASE REAL CHAT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCn9bgrZxcaH3DF2CAYuLq7FT0nM0JFwjY",
+  authDomain: "mychat-9eb7c.firebaseapp.com",
+  databaseURL: "https://mychat-9eb7c-default-rtdb.firebaseio.com",
+  projectId: "mychat-9eb7c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.sendMessage = function(){
+  let msg = document.getElementById("msg").value;
+  if(msg=="") return;
+
+  push(ref(db, "messages"), { text: msg });
+  document.getElementById("msg").value="";
+}
+
+onChildAdded(ref(db, "messages"), (data) => {
+  let box = document.getElementById("chatBox");
+
+  let div = document.createElement("div");
+  div.className="message";
+  div.innerText=data.val().text;
+
+  box.appendChild(div);
+});
+</script>
+
 </body>
-  </html>
+</html>
