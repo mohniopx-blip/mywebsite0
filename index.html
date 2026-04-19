@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Service</title>
+
+<style>
+body{
+margin:0;
+font-family:sans-serif;
+background:linear-gradient(#0b0b1a,#140f2d);
+color:white;
+}
+
+.header{
+padding:15px;
+font-size:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.video-btn{
+background:red;
+padding:8px 15px;
+border:none;
+border-radius:10px;
+color:white;
+}
+
+.hero img{
+width:100%;
+height:auto;
+}
+
+.boxes{
+display:flex;
+gap:10px;
+padding:15px;
+}
+
+.box{
+flex:1;
+background:#1c1c2e;
+padding:20px;
+border-radius:15px;
+text-align:center;
+}
+
+.services{
+padding:15px;
+}
+
+.card{
+background:#1c1c2e;
+padding:15px;
+margin-top:10px;
+border-radius:15px;
+display:flex;
+justify-content:space-between;
+}
+
+.btn{
+background:linear-gradient(45deg,purple,blue);
+border:none;
+padding:10px 20px;
+border-radius:20px;
+color:white;
+}
+
+#qr{
+display:none;
+text-align:center;
+}
+
+#proofSection{
+display:none;
+padding:15px;
+}
+
+/* CHAT UI */
+#chatSection{
+display:none;
+padding:15px;
+}
+
+.chat-box{
+height:250px;
+overflow-y:scroll;
+background:#1c1c2e;
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+input{
+padding:10px;
+width:70%;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+❤️ ONLINE SERVICE
+<button class="video-btn" onclick="videoCall()">📹 Video Call</button>
+</div>
+
+<div class="hero">
+<img src="myphoto.jpg">
+</div>
+
+<div class="boxes">
+<div class="box" onclick="showProofs()">Past Proofs</div>
+<div class="box" onclick="openChat()">Live Chat</div>
+</div>
+
+<div class="services">
+
+<div class="card" onclick="selectService(200)">
+15 min private cam ₹200
+<button class="btn">BOOK</button>
+</div>
+
+<div class="card" onclick="selectService(300)">
+30 min private cam ₹300
+<button class="btn">BOOK</button>
+</div>
+
+<div class="card" onclick="selectService(200)">
+20 min voice call ₹200
+<button class="btn">BOOK</button>
+</div>
+
+<div class="card" onclick="selectService(300)">
+1 hour voice call ₹300
+<button class="btn">BOOK</button>
+</div>
+
+<div class="card" onclick="selectService(100)">
+30 min chat ₹100
+<button class="btn">BOOK</button>
+</div>
+
+<div class="card" onclick="selectService(200)">
+1 hour chat ₹200
+<button class="btn">BOOK</button>
+</div>
+
+</div>
+
+<div style="padding:15px;">
+<p id="price">Selected Price: ₹0</p>
+
+<input id="coupon" placeholder="Enter coupon code">
+<button class="btn" onclick="applyCoupon()">Apply</button>
+
+<br><br>
+<button class="btn" onclick="showQR()">Proceed to Pay</button>
+</div>
+
+<!-- QR -->
+<div id="qr">
+<h2>Scan & Pay</h2>
+<img src="qr.png" width="200">
+
+<br><br>
+<button class="btn" onclick="paid()">I Have Paid</button>
+</div>
+
+<!-- CHAT SECTION -->
+<div id="chatSection">
+<h2>Live Chat</h2>
+
+<div class="chat-box" id="chat"></div>
+
+<input id="msg" placeholder="Type message...">
+<button onclick="sendMsg()">Send</button>
+</div>
+
+<!-- PROOFS -->
+<div id="proofSection">
+<h2>Proofs</h2>
+<img src="img1.jpg">
+<img src="img2.jpg">
+<img src="img3.jpg">
+<img src="img4.jpg">
+<img src="img5.jpg">
+<img src="img6.jpg">
+</div>
+
+<script>
+let price = 0;
+let paidStatus = false;
+
+function selectService(p){
+price=p;
+document.getElementById("price").innerText="Selected Price: ₹"+p;
+}
+
+function applyCoupon(){
+let code=document.getElementById("coupon").value;
+
+if(code.toLowerCase()=="firsttime"){
+price=50;
+document.getElementById("price").innerText="Discount Price: ₹100";
+}else{
+alert("Invalid Coupon");
+}
+}
+
+function showQR(){
+if(price==0){
+alert("Select service first");
+return;
+}
+document.getElementById("qr").style.display="block";
+}
+
+function paid(){
+paidStatus = true;
+alert("Payment received! Now you can chat.");
+}
+
+function openChat(){
+if(!paidStatus){
+alert("❌ Please make payment first");
+return;
+}
+document.getElementById("chatSection").style.display="block";
+}
+
+function showProofs(){
+document.getElementById("proofSection").style.display="block";
+}
+
+function videoCall(){
+alert("❌ Make payment first");
+}
+</script>
+
+<!-- 🔥 FIREBASE CHAT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  databaseURL: "PASTE_HERE",
+  projectId: "PASTE_HERE"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.sendMsg = function(){
+let msg = document.getElementById("msg").value;
+push(ref(db, "messages"), { text: msg });
+document.getElementById("msg").value="";
+}
+
+onValue(ref(db, "messages"), (snapshot)=>{
+let chat = document.getElementById("chat");
+chat.innerHTML="";
+snapshot.forEach(child=>{
+chat.innerHTML += "<p>"+child.val().text+"</p>";
+});
+});
+</script>
+
+</body>
+</html>
