@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Live Stream</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--gold2:#f0d080;--dark:#0a0a0f;--dark2:#12121a;--pink:#e91e8c;--pink2:#ff4db8;--white:#f8f4ee;--gray:#888;--red:#ff3b3b;--green:#25d366;--chat-bg:#0b141a;--chat-other:#202c33;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--dark);color:var(--white);font-family:'Raleway',sans-serif;overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--dark2);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:4px;}
+img,video{-webkit-user-select:none!important;user-select:none!important;-webkit-user-drag:none!important;}
+body,p,div,span,h1,h2,h3,h4{-webkit-user-select:none;-moz-user-select:none;user-select:none;}
+input,textarea{-webkit-user-select:text!important;user-select:text!important;}
+video::-webkit-media-controls-download-button{display:none!important;}
+video{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0;}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:.5;}90%{opacity:.2;}100%{transform:translateY(-20px);opacity:0;}}
+
+/* SCREEN 1 - NOT LIVE */
+#notLiveScreen{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(233,30,140,.13),transparent 65%),var(--dark);padding:28px;text-align:center;}
+.nl-emoji{font-size:60px;margin-bottom:16px;animation:bounce 2s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.nl-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.nl-sub{font-size:13px;color:var(--gray);letter-spacing:1px;line-height:1.8;margin-bottom:28px;}
+.nl-times{background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(233,30,140,.07));border:1px solid rgba(201,168,76,.25);border-radius:18px;padding:20px 24px;width:100%;max-width:320px;margin-bottom:24px;}
+.nl-time-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.nl-time-row:last-child{border-bottom:none;}
+.nl-show-name{font-size:13px;font-weight:700;color:var(--white);}
+.nl-show-time{font-size:12px;color:var(--gold2);font-weight:600;}
+.nl-back{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:14px;padding:14px 36px;color:#fff;font-family:'Raleway',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+
+/* SCREEN 2 - PREVIEW */
+#previewScreen{display:none;position:fixed;inset:0;z-index:300;background:#000;flex-direction:column;}
+#previewScreen.active{display:flex;}
+.prev-top{position:absolute;top:0;left:0;right:0;z-index:10;padding:16px;background:linear-gradient(180deg,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:space-between;}
+.prev-live-badge{display:flex;align-items:center;gap:6px;background:var(--red);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;}
+.prev-live-dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:ldot 1s ease-in-out infinite;}
+@keyframes ldot{0%,100%{opacity:1;}50%{opacity:.2;}}
+.prev-timer-badge{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 16px;font-size:13px;font-weight:700;color:#fff;}
+#previewVid{width:100%;height:100%;object-fit:cover;pointer-events:auto;}
+.prev-overlay{position:absolute;inset:0;z-index:9;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.9) 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:28px 24px;}
+.prev-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;text-align:center;}
+.prev-sub{font-size:13px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:20px;}
+.prev-bar-wrap{width:100%;height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;margin-bottom:20px;}
+.prev-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--pink));border-radius:2px;width:0%;}
+
+/* SCREEN 3 - TOKEN */
+#tokenScreen{display:none;position:fixed;inset:0;z-index:300;background:radial-gradient(ellipse at center,#1a0a2e,var(--dark) 70%);flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;}
+#tokenScreen.active{display:flex;}
+.tok-icon{font-size:56px;margin-bottom:16px;animation:bounce 2s ease-in-out infinite;}
+.tok-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.tok-sub{font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:28px;}
+.tok-card{background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(233,30,140,.07));border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:24px 20px;width:100%;max-width:340px;margin-bottom:20px;}
+.tok-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(201,168,76,.3);border-radius:12px;padding:14px 16px;color:var(--white);font-family:'Raleway',sans-serif;font-size:15px;outline:none;margin-bottom:14px;transition:border-color .3s;-webkit-user-select:text!important;user-select:text!important;}
+.tok-input:focus{border-color:var(--gold);}
+.tok-input::placeholder{color:rgba(255,255,255,.3);}
+.tok-enter-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:12px;padding:14px;color:#fff;font-family:'Raleway',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:14px;pointer-events:auto;}
+.tok-divider{font-size:12px;color:var(--gray);margin:4px 0 14px;}
+.tok-get-btn{width:100%;background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.35);border-radius:12px;padding:13px;color:#25d366;font-family:'Raleway',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;pointer-events:auto;}
+.tok-note{font-size:11px;color:rgba(255,255,255,.3);line-height:1.7;margin-top:16px;}
+
+/* SCREEN 4 - LIVE */
+#liveScreen{display:none;flex-direction:column;min-height:100vh;}
+#liveScreen.active{display:flex;}
+.live-hdr{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.95);backdrop-filter:blur(10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.15);}
+.live-hdr-left{display:flex;align-items:center;gap:10px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--red);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;}
+.live-dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:ldot 1s ease-in-out infinite;}
+.live-viewers{font-size:12px;color:var(--gray);display:flex;align-items:center;gap:4px;}
+.live-back-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;color:var(--white);font-family:'Raleway',sans-serif;font-size:12px;cursor:pointer;pointer-events:auto;}
+.live-video-wrap{position:relative;width:100%;background:#000;}
+#liveVid{width:100%;display:block;object-fit:cover;pointer-events:auto;}
+.live-vid-overlay{position:absolute;top:10px;left:10px;display:flex;gap:8px;}
+.live-duration{background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border-radius:20px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);}
+.reactions-bar{background:var(--dark2);padding:10px 16px;display:flex;align-items:center;gap:10px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);}
+.reactions-bar::-webkit-scrollbar{display:none;}
+.react-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:7px 14px;font-size:16px;cursor:pointer;transition:transform .2s;flex-shrink:0;display:flex;align-items:center;gap:5px;pointer-events:auto;}
+.react-btn:active{transform:scale(1.25);}
+.react-count{font-size:11px;color:var(--gray);}
+.fly-emoji{position:absolute;font-size:24px;animation:flyUp2 2.5s ease-out forwards;pointer-events:none;}
+@keyframes flyUp2{0%{transform:translateY(0) scale(1);opacity:1;}100%{transform:translateY(-200px) scale(1.5);opacity:0;}}
+.live-chat-wrap{flex:1;display:flex;flex-direction:column;background:var(--chat-bg);}
+.live-chat-title{padding:12px 16px;font-size:13px;font-weight:700;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px;}
+.live-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:300px;}
+.live-msg{display:flex;gap:8px;align-items:flex-start;animation:msgIn .3s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.live-msg-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.live-msg-body{flex:1;}
+.live-msg-name{font-size:11px;color:var(--gold2);font-weight:700;margin-bottom:2px;}
+.live-msg-text{font-size:13px;color:rgba(255,255,255,.85);line-height:1.4;word-break:break-word;}
+.live-msg-img{width:140px;border-radius:10px;margin-top:4px;display:block;pointer-events:none;}
+.live-msg.is-host .live-msg-avatar{background:linear-gradient(135deg,var(--red),#ff6b6b);}
+.live-msg.is-host .live-msg-name{color:#ff9a9a;}
+.live-input-wrap{background:var(--dark2);padding:10px 12px;display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,.06);padding-bottom:calc(10px + env(safe-area-inset-bottom));}
+.live-file-btn{background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;padding:4px;pointer-events:auto;}
+#liveChatInput{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:20px;padding:9px 16px;color:#fff;font-family:'Raleway',sans-serif;font-size:14px;outline:none;-webkit-user-select:text!important;user-select:text!important;}
+#liveChatInput::placeholder{color:rgba(255,255,255,.3);}
+.live-send-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;width:40px;height:40px;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;pointer-events:auto;}
+#livePhotoInput{display:none;}
+.chat-photo-prev{display:none;background:rgba(255,255,255,.05);border-top:1px solid rgba(255,255,255,.08);padding:8px 14px;align-items:center;gap:10px;}
+.chat-photo-prev.show{display:flex;}
+.cprev-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;pointer-events:none;}
+.cprev-name{font-size:12px;color:var(--gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cprev-rm{background:none;border:none;color:#e06060;font-size:18px;cursor:pointer;pointer-events:auto;}
+.float-react-area{position:fixed;right:12px;bottom:130px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;z-index:80;}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(60px);background:rgba(30,30,40,.95);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:11px 22px;color:var(--white);font-size:13px;z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);backdrop-filter:blur(10px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<!-- SCREEN 1: NOT LIVE -->
+<div id="notLiveScreen">
+  <div class="nl-emoji">📡</div>
+  <div class="nl-title">Live Abhi Nahi Hai</div>
+  <div class="nl-sub">Streaming sirf inhi timings par hoti hai.<br>Sahi waqt par aao! 🔥</div>
+  <div class="nl-times">
+    <div class="nl-time-row">
+      <div class="nl-show-name">🌅 Morning Show</div>
+      <div class="nl-show-time">11:40 AM – 12:00 PM</div>
+    </div>
+    <div class="nl-time-row">
+      <div class="nl-show-name">🌙 Night Show</div>
+      <div class="nl-show-time">1:00 AM – 2:00 AM</div>
+    </div>
+  </div>
+  <button class="nl-back" onclick="window.location.href='index.html'">← Wapas Jao</button>
+</div>
+
+<!-- SCREEN 2: PREVIEW -->
+<div id="previewScreen">
+  <div class="prev-top">
+    <div class="prev-live-badge"><div class="prev-live-dot"></div> LIVE</div>
+    <div class="prev-timer-badge">Preview: <span id="prevCountdown">5</span>s</div>
+  </div>
+  <video id="previewVid" src="video99.mp4" autoplay muted playsinline
+    controlslist="nodownload nofullscreen noremoteplayback"
+    disablepictureinpicture oncontextmenu="return false"></video>
+  <div class="prev-overlay">
+    <div class="prev-title">🔴 Live Stream</div>
+    <div class="prev-sub">Token code se full access unlock karo</div>
+    <div class="prev-bar-wrap"><div class="prev-bar" id="prevBar"></div></div>
+  </div>
+</div>
+
+<!-- SCREEN 3: TOKEN -->
+<div id="tokenScreen">
+  <div class="tok-icon">🎫</div>
+  <div class="tok-title">Token Code Chahiye</div>
+  <div class="tok-sub">Preview khatam! Full live access ke liye<br><strong style="color:var(--gold);">Token Code</strong> enter karo.</div>
+  <div class="tok-card">
+    <input type="text" class="tok-input" id="tokenInput" placeholder="Token Code Daalo..." maxlength="30" autocomplete="off">
+    <button class="tok-enter-btn" onclick="verifyToken()">Enter Live Stream</button>
+    <div class="tok-divider">— ya phir —</div>
+    <button class="tok-get-btn" onclick="getTokenFromChat()">💬 Get Token Code (Chat se lo)</button>
+  </div>
+  <div class="tok-note">Chat mein jaao aur request karo — admin dega!</div>
+</div>
+
+<!-- SCREEN 4: LIVE -->
+<div id="liveScreen">
+  <div class="live-hdr">
+    <div class="live-hdr-left">
+      <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+      <div class="live-viewers">👁 <span id="viewerCount">1</span> watching</div>
+    </div>
+    <button class="live-back-btn" onclick="window.location.href='index.html'">← Home</button>
+  </div>
+  <div class="live-video-wrap">
+    <video id="liveVid" src="video99.mp4" autoplay playsinline controls
+      controlslist="nodownload nofullscreen noremoteplayback"
+      disablepictureinpicture oncontextmenu="return false"></video>
+    <div class="live-vid-overlay">
+      <div class="live-duration" id="liveDuration">00:00</div>
+    </div>
+  </div>
+  <div class="reactions-bar">
+    <button class="react-btn" onclick="sendReaction('heart')">❤️ <span class="react-count" id="rc1">0</span></button>
+    <button class="react-btn" onclick="sendReaction('fire')">🔥 <span class="react-count" id="rc2">0</span></button>
+    <button class="react-btn" onclick="sendReaction('love')">😍 <span class="react-count" id="rc3">0</span></button>
+    <button class="react-btn" onclick="sendReaction('clap')">👏 <span class="react-count" id="rc4">0</span></button>
+    <button class="react-btn" onclick="sendReaction('gem')">💎 <span class="react-count" id="rc5">0</span></button>
+    <button class="react-btn" onclick="sendReaction('hug')">🥰 <span class="react-count" id="rc6">0</span></button>
+  </div>
+  <div class="float-react-area" id="floatReactArea"></div>
+  <div class="live-chat-wrap">
+    <div class="live-chat-title">💬 Live Chat</div>
+    <div class="live-msgs" id="liveMsgs"></div>
+    <div class="chat-photo-prev" id="chatPhotoPrev">
+      <img id="cprevThumb" class="cprev-thumb" src="" alt="">
+      <span id="cprevName" class="cprev-name"></span>
+      <button class="cprev-rm" onclick="removeChatPhoto()">✕</button>
+    </div>
+    <div class="live-input-wrap">
+      <input type="file" id="livePhotoInput" accept="image/*" onchange="onLivePhoto(event)">
+      <button class="live-file-btn" onclick="document.getElementById('livePhotoInput').click()">📎</button>
+      <input type="text" id="liveChatInput" placeholder="Message likhao..." maxlength="200" onkeydown="if(event.key==='Enter')sendLiveMsg()">
+      <button class="live-send-btn" onclick="sendLiveMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const cfg = {
+  apiKey:"AIzaSyAt5S-K9Gu-fCjEgbqk38mGYAo6R7DwgHc",
+  authDomain:"vipliveme.firebaseapp.com",
+  projectId:"vipliveme",
+  storageBucket:"vipliveme.firebasestorage.app",
+  messagingSenderId:"212842409897",
+  appId:"1:212842409897:web:b1feadb097db068fe95eb8",
+  databaseURL:"https://vipliveme-default-rtdb.firebaseio.com"
+};
+const app = initializeApp(cfg);
+const db = getDatabase(app);
+window._FB = { db, ref, push, onChildAdded, set, onValue };
+window._fbOk = true;
+document.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+const IMGBB_KEY = 'c4b4735988d74b7ebb4119130a8cb07c';
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// PARTICLES
+(function(){
+  const c = document.getElementById('particles');
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.cssText='left:'+Math.random()*100+'%;width:'+(1+Math.random()*3)+'px;height:'+(1+Math.random()*3)+'px;animation-duration:'+(8+Math.random()*12)+'s;animation-delay:'+Math.random()*10+'s;background:'+(Math.random()>.5?'#c9a84c':'#e91e8c')+';';
+    c.appendChild(p);
+  }
+})();
+
+// STATE
+let uname = localStorage.getItem('vip_uname') || 'Guest';
+let uid = localStorage.getItem('vip_uid') || ('u_'+Date.now());
+let pendPhoto = null;
+
+const EMOJIS = { heart:'❤️', fire:'🔥', love:'😍', clap:'👏', gem:'💎', hug:'🥰' };
+const reactNums = { heart:0, fire:0, love:0, clap:0, gem:0, hug:0 };
+const reactIds  = { heart:'rc1', fire:'rc2', love:'rc3', clap:'rc4', gem:'rc5', hug:'rc6' };
+
+// SHOW TIMINGS
+const SHOWS = [
+  { startH:11, startM:40, endH:12, endM:0 },
+  { startH:1,  startM:0,  endH:2,  endM:0 }
+];
+
+function isLiveNow() {
+  const now = new Date();
+  for(const s of SHOWS){
+    const start = new Date(now); start.setHours(s.startH, s.startM, 0, 0);
+    const end   = new Date(now); end.setHours(s.endH, s.endM, 0, 0);
+    if(s.startH < 6 && now.getHours() >= 6){
+      start.setDate(start.getDate()+1);
+      end.setDate(end.getDate()+1);
+    }
+    if(now >= start && now < end) return true;
+  }
+  return false;
+}
+
+function getDeviceKey() {
+  let k = localStorage.getItem('vip_fp');
+  if(!k){ k='fp_'+Date.now()+'_'+Math.random().toString(36).substr(2,6); localStorage.setItem('vip_fp',k); }
+  return k;
+}
+function hasSeenPreview() { return localStorage.getItem('preview_seen_'+getDeviceKey()) === '1'; }
+function markPreviewSeen(){ localStorage.setItem('preview_seen_'+getDeviceKey(),'1'); }
+function hasValidToken() { return localStorage.getItem('live_token_'+uid) === '1'; }
+function markTokenValid(){ localStorage.setItem('live_token_'+uid,'1'); }
+
+const VALID_TOKENS = ['VIP2024','LIVE99','TOKEN123','PREMIUM1'];
+
+// INIT
+window.addEventListener('load', () => {
+  if(!isLiveNow()){
+    document.getElementById('notLiveScreen').style.display = 'flex';
+    return;
+  }
+  document.getElementById('notLiveScreen').style.display = 'none';
+  if(hasValidToken()){ showLivePage(); return; }
+  if(!hasSeenPreview()){ startPreview(); }
+  else { showTokenScreen(); }
+});
+
+// PREVIEW
+function startPreview(){
+  const ps = document.getElementById('previewScreen');
+  ps.classList.add('active');
+  const bar = document.getElementById('prevBar');
+  const cd  = document.getElementById('prevCountdown');
+  let count = 5;
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  setTimeout(() => {
+    bar.style.transition = 'width 5s linear';
+    bar.style.width = '100%';
+  }, 50);
+  const iv = setInterval(() => {
+    count--;
+    cd.textContent = count;
+    if(count <= 0){
+      clearInterval(iv);
+      markPreviewSeen();
+      try{ document.getElementById('previewVid').pause(); }catch(e){}
+      ps.classList.remove('active');
+      showTokenScreen();
+    }
+  }, 1000);
+}
+
+// TOKEN
+function showTokenScreen(){
+  document.getElementById('tokenScreen').classList.add('active');
+}
+
+function verifyToken(){
+  const val = document.getElementById('tokenInput').value.trim().toUpperCase();
+  if(!val){ showToast('Token code daalo!'); return; }
+  if(window._fbOk){
+    const { db, ref, onValue } = window._FB;
+    onValue(ref(db,'validTokens/'+val), snap => {
+      if(snap.exists() || VALID_TOKENS.includes(val)){
+        markTokenValid();
+        document.getElementById('tokenScreen').classList.remove('active');
+        if(window._fbOk) window._FB.set(window._FB.ref(db,'usedTokens/'+val+'_'+uid),{uid,name:uname,usedAt:Date.now()});
+        showLivePage();
+      } else {
+        document.getElementById('tokenInput').style.borderColor='#e91e8c';
+        setTimeout(()=>document.getElementById('tokenInput').style.borderColor='rgba(201,168,76,.3)',2000);
+        showToast('Token invalid hai!');
+      }
+    },{onlyOnce:true});
+  } else {
+    if(VALID_TOKENS.includes(val)){ markTokenValid(); document.getElementById('tokenScreen').classList.remove('active'); showLivePage(); }
+    else showToast('Token invalid hai!');
+  }
+}
+
+function getTokenFromChat(){
+  const msg = 'Mujhe Live Stream ka Token Code chahiye! ('+new Date().toLocaleTimeString('en-IN')+')';
+  if(window._fbOk){
+    const { db, ref, push, set } = window._FB;
+    push(ref(db,'chats/'+uid+'/messages'),{ sender:'user', username:uname, uid, text:msg, timestamp:Date.now(), mediaUrl:null, mediaType:null, isTokenRequest:true });
+    set(ref(db,'chats/'+uid+'/info'),{ username:uname, uid, lastMsg:msg, lastSeen:Date.now(), unread:true });
+  }
+  showToast('Request bhej di! Chat check karo.');
+  setTimeout(()=>{ window.location.href='index.html'; }, 1500);
+}
+
+// LIVE PAGE
+let liveStartTime = Date.now();
+function showLivePage(){
+  document.getElementById('liveScreen').classList.add('active');
+  initLiveChat();
+  setInterval(()=>{
+    const sec = Math.floor((Date.now()-liveStartTime)/1000);
+    const m = String(Math.floor(sec/60)).padStart(2,'0');
+    const s = String(sec%60).padStart(2,'0');
+    document.getElementById('liveDuration').textContent = m+':'+s;
+  },1000);
+  let v = Math.floor(Math.random()*80)+20;
+  document.getElementById('viewerCount').textContent = v;
+  setInterval(()=>{
+    v += Math.floor(Math.random()*5)-2;
+    if(v<5)v=5;
+    document.getElementById('viewerCount').textContent = v;
+  },5000);
+  loadReactions();
+}
+
+// REACTIONS
+function loadReactions(){
+  if(!window._fbOk) return;
+  const { db, ref, onValue } = window._FB;
+  onValue(ref(db,'liveReactions'), snap => {
+    const data = snap.val() || {};
+    for(const key of Object.keys(reactNums)){
+      reactNums[key] = data[key] || 0;
+      document.getElementById(reactIds[key]).textContent = reactNums[key];
+    }
+  });
+}
+
+function sendReaction(key){
+  reactNums[key]++;
+  document.getElementById(reactIds[key]).textContent = reactNums[key];
+  floatEmoji(EMOJIS[key]);
+  if(window._fbOk){
+    const { db, ref, set } = window._FB;
+    set(ref(db,'liveReactions/'+key), reactNums[key]);
+  }
+}
+
+function floatEmoji(emoji){
+  const area = document.getElementById('floatReactArea');
+  const el = document.createElement('div');
+  el.className = 'fly-emoji';
+  el.textContent = emoji;
+  el.style.right = Math.random()*30+'px';
+  area.appendChild(el);
+  setTimeout(()=>el.remove(), 2500);
+}
+
+// LIVE CHAT
+const RNAMES = ['Priya','Neha','Anjali','Kavya','Simran','Riya','Pooja','Sneha','Meera','Divya'];
+const RMSGS  = ['Tum bahut sundar ho!','Best stream ever!','Love you!','Amazing content!','Ekdum mast!','Bahut pyaari ho!','Daily aana chahiye!','You are the best!','So cute!','Teri smile best hai!'];
+let chatInited = false;
+
+function initLiveChat(){
+  if(chatInited) return;
+  chatInited = true;
+  function addRandom(){
+    const name = RNAMES[Math.floor(Math.random()*RNAMES.length)];
+    const text = RMSGS[Math.floor(Math.random()*RMSGS.length)];
+    addMsg({ name, text, isHost:false });
+    setTimeout(addRandom, 3000+Math.random()*6000);
+  }
+  setTimeout(addRandom, 2000);
+  if(window._fbOk){
+    const { db, ref, onChildAdded } = window._FB;
+    onChildAdded(ref(db,'liveChatMsgs'), snap => {
+      const m = snap.val();
+      if(m) addMsg({ name:m.username||'User', text:m.text, imgUrl:m.imgUrl, isHost:m.isHost||false });
+    });
+  }
+}
+
+function addMsg({ name, text, imgUrl, isHost }){
+  const area = document.getElementById('liveMsgs');
+  const div = document.createElement('div');
+  div.className = 'live-msg'+(isHost?' is-host':'');
+  const init = name.charAt(0).toUpperCase();
+  let inner = '<div class="live-msg-avatar">'+init+'</div><div class="live-msg-body"><div class="live-msg-name">'+esc(name)+'</div>';
+  if(imgUrl) inner += '<img src="'+imgUrl+'" class="live-msg-img" oncontextmenu="return false">';
+  if(text) inner += '<div class="live-msg-text">'+esc(text)+'</div>';
+  inner += '</div>';
+  div.innerHTML = inner;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function sendLiveMsg(){
+  const inp = document.getElementById('liveChatInput');
+  const txt = inp.value.trim();
+  if(!txt && !pendPhoto) return;
+  inp.value = '';
+  let imgUrl = null;
+  if(pendPhoto){
+    try{
+      showToast('Uploading...');
+      imgUrl = await uploadToImgBB(pendPhoto.dataUrl);
+      removeChatPhoto();
+    }catch(e){ showToast('Upload failed'); return; }
+  }
+  addMsg({ name:uname, text:txt, imgUrl, isHost:false });
+  if(window._fbOk){
+    const { db, ref, push } = window._FB;
+    push(ref(db,'liveChatMsgs'),{ uid, username:uname, text:txt||'', imgUrl:imgUrl||null, timestamp:Date.now(), isHost:false });
+  }
+}
+
+function onLivePhoto(e){
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    pendPhoto = { dataUrl:ev.target.result, name:f.name };
+    document.getElementById('cprevThumb').src = ev.target.result;
+    document.getElementById('cprevName').textContent = f.name;
+    document.getElementById('chatPhotoPrev').classList.add('show');
+  };
+  r.readAsDataURL(f); e.target.value='';
+}
+function removeChatPhoto(){
+  pendPhoto=null;
+  document.getElementById('chatPhotoPrev').classList.remove('show');
+  document.getElementById('cprevThumb').src='';
+}
+
+async function uploadToImgBB(dataUrl){
+  const base64 = dataUrl.split(',')[1];
+  const fd = new FormData();
+  fd.append('key', IMGBB_KEY);
+  fd.append('image', base64);
+  const res = await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+  const json = await res.json();
+  if(json.success) return json.data.url;
+  throw new Error('failed');
+}
+
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+window.verifyToken=verifyToken;
+window.getTokenFromChat=getTokenFromChat;
+window.sendReaction=sendReaction;
+window.sendLiveMsg=sendLiveMsg;
+window.onLivePhoto=onLivePhoto;
+window.removeChatPhoto=removeChatPhoto;
+</script>
+</body>
+</html>
