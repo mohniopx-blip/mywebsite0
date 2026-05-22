@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--gold2:#f0d080;--dark:#0a0a0f;--dark2:#12121a;--dark3:#1a1a26;--pink:#e91e8c;--pink2:#ff4db8;--white:#f8f4ee;--gray:#888;--green:#25d366;--red:#e05050;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--dark);color:var(--white);font-family:'Raleway',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--dark2);}::-webkit-scrollbar-thumb{background:var(--gold);}
+#admin-login{position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a0a2e 0%,#0a0a0f 70%);display:flex;align-items:center;justify-content:center;z-index:999;transition:opacity .6s;}
+#admin-login.hide{opacity:0;pointer-events:none;}
+.login-card{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(233,30,140,.06));border:1px solid rgba(201,168,76,.25);border-radius:24px;padding:44px 32px;width:90%;max-width:380px;text-align:center;box-shadow:0 0 80px rgba(233,30,140,.15);}
+.login-icon{font-size:46px;margin-bottom:14px;}
+.login-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.login-sub{font-size:12px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:26px;}
+.admin-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.25);border-radius:12px;padding:13px 17px;color:var(--white);font-family:'Raleway',sans-serif;font-size:14px;outline:none;margin-bottom:13px;transition:border-color .3s;}
+.admin-input:focus{border-color:var(--gold);}
+.admin-input::placeholder{color:rgba(255,255,255,.3);}
+.admin-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:12px;padding:14px;color:#fff;font-family:'Raleway',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.login-error{font-size:12px;color:var(--red);margin-top:9px;display:none;}
+#admin-panel{display:none;}
+#admin-panel.visible{display:block;}
+.admin-header{background:var(--dark2);border-bottom:1px solid rgba(201,168,76,.15);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.admin-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.admin-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-left:10px;}
+.logout-btn{background:rgba(224,80,80,.14);border:1px solid rgba(224,80,80,.3);border-radius:9px;padding:7px 15px;color:var(--red);font-size:12px;cursor:pointer;font-family:'Raleway',sans-serif;font-weight:600;}
+.admin-content{padding:16px;max-width:600px;margin:0 auto;}
+.tabs{display:flex;gap:7px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;}
+.tabs::-webkit-scrollbar{height:0;}
+.tab-btn{padding:8px 13px;border-radius:11px;border:1px solid rgba(201,168,76,.2);background:rgba(255,255,255,.04);color:var(--gray);font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.tab-btn.active{background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(233,30,140,.15));border-color:var(--gold);color:var(--gold2);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.admin-card{background:linear-gradient(135deg,rgba(201,168,76,.05),rgba(233,30,140,.03));border:1px solid rgba(201,168,76,.14);border-radius:17px;padding:18px;margin-bottom:14px;}
+.card-title{font-weight:700;font-size:14px;color:var(--gold2);margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.form-label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block;}
+.form-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:11px 14px;color:var(--white);font-family:'Raleway',sans-serif;font-size:14px;outline:none;margin-bottom:11px;transition:border-color .3s;resize:vertical;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(255,255,255,.25);}
+.save-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:11px;padding:12px 24px;color:#fff;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+.save-btn:active{transform:scale(.97);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.14);border-radius:13px;padding:16px;text-align:center;}
+.stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:11px;color:var(--gray);margin-top:3px;letter-spacing:1px;text-transform:uppercase;}
+.user-chip-wrap{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto;flex-wrap:wrap;padding-bottom:4px;}
+.user-chip-wrap::-webkit-scrollbar{height:0;}
+.user-chip{padding:6px 13px;border-radius:18px;border:1px solid rgba(201,168,76,.2);background:rgba(255,255,255,.04);color:var(--gray);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:'Raleway',sans-serif;}
+.user-chip.active{background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(233,30,140,.15));border-color:var(--gold);color:var(--gold2);}
+.user-chip.blocked-chip{border-color:rgba(224,80,80,.4);color:var(--red);}
+.unread-dot{display:inline-block;width:6px;height:6px;background:var(--pink);border-radius:50%;margin-left:4px;vertical-align:middle;}
+.user-info-bar{display:none;align-items:center;justify-content:space-between;padding:9px 13px;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.14);border-radius:11px;margin-bottom:11px;}
+.user-info-bar.show{display:flex;}
+.uib-name{font-size:13px;font-weight:700;color:var(--white);}
+.uib-uid{font-size:10px;color:var(--gray);font-family:monospace;margin-top:2px;}
+.block-btn{background:rgba(224,80,80,.14);border:1.5px solid rgba(224,80,80,.38);border-radius:9px;padding:7px 14px;color:var(--red);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.block-btn.unblock{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.38);color:var(--green);}
+.allow-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.14);border-radius:11px;margin-bottom:10px;}
+.allow-label{font-size:13px;color:var(--white);display:flex;align-items:center;gap:8px;}
+.toggle-switch{position:relative;width:46px;height:26px;cursor:pointer;}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:13px;transition:background .3s;}
+.toggle-slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .3s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--green);}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);}
+.chat-list{display:flex;flex-direction:column;gap:7px;max-height:320px;overflow-y:auto;margin-bottom:12px;}
+.chat-msg-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 13px;}
+.chat-msg-sender{font-size:11px;color:var(--gold);font-weight:600;margin-bottom:3px;}
+.chat-msg-text{font-size:13px;color:var(--white);line-height:1.5;word-break:break-word;}
+.chat-msg-time{font-size:10px;color:var(--gray);margin-top:3px;}
+.chat-msg-img{width:140px;border-radius:9px;margin-top:5px;display:block;cursor:pointer;}
+.lock-toggle-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(233,30,140,.07);border:1px solid rgba(233,30,140,.2);border-radius:10px;cursor:pointer;margin-bottom:11px;}
+.lock-toggle-row.locked-on{background:rgba(233,30,140,.15);border-color:rgba(233,30,140,.45);}
+.lock-toggle-label{font-size:13px;color:rgba(255,255,255,.7);flex:1;}
+.lock-toggle-row.locked-on .lock-toggle-label{color:#ff4db8;font-weight:700;}
+.reply-row{display:flex;gap:7px;align-items:flex-end;}
+.att-btn{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.28);border-radius:11px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;}
+.reply-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.2);border-radius:11px;padding:11px 14px;color:var(--white);font-family:'Raleway',sans-serif;font-size:14px;outline:none;}
+.reply-input:focus{border-color:var(--gold);}
+.reply-send-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:11px;padding:11px 16px;color:#fff;font-size:17px;cursor:pointer;height:42px;display:flex;align-items:center;justify-content:center;}
+.admin-mprev-wrap{display:none;align-items:center;gap:9px;padding:8px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:10px;margin-bottom:10px;}
+.admin-mprev-wrap.active{display:flex;}
+.admin-mpthumb{width:46px;height:46px;border-radius:7px;object-fit:cover;}
+.admin-mprem{background:none;border:none;color:var(--red);font-size:17px;cursor:pointer;}
+.upload-prog{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--gold);display:none;margin-bottom:9px;align-items:center;gap:7px;}
+.upload-prog.active{display:flex;}
+.grp-msgs-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px;}
+.grp-msg-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-left:3px solid;border-radius:10px;padding:10px 13px;}
+.grp-msg-item.admin-grp{border-left-color:var(--gold);}
+.grp-msg-item.user-grp{border-left-color:#53bdeb;}
+.grp-msg-txt{font-size:13px;color:var(--white);line-height:1.5;word-break:break-word;}
+.grp-msg-meta{font-size:10px;color:var(--gray);margin-top:3px;display:flex;align-items:center;gap:7px;}
+.lock-badge-sm{background:rgba(233,30,140,.15);border:1px solid rgba(233,30,140,.3);border-radius:6px;padding:2px 7px;font-size:9px;color:var(--pink2);font-weight:700;}
+.grp-msg-thumb{width:80px;height:60px;border-radius:8px;object-fit:cover;margin-top:5px;}
+.typing-toggle{display:flex;align-items:center;gap:9px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:11px;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.typing-toggle.on{border-color:var(--green);background:rgba(37,211,102,.06);}
+.toggle-dot{width:11px;height:11px;border-radius:50%;background:var(--gray);transition:background .3s;}
+.typing-toggle.on .toggle-dot{background:var(--green);box-shadow:0 0 7px rgba(37,211,102,.6);}
+.toggle-lbl{font-size:13px;color:var(--gray);font-weight:600;}
+.typing-toggle.on .toggle-lbl{color:var(--green);}
+.visitor-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.vis-av{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.vis-name{font-weight:600;font-size:13px;}
+.vis-time{font-size:10px;color:var(--gray);margin-top:2px;}
+.vis-block-btn{background:rgba(224,80,80,.12);border:1px solid rgba(224,80,80,.28);border-radius:8px;padding:5px 10px;color:var(--red);font-size:11px;font-weight:700;cursor:pointer;font-family:'Raleway',sans-serif;margin-left:auto;flex-shrink:0;}
+.vis-block-btn.unblock{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.28);color:var(--green);}
+.sub-item{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.14);border-radius:13px;padding:14px;margin-bottom:11px;}
+.sub-item.pending{border-color:rgba(255,152,0,.3);}
+.sub-item.approved{border-color:rgba(37,211,102,.3);}
+.sub-item.rejected{border-color:rgba(224,80,80,.3);}
+.sub-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:3px;}
+.sub-uid{font-size:10px;color:var(--gray);font-family:monospace;margin-bottom:5px;}
+.sub-txn{background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.18);border-radius:9px;padding:9px 13px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sub-txn-val{font-size:13px;font-weight:700;color:var(--gold2);font-family:monospace;flex:1;word-break:break-all;}
+.sub-copy-btn{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.28);border-radius:7px;padding:5px 11px;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:'Raleway',sans-serif;white-space:nowrap;}
+.sub-actions{display:flex;gap:7px;}
+.sub-approve{flex:1;background:linear-gradient(135deg,var(--green),#128c7e);border:none;border-radius:9px;padding:9px;color:#fff;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.sub-reject{background:rgba(224,80,80,.14);border:1.5px solid rgba(224,80,80,.38);border-radius:9px;padding:9px 14px;color:var(--red);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.sub-delete{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 11px;color:var(--gray);font-family:'Raleway',sans-serif;font-size:12px;cursor:pointer;}
+.status-chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:18px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;}
+.status-chip.pending{background:rgba(255,152,0,.14);border:1px solid rgba(255,152,0,.38);color:#ffb74d;}
+.status-chip.approved{background:rgba(37,211,102,.14);border:1px solid rgba(37,211,102,.38);color:var(--green);}
+.status-chip.rejected{background:rgba(224,80,80,.14);border:1px solid rgba(224,80,80,.38);color:var(--red);}
+.blocked-item{background:rgba(224,80,80,.05);border:1px solid rgba(224,80,80,.18);border-radius:11px;padding:13px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:9px;}
+.bl-icon{font-size:22px;flex-shrink:0;}
+.bl-name{font-weight:700;font-size:13px;color:var(--white);margin-bottom:2px;}
+.bl-uid{font-size:10px;color:var(--gray);font-family:monospace;}
+.unblock-btn{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.28);border-radius:8px;padding:6px 13px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:'Raleway',sans-serif;flex-shrink:0;align-self:center;margin-left:auto;}
+.grp-settings-row{display:flex;gap:10px;margin-bottom:12px;}
+.grp-settings-row .form-input{margin-bottom:0;flex:1;}
+.danger-btn{background:rgba(224,80,80,.14);border:1px solid rgba(224,80,80,.28);border-radius:11px;padding:10px 18px;color:var(--red);font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-right:7px;margin-bottom:7px;}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.2),transparent);margin:13px 0;}
+.spin{width:18px;height:18px;border:2px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:7px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-state{text-align:center;color:var(--gray);font-size:13px;padding:24px;}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(30,30,40,.95);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:11px 22px;color:var(--white);font-size:13px;z-index:1000;transition:transform .4s cubic-bezier(.34,1.56,.64,1);backdrop-filter:blur(10px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.confirm-overlay.show{display:flex;}
+.confirm-box{background:linear-gradient(135deg,var(--dark3),#1a0820);border:1.5px solid rgba(224,80,80,.4);border-radius:20px;padding:30px 26px;max-width:300px;width:90%;text-align:center;animation:popin .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popin{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.confirm-icon{font-size:42px;margin-bottom:12px;}
+.confirm-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;color:var(--red);margin-bottom:9px;}
+.confirm-msg{font-size:12px;color:var(--gray);line-height:1.7;margin-bottom:22px;}
+.confirm-btns{display:flex;gap:9px;}
+.confirm-cancel{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px;color:var(--gray);font-family:'Raleway',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.confirm-ok{flex:2;background:linear-gradient(135deg,#e05050,#c0392b);border:none;border-radius:11px;padding:11px;color:#fff;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+/* SUB STATUS INFO */
+.sub-status-info{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:9px;padding:8px 13px;font-size:11px;color:#25d366;margin-top:8px;display:none;}
+.sub-status-info.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="admin-login">
+  <div class="login-card">
+    <div class="login-icon">🛡️</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">Secure Access Only</div>
+    <input type="text" class="admin-input" id="admin-user" placeholder="Username" autocomplete="off">
+    <input type="password" class="admin-input" id="admin-pass" placeholder="Password">
+    <button class="admin-btn" onclick="adminLogin()">Login →</button>
+    <div class="login-error" id="login-error">❌ Wrong credentials!</div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div style="display:flex;align-items:center;">
+      <div class="admin-logo">⚙️</div>
+      <div class="admin-title" style="margin-left:10px;">Admin Panel</div>
+    </div>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+  </div>
+
+  <div class="admin-content">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('group',this)">💬 Group</button>
+      <button class="tab-btn" onclick="switchTab('private',this)">✉️ Private</button>
+      <button class="tab-btn" onclick="switchTab('visitors',this)">👥 Visitors</button>
+      <button class="tab-btn" onclick="switchTab('blocked',this)">🚫 Blocked</button>
+      <button class="tab-btn" onclick="switchTab('subscriptions',this)" id="sub-tab-btn">💎 Subs</button>
+      <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ Settings</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="st-visitors">–</div><div class="stat-label">Visitors</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-chats">–</div><div class="stat-label">Private Chats</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-grpmsgs">–</div><div class="stat-label">Group Msgs</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-unread">–</div><div class="stat-label">Unread</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box" style="border-color:rgba(255,152,0,.3);">
+          <div class="stat-num" style="background:linear-gradient(135deg,#ffb74d,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="st-sub-pending">0</div>
+          <div class="stat-label">⏳ Pending Subs</div>
+        </div>
+        <div class="stat-box" style="border-color:rgba(37,211,102,.3);">
+          <div class="stat-num" style="background:linear-gradient(135deg,#25d366,#128c7e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="st-sub-approved">0</div>
+          <div class="stat-label">✅ Approved Subs</div>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">🔥 System Status</div>
+        <div style="font-size:13px;color:var(--gray);line-height:2.2;">
+          <div>Firebase: <strong id="fb-status" style="color:var(--green);">Connecting...</strong></div>
+          <div>Group Chat: <strong style="color:var(--green);">Active ✓</strong></div>
+          <div>Subscription Access: <strong style="color:var(--green);">Auto-grant on Approve ✓</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP CHAT -->
+    <div class="tab-content" id="tab-group">
+      <div class="admin-card">
+        <div class="card-title">⚙️ Group Settings</div>
+        <label class="form-label">Group Name</label>
+        <input type="text" class="form-input" id="grp-name-input" placeholder="VIP Group">
+        <div class="grp-settings-row">
+          <div style="flex:1;">
+            <label class="form-label">Member Count (Dummy)</label>
+            <input type="number" class="form-input" id="grp-member-input" placeholder="1247" style="margin-bottom:0;">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Avatar Emoji</label>
+            <input type="text" class="form-input" id="grp-emoji-input" placeholder="👑" maxlength="2" style="margin-bottom:0;">
+          </div>
+        </div>
+        <div style="margin-top:11px;">
+          <button class="save-btn" onclick="saveGroupSettings()">💾 Save Group Settings</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">⌨️ Group Typing Indicator</div>
+        <div class="typing-toggle" id="grp-typing-toggle" onclick="toggleGrpTyping()">
+          <div class="toggle-dot"></div>
+          <div class="toggle-lbl">Show "Typing..." in group</div>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">📤 Send Message to Group</div>
+        <input type="file" id="grp-admin-file" accept="image/*,video/*" style="display:none" onchange="onGrpAdminFile(event)">
+        <div class="lock-toggle-row" id="lock-toggle-row" onclick="toggleLock()">
+          <span style="font-size:18px;" id="lock-icon">🔓</span>
+          <span class="lock-toggle-label" id="lock-label">Content Unlocked — Click to Lock</span>
+          <span style="font-size:18px;">›</span>
+        </div>
+        <div class="upload-prog" id="grp-upload-prog"><span class="spin"></span><span>Uploading...</span></div>
+        <div class="admin-mprev-wrap" id="grp-admin-mprev">
+          <img id="grp-admin-mthumb" class="admin-mpthumb" src="" alt="">
+          <span id="grp-admin-mname" style="font-size:12px;color:var(--gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <button class="admin-mprem" onclick="removeGrpAdminMedia()">✕</button>
+        </div>
+        <div class="reply-row">
+          <button class="att-btn" onclick="document.getElementById('grp-admin-file').click()">📷</button>
+          <input type="text" class="reply-input" id="grp-admin-text" placeholder="Type group message..." onkeydown="if(event.key==='Enter')sendToGroup()">
+          <button class="reply-send-btn" onclick="sendToGroup()">➤</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">📋 Group Messages (Recent)</div>
+        <div class="grp-msgs-list" id="grp-msgs-list"><div class="empty-state"><span class="spin"></span> Loading...</div></div>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">✅ Allow Users to Send Messages</div>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:6px;line-height:1.7;">Jo users yahan allowed honge woh group mein message bhej sakte hain.</p>
+        <p style="font-size:11px;color:rgba(37,211,102,.8);margin-bottom:12px;">💡 Approved subscribers automatically message kar sakte hain — yahan manually bhi allow kar sakte ho.</p>
+        <div id="allow-user-list"><div class="empty-state"><span class="spin"></span> Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- PRIVATE CHAT -->
+    <div class="tab-content" id="tab-private">
+      <div class="admin-card">
+        <div class="card-title">👥 Select User</div>
+        <div class="user-chip-wrap" id="user-selector"></div>
+        <div class="user-info-bar" id="user-info-bar">
+          <div><div class="uib-name" id="uib-name">–</div><div class="uib-uid" id="uib-uid">–</div></div>
+          <button class="block-btn" id="main-block-btn" onclick="toggleBlockSelected()">🚫 Block</button>
+        </div>
+        <div class="typing-toggle" id="pvt-typing-toggle" onclick="togglePvtTyping()">
+          <div class="toggle-dot"></div>
+          <div class="toggle-lbl">Show "Typing..." to user</div>
+        </div>
+        <div class="chat-list" id="admin-chat-list"><div class="empty-state"><span style="font-size:28px;">👆</span><br>Select user above</div></div>
+        <div class="divider"></div>
+        <div class="card-title" style="margin-bottom:10px;">📤 Reply</div>
+        <input type="file" id="pvt-file" accept="image/*" style="display:none" onchange="onPvtFileSelect(event)">
+        <div class="upload-prog" id="pvt-upload-prog"><span class="spin"></span><span>Uploading...</span></div>
+        <div class="admin-mprev-wrap" id="pvt-mprev">
+          <img id="pvt-mthumb" class="admin-mpthumb" src="" alt="">
+          <span id="pvt-mname" style="font-size:12px;color:var(--gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <button class="admin-mprem" onclick="removePvtMedia()">✕</button>
+        </div>
+        <div class="reply-row">
+          <button class="att-btn" onclick="document.getElementById('pvt-file').click()">📷</button>
+          <input type="text" class="reply-input" id="pvt-reply-input" placeholder="Type reply..." onkeydown="if(event.key==='Enter')sendPvtReply()">
+          <button class="reply-send-btn" onclick="sendPvtReply()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISITORS -->
+    <div class="tab-content" id="tab-visitors">
+      <div class="admin-card">
+        <div class="card-title">👥 All Visitors</div>
+        <div id="visitors-list"><div class="empty-state"><span class="spin"></span> Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- BLOCKED -->
+    <div class="tab-content" id="tab-blocked">
+      <div class="admin-card">
+        <div class="card-title">🚫 Blocked Users</div>
+        <div id="blocked-list"><div class="empty-state"><span class="spin"></span> Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTIONS -->
+    <div class="tab-content" id="tab-subscriptions">
+      <div class="admin-card">
+        <div class="card-title">💎 Subscription Requests</div>
+        <div style="background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:rgba(255,255,255,.6);margin-bottom:14px;line-height:1.7;">
+          ✅ <strong style="color:#25d366;">Approve</strong> karne par user ko automatically group access + locked content unlock ho jayega.<br>
+          ❌ <strong style="color:#e05050;">Reject</strong> karne par access band ho jayega.
+        </div>
+        <div style="display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;">
+          <button class="tab-btn active" onclick="filterSubs('all',this)" style="font-size:11px;">All</button>
+          <button class="tab-btn" onclick="filterSubs('pending',this)" style="font-size:11px;">⏳ Pending</button>
+          <button class="tab-btn" onclick="filterSubs('approved',this)" style="font-size:11px;">✅ Approved</button>
+          <button class="tab-btn" onclick="filterSubs('rejected',this)" style="font-size:11px;">❌ Rejected</button>
+        </div>
+        <div id="subs-list"><div class="empty-state"><span class="spin"></span> Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-content" id="tab-settings">
+      <div class="admin-card">
+        <div class="card-title">🔐 Change Credentials</div>
+        <label class="form-label">New Username</label>
+        <input type="text" class="form-input" id="new-admin-user" placeholder="New username">
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-input" id="new-admin-pass" placeholder="New password">
+        <button class="save-btn" onclick="changeCreds()">Update Credentials</button>
+      </div>
+      <div class="admin-card">
+        <div class="card-title">🗑️ Danger Zone</div>
+        <button class="danger-btn" onclick="clearData('chats')">🗑️ Clear Private Chats</button>
+        <button class="danger-btn" onclick="clearData('groupMessages')">🗑️ Clear Group Messages</button>
+        <button class="danger-btn" onclick="clearData('visitors')">👥 Clear Visitors</button>
+        <button class="danger-btn" onclick="clearData('groupVisitors')">👥 Clear Group Visitors</button>
+        <button class="danger-btn" onclick="clearData('blockedUsers')">🚫 Clear Blocks</button>
+        <button class="danger-btn" onclick="clearData('subscriptionRequests')">💎 Clear Subs</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🚫</div>
+    <div class="confirm-title">Block User?</div>
+    <div class="confirm-msg">Kya tum <strong id="confirm-uname" style="color:var(--white);"></strong> ko permanently block karna chahte ho?</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" onclick="confirmBlock()">🚫 Block</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const cfg={apiKey:"AIzaSyAt5S-K9Gu-fCjEgbqk38mGYAo6R7DwgHc",authDomain:"vipliveme.firebaseapp.com",projectId:"vipliveme",storageBucket:"vipliveme.firebasestorage.app",messagingSenderId:"212842409897",appId:"1:212842409897:web:b1feadb097db068fe95eb8",databaseURL:"https://vipliveme-default-rtdb.firebaseio.com"};
+const app=initializeApp(cfg);
+const db=getDatabase(app);
+window._FB={db,ref,onValue,set,push,remove,get};
+window._fbOk=true;
+document.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+const IMGBB_KEY='c4b4735988d74b7ebb4119130a8cb07c';
+
+let selUID=null,selUName='',pvtTypingOn=false,grpTypingOn=false;
+let usersMap={},visitorsMap={},blockedMap={},subsMap={},allowedMap={};
+// ✅ groupVisitorsMap — group pe aane wale users
+let groupVisitorsMap={};
+let grpAdminMedia=null,pvtMedia=null,pendingBlock=null;
+let sendLocked=false,subFilter='all';
+
+async function uploadImgBB(dataUrl){
+  const b=dataUrl.split(',')[1],fd=new FormData();
+  fd.append('key',IMGBB_KEY);fd.append('image',b);
+  const r=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+  const j=await r.json();if(j.success)return j.data.url;throw new Error('fail');
+}
+
+function getCreds(){return{user:localStorage.getItem('adm_u')||'admin',pass:localStorage.getItem('adm_p')||'admin123'};}
+function adminLogin(){
+  const u=document.getElementById('admin-user').value.trim();
+  const p=document.getElementById('admin-pass').value.trim();
+  const c=getCreds();
+  if(u===c.user&&p===c.pass){
+    document.getElementById('admin-login').classList.add('hide');
+    setTimeout(()=>{document.getElementById('admin-login').style.display='none';document.getElementById('admin-panel').classList.add('visible');initAdmin();},600);
+  } else {
+    const e=document.getElementById('login-error');e.style.display='block';setTimeout(()=>e.style.display='none',3000);
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('admin-login').style.display!=='none')adminLogin();});
+function adminLogout(){location.reload();}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+function initAdmin(){
+  const go=()=>{
+    document.getElementById('fb-status').textContent='Connected ✓';
+    listenChats();
+    listenVisitors();
+    listenBlocked();
+    listenGroupMessages();
+    listenGroupSettings();
+    listenSubs();
+    listenGroupVisitors(); // ✅ NEW
+  };
+  if(window._fbOk)go();else document.addEventListener('fb-ready',go,{once:true});
+}
+
+// ✅ FIX: Listen to groupVisitors node (group pe aane wale)
+function listenGroupVisitors(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'groupVisitors'),snap=>{
+    groupVisitorsMap=snap.val()||{};
+    // Merge into usersMap for allow list
+    Object.keys(groupVisitorsMap).forEach(uid=>{
+      if(!usersMap[uid]){
+        usersMap[uid]={
+          name:groupVisitorsMap[uid].name||uid,
+          lastMsg:'',unread:false,
+          lastSeen:groupVisitorsMap[uid].lastSeen||0
+        };
+      }
+    });
+    renderAllowList();
+    renderUserSelector();
+  });
+}
+
+// GROUP SETTINGS
+function listenGroupSettings(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'groupSettings'),snap=>{
+    const d=snap.val()||{};
+    document.getElementById('grp-name-input').value=d.name||'';
+    document.getElementById('grp-member-input').value=d.memberCount||1247;
+    document.getElementById('grp-emoji-input').value=d.avatarEmoji||'👑';
+    allowedMap=d.allowedUsers||{};
+    renderAllowList();
+  });
+}
+
+function saveGroupSettings(){
+  const {db,ref,set}=window._FB;
+  const name=document.getElementById('grp-name-input').value.trim()||'VIP Group';
+  const memberCount=parseInt(document.getElementById('grp-member-input').value)||1247;
+  const avatarEmoji=document.getElementById('grp-emoji-input').value.trim()||'👑';
+  set(ref(db,'groupSettings/name'),name);
+  set(ref(db,'groupSettings/memberCount'),memberCount);
+  set(ref(db,'groupSettings/avatarEmoji'),avatarEmoji);
+  showToast('✅ Group settings saved!');
+}
+
+// ALLOW LIST — ✅ Sab users dikho (chats + groupVisitors)
+function renderAllowList(){
+  const wrap=document.getElementById('allow-user-list');
+  // Merge both maps
+  const combined={...usersMap};
+  Object.keys(groupVisitorsMap).forEach(uid=>{
+    if(!combined[uid]) combined[uid]={name:groupVisitorsMap[uid].name||uid,lastSeen:groupVisitorsMap[uid].lastSeen||0};
+  });
+  const uids=Object.keys(combined).filter(u=>u&&u!=='null');
+  if(!uids.length){wrap.innerHTML='<div class="empty-state">Abhi koi user group mein nahi aaya</div>';return;}
+  wrap.innerHTML='';
+  uids.forEach(uid=>{
+    const u=combined[uid];
+    const isAllowed=!!(allowedMap[uid]);
+    const row=document.createElement('div');
+    row.className='allow-toggle-row';
+    row.innerHTML=`
+      <span class="allow-label">${isAllowed?'✅':'👤'} ${esc(u.name||uid)}</span>
+      <label class="toggle-switch">
+        <input type="checkbox" ${isAllowed?'checked':''} data-uid="${uid}">
+        <span class="toggle-slider"></span>
+      </label>`;
+    const chk=row.querySelector('input');
+    chk.addEventListener('change',()=>toggleAllowUser(uid,chk.checked,u.name||uid));
+    wrap.appendChild(row);
+  });
+}
+
+function toggleAllowUser(uid,allow,name){
+  const {db,ref,set,remove}=window._FB;
+  if(allow){
+    set(ref(db,'groupSettings/allowedUsers/'+uid),{name,allowedAt:Date.now()});
+    showToast('✅ '+name+' can now send messages');
+  } else {
+    remove(ref(db,'groupSettings/allowedUsers/'+uid));
+    showToast('🔕 '+name+' muted from group');
+  }
+}
+
+function toggleGrpTyping(){
+  grpTypingOn=!grpTypingOn;
+  document.getElementById('grp-typing-toggle').classList.toggle('on',grpTypingOn);
+  const {db,ref,set}=window._FB;
+  set(ref(db,'groupTyping'),grpTypingOn?true:null);
+  showToast(grpTypingOn?'⌨️ Group typing ON':'⌨️ Group typing OFF');
+}
+
+function toggleLock(){
+  sendLocked=!sendLocked;
+  document.getElementById('lock-toggle-row').classList.toggle('locked-on',sendLocked);
+  document.getElementById('lock-icon').textContent=sendLocked?'🔒':'🔓';
+  document.getElementById('lock-label').textContent=sendLocked?'Content Locked — Subscribers only':'Content Unlocked — Click to Lock';
+  showToast(sendLocked?'🔒 Next message will be LOCKED':'🔓 Next message will be UNLOCKED');
+}
+
+async function sendToGroup(){
+  const {db,ref,push}=window._FB;
+  const txt=document.getElementById('grp-admin-text').value.trim();
+  if(!txt&&!grpAdminMedia){showToast('⚠️ Kuch likho ya image/video select karo');return;}
+  const msg={sender:'admin',senderUID:'admin',senderName:'Admin',text:txt||'',timestamp:Date.now(),mediaUrl:null,mediaType:null,locked:sendLocked};
+  if(grpAdminMedia){
+    try{
+      document.getElementById('grp-upload-prog').classList.add('active');
+      msg.mediaUrl=await uploadImgBB(grpAdminMedia.dataUrl);
+      msg.mediaType='image';removeGrpAdminMedia();
+    }catch(e){document.getElementById('grp-upload-prog').classList.remove('active');showToast('❌ Upload failed');return;}
+    document.getElementById('grp-upload-prog').classList.remove('active');
+  }
+  await push(ref(db,'groupMessages'),msg);
+  document.getElementById('grp-admin-text').value='';
+  sendLocked=false;
+  document.getElementById('lock-toggle-row').classList.remove('locked-on');
+  document.getElementById('lock-icon').textContent='🔓';
+  document.getElementById('lock-label').textContent='Content Unlocked — Click to Lock';
+  showToast('✅ Message sent to group!');
+}
+
+function listenGroupMessages(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'groupMessages'),snap=>{
+    const d=snap.val()||{};
+    const entries=Object.entries(d).sort((a,b)=>(b[1].timestamp||0)-(a[1].timestamp||0)).slice(0,50);
+    document.getElementById('st-grpmsgs').textContent=Object.keys(d).length;
+    const list=document.getElementById('grp-msgs-list');
+    if(!entries.length){list.innerHTML='<div class="empty-state">No group messages yet</div>';return;}
+    list.innerHTML='';
+    entries.forEach(([key,m])=>{
+      const isAdm=m.sender==='admin';
+      const div=document.createElement('div');
+      div.className='grp-msg-item '+(isAdm?'admin-grp':'user-grp');
+      const d2=new Date(m.timestamp||Date.now());
+      const ts=pad(d2.getHours())+':'+pad(d2.getMinutes());
+      div.innerHTML=`
+        <div style="color:${isAdm?'var(--gold)':'#53bdeb'};font-size:11px;font-weight:700;margin-bottom:3px;">
+          ${isAdm?'👑 Admin':('👤 '+esc(m.senderName||'User'))}
+        </div>
+        ${m.mediaUrl?`<img src="${m.mediaUrl}" class="grp-msg-thumb" onerror="this.style.display='none'">`:''}
+        ${m.text?`<div class="grp-msg-txt">${esc(m.text)}</div>`:''}
+        <div class="grp-msg-meta">
+          <span>${ts}</span>
+          ${m.locked?'<span class="lock-badge-sm">🔒 LOCKED</span>':'<span style="font-size:9px;color:var(--green);">🔓 Open</span>'}
+        </div>`;
+      list.appendChild(div);
+    });
+  });
+}
+
+function onGrpAdminFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    grpAdminMedia={dataUrl:ev.target.result,name:f.name};
+    document.getElementById('grp-admin-mthumb').src=ev.target.result;
+    document.getElementById('grp-admin-mname').textContent=f.name;
+    document.getElementById('grp-admin-mprev').classList.add('active');
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+function removeGrpAdminMedia(){grpAdminMedia=null;document.getElementById('grp-admin-mprev').classList.remove('active');}
+
+// PRIVATE CHAT
+function listenChats(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'chats'),snap=>{
+    const d=snap.val()||{};
+    Object.keys(d).filter(u=>u&&u!=='null').forEach(uid=>{
+      const info=d[uid].info||{};
+      usersMap[uid]={name:info.username||uid,lastMsg:info.lastMsg||'',unread:info.unread||false,lastSeen:info.lastSeen||0};
+    });
+    renderUserSelector();renderAllowList();
+    document.getElementById('st-chats').textContent=Object.keys(usersMap).length;
+    document.getElementById('st-unread').textContent=Object.values(usersMap).filter(u=>u.unread).length;
+  });
+}
+
+function renderUserSelector(){
+  const sel=document.getElementById('user-selector');
+  const uids=Object.keys(usersMap).filter(u=>u&&u!=='null').sort((a,b)=>(usersMap[b].lastSeen||0)-(usersMap[a].lastSeen||0));
+  if(!uids.length){sel.innerHTML='<div style="color:var(--gray);font-size:13px;">No users yet</div>';return;}
+  sel.innerHTML='';
+  uids.forEach(uid=>{
+    const u=usersMap[uid];
+    const blocked=!!blockedMap[uid];
+    const chip=document.createElement('button');
+    chip.className='user-chip'+(uid===selUID?' active':'')+(blocked?' blocked-chip':'');
+    chip.innerHTML=(blocked?'🚫 ':'')+esc(u.name)+(u.unread&&!blocked?'<span class="unread-dot"></span>':'');
+    chip.dataset.uid=uid;chip.dataset.name=u.name;
+    chip.addEventListener('click',()=>selectUser(chip.dataset.uid,chip.dataset.name));
+    sel.appendChild(chip);
+  });
+}
+
+function selectUser(uid,name){
+  selUID=uid;selUName=name;
+  renderUserSelector();loadPvtMessages(uid);updateUserInfoBar();
+  const {db,ref,set}=window._FB;
+  set(ref(db,'chats/'+uid+'/info/unread'),false);
+}
+
+function updateUserInfoBar(){
+  if(!selUID){document.getElementById('user-info-bar').classList.remove('show');return;}
+  document.getElementById('user-info-bar').classList.add('show');
+  document.getElementById('uib-name').textContent=selUName;
+  document.getElementById('uib-uid').textContent='UID: '+selUID;
+  const btn=document.getElementById('main-block-btn');
+  if(blockedMap[selUID]){btn.textContent='✅ Unblock';btn.classList.add('unblock');}
+  else{btn.textContent='🚫 Block';btn.classList.remove('unblock');}
+}
+
+function loadPvtMessages(uid){
+  const {db,ref,onValue}=window._FB;
+  const list=document.getElementById('admin-chat-list');
+  list.innerHTML='<div class="empty-state"><span class="spin"></span></div>';
+  if(window._currentMsgOff)window._currentMsgOff();
+  window._currentMsgOff=onValue(ref(db,'chats/'+uid+'/messages'),snap=>{
+    list.innerHTML='';
+    if(!snap.exists()){list.innerHTML='<div class="empty-state">No messages</div>';return;}
+    snap.forEach(child=>{
+      const m=child.val();
+      const item=document.createElement('div');
+      item.className='chat-msg-item';
+      item.style.borderLeft='3px solid '+(m.sender==='user'?'var(--gold)':'var(--pink)');
+      const d=new Date(m.timestamp||Date.now());
+      const ts=pad(d.getHours())+':'+pad(d.getMinutes());
+      item.innerHTML=`<div class="chat-msg-sender">${m.sender==='user'?'👤 '+esc(m.username||'User'):'👑 Admin'}</div>
+        ${m.mediaUrl?`<img src="${m.mediaUrl}" class="chat-msg-img" onclick="window.open('${m.mediaUrl}','_blank')">`:''}
+        <div class="chat-msg-text">${esc(m.text||'')}</div>
+        <div class="chat-msg-time">${ts}</div>`;
+      list.appendChild(item);
+    });
+    list.scrollTop=list.scrollHeight;
+  });
+}
+
+function togglePvtTyping(){
+  if(!selUID){showToast('⚠️ Select user first');return;}
+  pvtTypingOn=!pvtTypingOn;
+  document.getElementById('pvt-typing-toggle').classList.toggle('on',pvtTypingOn);
+  const {db,ref,set}=window._FB;
+  set(ref(db,'adminTyping'),pvtTypingOn?true:null);
+  showToast(pvtTypingOn?'⌨️ Typing ON':'⌨️ Typing OFF');
+}
+
+function onPvtFileSelect(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    pvtMedia={dataUrl:ev.target.result,name:f.name};
+    document.getElementById('pvt-mthumb').src=ev.target.result;
+    document.getElementById('pvt-mname').textContent=f.name;
+    document.getElementById('pvt-mprev').classList.add('active');
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+function removePvtMedia(){pvtMedia=null;document.getElementById('pvt-mprev').classList.remove('active');}
+
+async function sendPvtReply(){
+  if(!selUID){showToast('⚠️ Select user');return;}
+  if(blockedMap[selUID]){showToast('🚫 User blocked');return;}
+  const {db,ref,push,set}=window._FB;
+  const txt=document.getElementById('pvt-reply-input').value.trim();
+  if(!txt&&!pvtMedia)return;
+  const msg={sender:'admin',text:txt||'',timestamp:Date.now(),mediaUrl:null,mediaType:null};
+  if(pvtMedia){
+    try{
+      document.getElementById('pvt-upload-prog').classList.add('active');
+      msg.mediaUrl=await uploadImgBB(pvtMedia.dataUrl);msg.mediaType='image';removePvtMedia();
+    }catch(e){document.getElementById('pvt-upload-prog').classList.remove('active');showToast('❌ Upload failed');return;}
+    document.getElementById('pvt-upload-prog').classList.remove('active');
+  }
+  await push(ref(db,'chats/'+selUID+'/messages'),msg);
+  set(ref(db,'adminReplies/'+selUID),{text:txt||'[Image]',timestamp:Date.now()});
+  document.getElementById('pvt-reply-input').value='';
+  showToast('✅ Reply sent to '+selUName+'!');
+}
+
+function toggleBlockSelected(){
+  if(!selUID){showToast('⚠️ Select user');return;}
+  if(blockedMap[selUID])unblockUser(selUID,selUName);
+  else{pendingBlock={uid:selUID,name:selUName};document.getElementById('confirm-uname').textContent=selUName;document.getElementById('confirm-overlay').classList.add('show');}
+}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('show');pendingBlock=null;}
+async function confirmBlock(){
+  if(!pendingBlock)return;
+  const {uid,name}=pendingBlock;closeConfirm();
+  const {db,ref,set}=window._FB;
+  await set(ref(db,'blockedUsers/'+uid),{uid,name,blockedAt:Date.now()});
+  showToast('🚫 '+name+' blocked!');
+}
+async function unblockUser(uid,name){
+  if(!confirm('Unblock '+name+'?'))return;
+  const {db,ref,remove}=window._FB;
+  await remove(ref(db,'blockedUsers/'+uid));
+  showToast('✅ '+name+' unblocked!');
+}
+
+function listenVisitors(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'visitors'),snap=>{
+    visitorsMap=snap.val()||{};
+    renderVisitors();
+    document.getElementById('st-visitors').textContent=Object.keys(visitorsMap).length;
+  });
+}
+function renderVisitors(){
+  const list=document.getElementById('visitors-list');
+  const entries=Object.entries(visitorsMap).sort((a,b)=>(b[1].lastSeen||0)-(a[1].lastSeen||0));
+  if(!entries.length){list.innerHTML='<div class="empty-state">No visitors</div>';return;}
+  list.innerHTML='';
+  entries.forEach(([uid,v])=>{
+    const blocked=!!blockedMap[uid];
+    const div=document.createElement('div');div.className='visitor-item';
+    const d=new Date(v.lastSeen||Date.now());
+    div.innerHTML=`<div class="vis-av">👤</div>
+      <div><div class="vis-name">${esc(v.name||uid)}</div><div class="vis-time">${d.toLocaleDateString('en-IN')} ${pad(d.getHours())}:${pad(d.getMinutes())}</div></div>`;
+    const btn=document.createElement('button');
+    btn.className='vis-block-btn '+(blocked?'unblock':'');
+    btn.textContent=blocked?'✅ Unblock':'🚫 Block';
+    btn.addEventListener('click',()=>{
+      if(blocked)unblockUser(uid,v.name||uid);
+      else{pendingBlock={uid,name:v.name||uid};document.getElementById('confirm-uname').textContent=v.name||uid;document.getElementById('confirm-overlay').classList.add('show');}
+    });
+    div.appendChild(btn);list.appendChild(div);
+  });
+}
+
+function listenBlocked(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'blockedUsers'),snap=>{
+    blockedMap=snap.val()||{};
+    renderBlockedList();renderUserSelector();updateUserInfoBar();
+  });
+}
+function renderBlockedList(){
+  const list=document.getElementById('blocked-list');
+  const entries=Object.entries(blockedMap).filter(([k,b])=>b.uid&&b.uid!=='null');
+  if(!entries.length){list.innerHTML='<div class="empty-state">✅ No blocked users</div>';return;}
+  list.innerHTML='';
+  entries.forEach(([key,b])=>{
+    const div=document.createElement('div');div.className='blocked-item';
+    const d=new Date(b.blockedAt||Date.now());
+    div.innerHTML=`<div class="bl-icon">🚫</div><div style="flex:1;"><div class="bl-name">${esc(b.name||'Unknown')}</div><div class="bl-uid">${esc(b.uid||key)}</div><div style="font-size:10px;color:var(--gray);">🕐 ${d.toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div></div>`;
+    const btn=document.createElement('button');btn.className='unblock-btn';btn.textContent='✅ Unblock';
+    btn.addEventListener('click',()=>unblockUser(b.uid||key,b.name||'Unknown'));
+    div.appendChild(btn);list.appendChild(div);
+  });
+}
+
+// ✅ FIX: updateSubStatus — subStatus update karo aur group access bhi
+function listenSubs(){
+  const {db,ref,onValue}=window._FB;
+  onValue(ref(db,'subscriptionRequests'),snap=>{
+    subsMap=snap.val()||{};
+    renderSubs();updateSubStats();
+  });
+}
+function updateSubStats(){
+  const all=Object.values(subsMap);
+  const pending=all.filter(s=>(s.status||'pending')==='pending').length;
+  const approved=all.filter(s=>s.status==='approved').length;
+  document.getElementById('st-sub-pending').textContent=pending;
+  document.getElementById('st-sub-approved').textContent=approved;
+  const btn=document.getElementById('sub-tab-btn');
+  btn.textContent=pending>0?`💎 Subs (${pending})`:'💎 Subs';
+  if(pending>0)btn.style.color='#ffb74d';else btn.style.color='';
+}
+function filterSubs(f,btn){
+  subFilter=f;
+  document.querySelectorAll('#tab-subscriptions .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderSubs();
+}
+function renderSubs(){
+  const list=document.getElementById('subs-list');
+  let entries=Object.entries(subsMap).sort((a,b)=>(b[1].submittedAt||0)-(a[1].submittedAt||0));
+  if(subFilter!=='all')entries=entries.filter(([,s])=>(s.status||'pending')===subFilter);
+  if(!entries.length){list.innerHTML='<div class="empty-state">Koi request nahi hai</div>';return;}
+  list.innerHTML='';
+  entries.forEach(([key,s])=>{
+    const status=s.status||'pending';
+    const d=new Date(s.submittedAt||Date.now());
+    const div=document.createElement('div');div.className='sub-item '+status;
+    div.innerHTML=`
+      <div class="status-chip ${status}">${status==='pending'?'⏳ Pending':status==='approved'?'✅ Approved':'❌ Rejected'}</div>
+      <div class="sub-name">👤 ${esc(s.name||'Unknown')}</div>
+      <div class="sub-uid">UID: ${esc(s.uid||'N/A')} · ${d.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})}</div>
+      <div class="sub-txn">
+        <div class="sub-txn-val">${esc(s.txnId||'—')}</div>
+        <button class="sub-copy-btn" onclick="navigator.clipboard.writeText('${esc(s.txnId||'')}').then(()=>showToast('📋 Copied!'))">Copy</button>
+      </div>
+      <div class="sub-actions" id="sact-${key}"></div>`;
+    const actDiv=div.querySelector('#sact-'+key);
+    if(status==='pending'){
+      const ab=document.createElement('button');ab.className='sub-approve';ab.textContent='✅ Approve';ab.onclick=()=>updateSubStatus(key,s,'approved');
+      const rb=document.createElement('button');rb.className='sub-reject';rb.textContent='❌ Reject';rb.onclick=()=>updateSubStatus(key,s,'rejected');
+      const db2=document.createElement('button');db2.className='sub-delete';db2.textContent='🗑️';db2.onclick=()=>deleteSub(key);
+      actDiv.appendChild(ab);actDiv.appendChild(rb);actDiv.appendChild(db2);
+    } else {
+      const reset=document.createElement('button');reset.className='sub-reject';reset.style.flex='1';reset.textContent='🔄 Reset';reset.onclick=()=>updateSubStatus(key,s,'pending');
+      const del=document.createElement('button');del.className='sub-delete';del.textContent='🗑️ Delete';del.onclick=()=>deleteSub(key);
+      actDiv.appendChild(reset);actDiv.appendChild(del);
+    }
+    list.appendChild(div);
+  });
+}
+
+// ✅ KEY FIX: Approve karne par subStatus + group access dono update karo
+async function updateSubStatus(key,s,status){
+  const {db,ref,set}=window._FB;
+  try{
+    // 1. Update subscription request status
+    await set(ref(db,'subscriptionRequests/'+key+'/status'),status);
+
+    // 2. ✅ Update subStatus node — user isko real-time sunta hai
+    if(s.uid&&s.uid!=='null'){
+      await set(ref(db,'subStatus/'+s.uid),{
+        txnId:s.txnId||'',
+        status:status,
+        updatedAt:Date.now(),
+        name:s.name||''
+      });
+    }
+
+    const msg=status==='approved'
+      ?'✅ Approved! User ko ab access mil gaya.'
+      :status==='rejected'
+      ?'❌ Rejected. User ka access band.'
+      :'🔄 Status pending reset.';
+    showToast(msg);
+  }catch(e){showToast('❌ Error: '+e.message);}
+}
+
+async function deleteSub(key){
+  if(!confirm('Delete?'))return;
+  const {db,ref,remove}=window._FB;
+  await remove(ref(db,'subscriptionRequests/'+key));showToast('🗑️ Deleted');
+}
+
+function changeCreds(){
+  const u=document.getElementById('new-admin-user').value.trim();
+  const p=document.getElementById('new-admin-pass').value.trim();
+  if(!u||!p){showToast('❌ Fill both');return;}
+  localStorage.setItem('adm_u',u);localStorage.setItem('adm_p',p);
+  document.getElementById('new-admin-user').value='';document.getElementById('new-admin-pass').value='';
+  showToast('✅ Credentials updated!');
+}
+async function clearData(path){
+  if(!confirm('Clear '+path+'?'))return;
+  const {db,ref,remove}=window._FB;
+  await remove(ref(db,path));showToast('🗑️ Cleared: '+path);
+}
+
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function pad(n){return String(n).padStart(2,'0');}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+window.adminLogin=adminLogin;window.adminLogout=adminLogout;window.switchTab=switchTab;
+window.saveGroupSettings=saveGroupSettings;window.toggleGrpTyping=toggleGrpTyping;
+window.toggleLock=toggleLock;window.sendToGroup=sendToGroup;
+window.onGrpAdminFile=onGrpAdminFile;window.removeGrpAdminMedia=removeGrpAdminMedia;
+window.toggleAllowUser=toggleAllowUser;
+window.togglePvtTyping=togglePvtTyping;window.onPvtFileSelect=onPvtFileSelect;
+window.removePvtMedia=removePvtMedia;window.sendPvtReply=sendPvtReply;
+window.toggleBlockSelected=toggleBlockSelected;window.closeConfirm=closeConfirm;window.confirmBlock=confirmBlock;
+window.unblockUser=unblockUser;window.filterSubs=filterSubs;
+window.updateSubStatus=updateSubStatus;window.deleteSub=deleteSub;
+window.changeCreds=changeCreds;window.clearData=clearData;
+</script>
+</body>
+</html>

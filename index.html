@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VIP Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--gold2:#f0d080;--dark:#0a0a0f;--dark2:#12121a;--dark3:#1a1a26;--pink:#e91e8c;--pink2:#ff4db8;--white:#f8f4ee;--gray:#888;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:var(--white);font-family:'Raleway',sans-serif;overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--dark2);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:4px;}
+img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;}
+
+/* ===== ENTRY SCREEN ===== */
+#entry-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a0a2e 0%,#0a0a0f 70%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .8s,transform .8s;}
+#entry-screen.hide{opacity:0;pointer-events:none;transform:scale(1.04);}
+.entry-card{background:linear-gradient(135deg,rgba(201,168,76,.09),rgba(233,30,140,.07));border:1px solid rgba(201,168,76,.28);border-radius:26px;padding:44px 32px;width:92%;max-width:400px;text-align:center;backdrop-filter:blur(20px);box-shadow:0 0 80px rgba(233,30,140,.15),0 0 40px rgba(201,168,76,.1);}
+.entry-logo{width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:34px;box-shadow:0 0 28px rgba(233,30,140,.45);}
+.entry-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.entry-sub{font-size:12px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;}
+.entry-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(201,168,76,.28);border-radius:13px;padding:14px 18px;color:var(--white);font-family:'Raleway',sans-serif;font-size:15px;outline:none;letter-spacing:.5px;transition:border-color .3s,box-shadow .3s;-webkit-user-select:text!important;user-select:text!important;margin-bottom:12px;}
+.entry-input:focus{border-color:var(--gold);box-shadow:0 0 18px rgba(201,168,76,.18);}
+.entry-input::placeholder{color:rgba(255,255,255,.3);}
+.entry-row{display:flex;gap:10px;margin-bottom:12px;}
+.entry-row .entry-input{margin-bottom:0;flex:1;}
+.entry-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:13px;padding:15px;color:#fff;font-family:'Raleway',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:transform .2s,box-shadow .3s;margin-top:4px;}
+.entry-btn:active{transform:scale(.97);}
+.entry-checking{font-size:12px;color:var(--gold);margin-top:12px;display:none;letter-spacing:1px;}
+.entry-checking.show{display:block;}
+
+/* ===== PARTICLES ===== */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0;}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:.5;}90%{opacity:.2;}100%{transform:translateY(-20px) scale(1);opacity:0;}}
+
+/* ===== MAIN SITE ===== */
+#main-site{display:none;}
+#main-site.visible{display:block;}
+
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(10,10,15,.96),transparent);backdrop-filter:blur(10px);}
+.hdr-left{display:flex;flex-direction:column;}
+.hdr-greet{font-size:12px;color:var(--gold);font-weight:600;letter-spacing:1px;}
+.hdr-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-logout{background:rgba(224,80,80,.14);border:1px solid rgba(224,80,80,.32);border-radius:9px;padding:7px 14px;color:#e05050;font-size:12px;font-weight:700;cursor:pointer;font-family:'Raleway',sans-serif;letter-spacing:1px;}
+
+/* HERO */
+.hero{padding:80px 20px 30px;text-align:center;background:radial-gradient(ellipse at top,rgba(233,30,140,.12) 0%,transparent 60%);}
+.hero-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.hero-sub{font-size:13px;color:var(--gray);letter-spacing:1px;}
+
+/* PHOTOS GRID */
+.photos-sec{padding:24px 16px 20px;max-width:480px;margin:0 auto;}
+.photos-sec-title{text-align:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;}
+.photos-sec-title::after{content:'';display:block;width:50px;height:2px;background:linear-gradient(90deg,var(--gold),var(--pink));margin:8px auto 0;border-radius:2px;}
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.photo-item{aspect-ratio:3/4;border-radius:14px;overflow:hidden;border:1.5px solid rgba(201,168,76,.22);position:relative;cursor:pointer;transition:transform .25s;}
+.photo-item:active{transform:scale(.96);}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;}
+.photo-item::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.45));pointer-events:none;}
+/* first photo spans 2 cols */
+.photo-item.wide{grid-column:span 2;aspect-ratio:4/3;}
+
+/* DIVIDER */
+.sdiv{height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.28),transparent);margin:10px 20px;}
+
+/* GROUP CHAT BTN */
+.grp-btn-sec{padding:22px 20px 30px;max-width:480px;margin:0 auto;text-align:center;}
+.grp-btn-wrap{position:relative;display:inline-block;width:100%;}
+.grp-chat-btn{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(233,30,140,.11));border:2px solid var(--gold);border-radius:18px;padding:18px 24px;cursor:pointer;text-decoration:none;color:var(--white);transition:transform .2s,box-shadow .3s;position:relative;overflow:hidden;}
+.grp-chat-btn:active{transform:scale(.97);}
+.grp-chat-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent);pointer-events:none;}
+.grp-btn-icon{font-size:28px;animation:iconBounce 1.8s ease-in-out infinite;}
+@keyframes iconBounce{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+.grp-btn-text{text-align:left;flex:1;}
+.grp-btn-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:3px;}
+.grp-btn-sub{font-size:12px;color:rgba(255,255,255,.5);}
+.grp-btn-arrow{font-size:22px;color:var(--gold);}
+/* blink ring */
+.blink-ring{position:absolute;inset:-3px;border-radius:20px;border:2px solid var(--gold);animation:blinkRing 1.4s ease-in-out infinite;pointer-events:none;}
+@keyframes blinkRing{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(201,168,76,.6);}50%{opacity:.4;box-shadow:0 0 0 8px rgba(201,168,76,0);}}
+.live-badge{position:absolute;top:-10px;right:14px;background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:20px;padding:4px 12px;font-size:10px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 2px 10px rgba(233,30,140,.4);}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(30,30,40,.95);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:11px 22px;color:var(--white);font-size:13px;z-index:1000;transition:transform .4s cubic-bezier(.34,1.56,.64,1);backdrop-filter:blur(10px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* LIGHTBOX */
+#lbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:900;align-items:center;justify-content:center;}
+#lbox.active{display:flex;}
+#lbox img{max-width:96%;max-height:92vh;object-fit:contain;border-radius:12px;pointer-events:none;}
+.lclose{position:fixed;top:15px;right:15px;background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<!-- ENTRY SCREEN -->
+<div id="entry-screen">
+  <div class="entry-card">
+    <div class="entry-logo">👑</div>
+    <div class="entry-title">Welcome</div>
+    <div class="entry-sub">your online g</div>
+    <input type="text" class="entry-input" id="e-name" placeholder="✍️ Your Name..." maxlength="30" autocomplete="off">
+    <div class="entry-row">
+      <input type="number" class="entry-input" id="e-age" placeholder="🎂 Age" min="18" max="99">
+      <input type="text"   class="entry-input" id="e-height" placeholder="📏 dick size" maxlength="10">
+    </div>
+    <button class="entry-btn" onclick="enterSite()">Enter ✨</button>
+    <div class="entry-checking" id="e-checking">🔐 Verifying...</div>
+  </div>
+</div>
+
+<!-- MAIN SITE -->
+<div id="main-site">
+  <header class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-greet" id="hdr-greet">Welcome 👋</div>
+      <div class="hdr-brand">✨ VIP Zone</div>
+    </div>
+    <button class="hdr-logout" onclick="logoutUser()">Logout</button>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">✨ your online girlfriend </div>
+    <div class="hero-sub">Premium Content for Members</div>
+  </div>
+
+  <!-- PHOTOS -->
+  <section class="photos-sec">
+    <div class="photos-sec-title">📸 Gallery</div>
+    <div class="photos-grid">
+      <div class="photo-item wide" onclick="openLbox('img1.jpg')"><img src="img1.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#2a0a40)'"></div>
+      <div class="photo-item" onclick="openLbox('img2.jpg')"><img src="img2.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#2a0a40)'"></div>
+      <div class="photo-item" onclick="openLbox('img3.jpg')"><img src="img3.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#0a1a2e,#1a2a40)'"></div>
+      <div class="photo-item" onclick="openLbox('img4.jpg')"><img src="img4.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#2a0a40)'"></div>
+      <div class="photo-item wide" onclick="openLbox('img5.jpg')"><img src="img5.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#2a0a40)'"></div>
+      <div class="photo-item" onclick="openLbox('img6.jpg')"><img src="img6.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#0a1a2e,#1a2a40)'"></div>
+      <div class="photo-item" onclick="openLbox('img7.jpg')"><img src="img7.jpg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#2a0a40)'"></div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- GROUP CHAT BUTTON -->
+  <div class="grp-btn-sec">
+    <div class="grp-btn-wrap">
+      <div class="blink-ring"></div>
+      <div class="live-badge">🔴 LIVE</div>
+      <a href="group.html" class="grp-chat-btn">
+        <div class="grp-btn-icon">💬</div>
+        <div class="grp-btn-text">
+          <span class="grp-btn-title">Join VIP Group</span>
+          <span class="grp-btn-sub">Exclusive members group • Active Now</span>
+        </div>
+        <div class="grp-btn-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div style="height:40px;"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lbox">
+  <button class="lclose" onclick="closeLbox()">✕</button>
+  <img id="lboximg" src="" alt="" draggable="false">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const cfg={apiKey:"AIzaSyAt5S-K9Gu-fCjEgbqk38mGYAo6R7DwgHc",authDomain:"vipliveme.firebaseapp.com",projectId:"vipliveme",storageBucket:"vipliveme.firebasestorage.app",messagingSenderId:"212842409897",appId:"1:212842409897:web:b1feadb097db068fe95eb8",databaseURL:"https://vipliveme-default-rtdb.firebaseio.com"};
+const app=initializeApp(cfg);
+const db=getDatabase(app);
+window._FB={db,ref,set,get};
+window._fbOk=true;
+document.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+// PARTICLES
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*10}s;background:${Math.random()>.5?'#c9a84c':'#e91e8c'};`;
+    c.appendChild(p);
+  }
+})();
+
+let uname='',uid='';
+
+function waitForFB(){return new Promise(r=>{if(window._fbOk){r();return;}document.addEventListener('fb-ready',()=>r(),{once:true});});}
+
+async function enterSite(){
+  const name=document.getElementById('e-name').value.trim();
+  const age=document.getElementById('e-age').value.trim();
+  const height=document.getElementById('e-height').value.trim();
+  if(!name){shake('e-name');showToast('⚠️ Apna naam likho!');return;}
+  if(!age||parseInt(age)<18){shake('e-age');showToast('⚠️ Valid age dalo (18+)');return;}
+  if(!height){shake('e-height');showToast('⚠️ Height dalo!');return;}
+
+  const btn=document.querySelector('.entry-btn');
+  btn.disabled=true;btn.textContent='🔐 Checking...';
+  document.getElementById('e-checking').classList.add('show');
+
+  let id=localStorage.getItem('vip_uid');
+  if(!id){id='u_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem('vip_uid',id);}
+
+  await waitForFB();
+  const {db,ref,get,set}=window._FB;
+  try{
+    const blockedSnap=await get(ref(db,'blockedUsers/'+id));
+    if(blockedSnap.exists()){showBlocked();return;}
+  }catch(e){}
+
+  uname=name;uid=id;
+  localStorage.setItem('vip_uname',name);
+  localStorage.setItem('vip_age',age);
+  localStorage.setItem('vip_height',height);
+
+  // Track visitor
+  try{set(ref(db,'visitors/'+id),{name,lastSeen:Date.now()});}catch(e){}
+
+  document.getElementById('entry-screen').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('entry-screen').style.display='none';
+    document.getElementById('main-site').classList.add('visible');
+    document.getElementById('hdr-greet').textContent='Welcome, '+name+' 👋';
+    showToast('Welcome '+name+'! ✨');
+  },800);
+}
+
+function showBlocked(){
+  document.body.innerHTML='<div style="position:fixed;inset:0;background:#0a0a0f;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;padding:32px;"><div style="font-size:60px;margin-bottom:16px;">🚫</div><div style="font-family:Playfair Display,serif;font-size:22px;color:#e05050;margin-bottom:10px;">Access Denied</div><div style="font-size:13px;color:#888;">Aapka access permanently ban kar diya gaya hai.</div></div></div>';
+}
+
+function logoutUser(){
+  if(!confirm('Logout karna chahte ho?'))return;
+  localStorage.removeItem('vip_uname');localStorage.removeItem('vip_uid');
+  location.reload();
+}
+
+// AUTO LOGIN
+window.addEventListener('load',async()=>{
+  const n=localStorage.getItem('vip_uname');
+  const id=localStorage.getItem('vip_uid');
+  document.getElementById('e-name').addEventListener('keydown',e=>{if(e.key==='Enter')enterSite();});
+  if(n&&id){
+    // Entry screen turant hide karo — user ko flicker mat dikhao
+    document.getElementById('entry-screen').style.display='none';
+    
+    await waitForFB();
+    const {db,ref,get}=window._FB;
+    try{
+      const s=await get(ref(db,'blockedUsers/'+id));
+      if(s.exists()){showBlocked();return;}
+    }catch(e){}
+    uname=n;uid=id;
+    document.getElementById('main-site').classList.add('visible');
+    document.getElementById('hdr-greet').textContent='Welcome back, '+n+' 👋';
+  }
+});
+
+// LIGHTBOX
+function openLbox(src){document.getElementById('lboximg').src=src;document.getElementById('lbox').classList.add('active');}
+function closeLbox(){document.getElementById('lbox').classList.remove('active');}
+document.getElementById('lbox').addEventListener('click',function(e){if(e.target===this)closeLbox();});
+
+// TOAST
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// SHAKE
+function shake(id){const el=document.getElementById(id);el.style.borderColor='#e91e8c';el.style.animation='shake .4s';setTimeout(()=>{el.style.borderColor='rgba(201,168,76,.28)';el.style.animation='';},800);}
+
+// Protection
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('copy',e=>e.preventDefault());
+
+window.enterSite=enterSite;window.logoutUser=logoutUser;window.openLbox=openLbox;window.closeLbox=closeLbox;
+</script>
+</body>
+</html>

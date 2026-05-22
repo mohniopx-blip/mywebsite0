@@ -1,0 +1,779 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VIP Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  :root{--gold:#c9a84c;--gold2:#f0d080;--dark:#0a0a0f;--dark2:#12121a;--dark3:#1a1a26;--pink:#e91e8c;--pink2:#ff4db8;--white:#f8f4ee;--gray:#888;--chat-bg:#0b141a;--chat-me:#005c4b;--chat-other:#202c33;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--chat-bg);color:var(--white);font-family:'Raleway',sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+  ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#0b141a;}::-webkit-scrollbar-thumb{background:var(--gold);}
+  
+  /* HEADER */
+  .grp-hdr{background:#1f2c34;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .grp-back{background:none;border:none;color:#aab;font-size:26px;cursor:pointer;padding:2px 8px 2px 0;line-height:1;}
+  .grp-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid rgba(201,168,76,.35);}
+  .grp-info{flex:1;min-width:0;}
+  .grp-name{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .grp-members{font-size:11px;color:#8696a0;display:flex;align-items:center;gap:5px;margin-top:1px;}
+  .grp-mdot{width:6px;height:6px;background:#25d366;border-radius:50%;animation:mdotpulse 2s infinite;}
+  @keyframes mdotpulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+  /* ===== SUBSCRIBE BUTTON IN HEADER ===== */
+  #hdr-sub-btn{
+    background:linear-gradient(135deg,var(--gold),var(--pink));
+    border:none;border-radius:20px;padding:7px 13px;
+    font-size:11px;font-weight:800;color:#fff;
+    cursor:pointer;white-space:nowrap;flex-shrink:0;
+    letter-spacing:.5px;font-family:'Raleway',sans-serif;
+    box-shadow:0 2px 10px rgba(233,30,140,.4);
+    display:flex;align-items:center;gap:4px;
+    animation:subBtnPulse 2s ease-in-out infinite;
+  }
+  @keyframes subBtnPulse{
+    0%,100%{box-shadow:0 2px 10px rgba(233,30,140,.4);}
+    50%{box-shadow:0 2px 18px rgba(233,30,140,.7),0 0 0 3px rgba(233,30,140,.15);}
+  }
+  /* ====================================== */
+  
+  /* COUNTDOWN BANNER */
+  #live-countdown-bar{background:linear-gradient(135deg,rgba(233,30,140,.18),rgba(201,168,76,.14));border-bottom:1px solid rgba(233,30,140,.3);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+  .cd-left{display:flex;align-items:center;gap:8px;}
+  .cd-pulse{width:10px;height:10px;background:#e91e8c;border-radius:50%;animation:cdpulse 1s infinite;}
+  @keyframes cdpulse{0%,100%{box-shadow:0 0 0 0 rgba(233,30,140,.7);}70%{box-shadow:0 0 0 8px rgba(233,30,140,0);}}
+  .cd-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:1px;text-transform:uppercase;}
+  .cd-timer-wrap{display:flex;gap:6px;align-items:center;}
+  .cd-unit{background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.3);border-radius:7px;padding:4px 8px;text-align:center;min-width:36px;}
+  .cd-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--gold2);line-height:1;}
+  .cd-sub{font-size:8px;color:rgba(255,255,255,.35);letter-spacing:1px;}
+  .cd-sep{color:var(--gold);font-size:16px;font-weight:900;opacity:.6;}
+  .cd-join-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  #live-countdown-bar.is-live .cd-label{color:#ff4db8;}
+  #live-countdown-bar.is-live .cd-pulse{background:#25d366;animation:cdpulse2 1s infinite;}
+  @keyframes cdpulse2{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.7);}70%{box-shadow:0 0 0 8px rgba(37,211,102,0);}}
+  
+  /* MESSAGES (main group chat) */
+  .grp-msgs{flex:1;overflow-y:auto;padding:10px 10px 6px;display:flex;flex-direction:column;gap:3px;-webkit-overflow-scrolling:touch;}
+  .cdatebadge{text-align:center;margin:10px 0;}
+  .cdatebadge span{background:rgba(255,255,255,.07);padding:4px 14px;border-radius:20px;font-size:11px;color:#8696a0;}
+  
+  /* BUBBLE */
+  .mbubble{max-width:82%;padding:7px 10px 4px;border-radius:8px;font-size:14px;line-height:1.5;word-break:break-word;}
+  .mbubble.sent{background:var(--chat-me);align-self:flex-end;border-top-right-radius:2px;color:#e9edef;}
+  .mbubble.recv{background:var(--chat-other);align-self:flex-start;border-top-left-radius:2px;color:#e9edef;}
+  .mbubble.admin-msg{background:linear-gradient(135deg,rgba(201,168,76,.16),rgba(233,30,140,.1));border:1px solid rgba(201,168,76,.28);align-self:flex-start;border-top-left-radius:2px;}
+  .msg-sender{font-size:11px;font-weight:700;margin-bottom:3px;}
+  .msg-sender.admin-clr{background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .msg-sender.user-clr{color:#53bdeb;}
+  .mtime{font-size:10px;color:rgba(255,255,255,.38);text-align:right;margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:3px;}
+  .mbubble.recv .mtime,.mbubble.admin-msg .mtime{justify-content:flex-start;}
+  .mticks{color:#53bdeb;font-size:12px;}
+  
+  /* MEDIA */
+  .chat-img{width:210px;max-width:100%;border-radius:10px;display:block;margin-bottom:3px;cursor:pointer;}
+  .chat-vid{width:220px;max-width:100%;border-radius:10px;display:block;margin-bottom:3px;}
+  
+  /* LOCKED */
+  .locked-wrap{position:relative;width:210px;border-radius:13px;overflow:hidden;cursor:pointer;}
+  .locked-img-bg{width:100%;height:185px;object-fit:cover;display:block;filter:blur(13px) brightness(.4);pointer-events:none;-webkit-user-drag:none;}
+  .locked-vid-bg{width:100%;height:150px;background:linear-gradient(135deg,#1a0a2e,#12101a);display:flex;align-items:center;justify-content:center;}
+  .locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .lock-big{font-size:32px;}
+  .lock-tag{font-size:11px;color:#e8c96a;font-weight:700;background:rgba(0,0,0,.65);padding:4px 14px;border-radius:20px;border:1px solid rgba(201,168,76,.3);}
+  
+  /* TYPING */
+  .typingi{align-self:flex-start;background:var(--chat-other);border-radius:8px;border-top-left-radius:2px;padding:10px 14px;display:none;margin:0 10px 4px;}
+  .typingi.show{display:flex;gap:4px;align-items:center;}
+  .tdot{width:7px;height:7px;border-radius:50%;background:#8696a0;animation:tb 1.2s ease-in-out infinite;}
+  .tdot:nth-child(2){animation-delay:.2s;}.tdot:nth-child(3){animation-delay:.4s;}
+  @keyframes tb{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+  
+  /* NEW MSG */
+  .newmsgbadge{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;z-index:10;box-shadow:0 3px 14px rgba(233,30,140,.4);display:none;white-space:nowrap;}
+  
+  /* INPUT */
+  .grp-input-wrap{background:#1f2c34;border-top:1px solid rgba(255,255,255,.06);padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));flex-shrink:0;}
+  .grp-mprev{display:none;align-items:center;gap:9px;padding:8px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:11px;margin-bottom:8px;}
+  .grp-mprev.active{display:flex;}
+  .grp-mpthumb{width:48px;height:48px;border-radius:8px;object-fit:cover;}
+  .grp-mpname{font-size:12px;color:#8696a0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .grp-mprem{background:none;border:none;color:#e06060;font-size:17px;cursor:pointer;}
+  .grp-input-row{display:flex;align-items:center;gap:8px;}
+  .grp-att-btn{background:none;border:none;color:#8696a0;font-size:22px;cursor:pointer;padding:5px;border-radius:50%;}
+  #grp-text-input{flex:1;background:#2a3942;border:none;border-radius:22px;padding:10px 15px;color:#e9edef;font-size:14px;font-family:'Raleway',sans-serif;outline:none;resize:none;max-height:100px;overflow-y:auto;-webkit-user-select:text!important;user-select:text!important;}
+  #grp-text-input::placeholder{color:#8696a0;}
+  .grp-send-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;width:42px;height:42px;border-radius:50%;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  #grp-fileInput{display:none;}
+  .no-send-bar{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:12px 16px;color:#8696a0;font-size:13px;}
+  
+  /* SPINNER */
+  .cspinner{position:absolute;inset:0;background:rgba(11,20,26,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:20;}
+  .cspinner.hide{display:none;}
+  .spin{width:32px;height:32px;border:3px solid rgba(201,168,76,.18);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .cspintxt{color:var(--gray);font-size:13px;letter-spacing:1px;}
+  
+  /* LIVE STREAM OVERLAY */
+  #live-overlay{display:none;position:fixed;inset:0;background:#000;z-index:800;flex-direction:column;}
+  #live-overlay.active{display:flex;}
+  .live-top-half{position:relative;height:50dvh;flex-shrink:0;background:#000;overflow:hidden;}
+  #live-video-el{width:100%;height:100%;object-fit:cover;display:block;}
+  .live-top-bar{position:absolute;top:0;left:0;right:0;padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent);display:flex;align-items:center;justify-content:space-between;z-index:5;gap:8px;}
+  .live-badge{background:#e91e8c;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:800;color:#fff;letter-spacing:1px;display:flex;align-items:center;gap:5px;}
+  .live-dot-w{width:7px;height:7px;background:#fff;border-radius:50%;animation:liveblink .8s infinite;}
+  @keyframes liveblink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  .live-viewers{background:rgba(0,0,0,.55);border-radius:20px;padding:4px 12px;font-size:12px;color:#fff;display:flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.12);}
+  .live-close-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .preview-bar-wrap{position:absolute;top:calc(54px + env(safe-area-inset-top));left:14px;right:14px;z-index:6;}
+  .preview-bar-label{font-size:10px;color:rgba(255,255,255,.65);margin-bottom:4px;text-align:right;}
+  .preview-bar-bg{height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;}
+  .preview-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--pink));border-radius:2px;width:100%;transition:width .1s linear;}
+  .live-bottom-half{flex:1;display:flex;flex-direction:column;background:#0b141a;border-top:2px solid rgba(201,168,76,.3);overflow:hidden;}
+  .live-chat-header{background:#1f2c34;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .live-chat-header-title{font-size:13px;font-weight:700;color:var(--gold2);display:flex;align-items:center;gap:6px;}
+  .live-online-count{margin-left:auto;font-size:11px;color:#25d366;display:flex;align-items:center;gap:4px;}
+  .live-odot{width:6px;height:6px;background:#25d366;border-radius:50%;animation:mdotpulse 2s infinite;}
+  .live-chat-scroll{flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch;}
+  .live-chat-item{display:flex;align-items:flex-start;gap:8px;animation:livemsgIn .3s ease;}
+  @keyframes livemsgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .live-chat-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+  .live-chat-bubble{background:var(--chat-other);border-radius:10px;border-top-left-radius:2px;padding:6px 10px;font-size:13px;color:#e9edef;max-width:78%;line-height:1.4;}
+  .live-chat-name{font-size:10px;font-weight:700;color:var(--gold2);display:block;margin-bottom:2px;}
+  .live-chat-input-wrap{background:#1f2c34;border-top:1px solid rgba(255,255,255,.06);padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));flex-shrink:0;display:flex;align-items:center;gap:8px;}
+  #live-chat-input-field{flex:1;background:#2a3942;border:none;border-radius:22px;padding:10px 15px;color:#e9edef;font-size:14px;font-family:'Raleway',sans-serif;outline:none;resize:none;-webkit-user-select:text!important;user-select:text!important;}
+  #live-chat-input-field::placeholder{color:#8696a0;}
+  .live-chat-send-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;width:42px;height:42px;border-radius:50%;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  
+  /* PAYMENT POPUP */
+  #pay-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);}
+  #pay-popup.active{display:flex;}
+  .pay-sheet{background:linear-gradient(180deg,#1a0a2e 0%,#0a0a0f 100%);border:1px solid rgba(201,168,76,.28);border-radius:26px 26px 0 0;width:100%;max-width:480px;max-height:94dvh;overflow-y:auto;animation:sheetUp .4s cubic-bezier(.34,1.3,.64,1);scrollbar-width:none;}
+  .pay-sheet::-webkit-scrollbar{display:none;}
+  @keyframes sheetUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .pay-handle-wrap{position:sticky;top:0;background:linear-gradient(180deg,#1a0a2e,rgba(26,10,46,.95));z-index:5;padding:12px 20px 0;display:flex;flex-direction:column;align-items:center;}
+  .pay-handle{width:42px;height:5px;background:rgba(255,255,255,.14);border-radius:3px;margin-bottom:10px;}
+  .pay-close-btn{position:absolute;right:14px;top:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:30px;height:30px;color:rgba(255,255,255,.5);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .pay-body{padding:6px 20px 44px;}
+  .pay-lock-top{text-align:center;margin-bottom:14px;}
+  .pay-lock-circle{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(233,30,140,.14));border:2px solid rgba(201,168,76,.4);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px;}
+  .pay-main-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;}
+  .pay-main-sub{font-size:12px;color:rgba(255,255,255,.42);letter-spacing:1px;}
+  .benefits-box{background:linear-gradient(135deg,rgba(201,168,76,.09),rgba(233,30,140,.06));border:1px solid rgba(201,168,76,.22);border-radius:16px;padding:16px 16px 12px;margin-bottom:18px;}
+  .benefits-title{font-size:12px;font-weight:700;color:var(--gold2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;}
+  .benefit-item{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.82);margin-bottom:9px;}
+  .benefit-item:last-child{margin-bottom:0;}
+  .benefit-icon{width:22px;height:22px;background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+  .price-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;}
+  .price-label{font-size:12px;color:rgba(255,255,255,.4);}
+  .price-val{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--gold2);}
+  .qr-section{text-align:center;margin-bottom:16px;}
+  .qr-wrap{background:#fff;border-radius:16px;padding:12px;width:175px;margin:0 auto 10px;box-shadow:0 0 30px rgba(201,168,76,.22);}
+  .qr-wrap img{width:100%;display:block;border-radius:8px;pointer-events:none;}
+  .qr-name{font-size:12px;font-weight:700;color:#0a0a0f;margin-top:7px;font-family:'Raleway',sans-serif;}
+  .scan-steps{list-style:none;text-align:left;margin-bottom:16px;}
+  .scan-steps li{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:8px;}
+  .step-num{width:19px;height:19px;background:linear-gradient(135deg,var(--gold),var(--pink));border-radius:50%;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .utr-label{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;display:block;}
+  .utr-row{display:flex;gap:8px;margin-bottom:7px;}
+  .utr-input{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(201,168,76,.28);border-radius:11px;padding:12px 14px;color:#fff;font-family:'Raleway',sans-serif;font-size:14px;outline:none;-webkit-user-select:text!important;user-select:text!important;transition:border-color .3s;}
+  .utr-input:focus{border-color:var(--gold);}
+  .utr-input::placeholder{color:rgba(255,255,255,.28);}
+  .utr-hint{font-size:11px;color:rgba(255,255,255,.26);margin-bottom:18px;line-height:1.5;}
+  .submit-pay-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:13px;padding:15px;color:#fff;font-family:'Raleway',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:2px;text-transform:uppercase;}
+  .submit-pay-btn:active{transform:scale(.97);}
+  .cancel-link{display:block;text-align:center;font-size:12px;color:rgba(255,255,255,.3);cursor:pointer;margin-top:12px;}
+  
+  /* PENDING POPUP */
+  #pending-pop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1100;align-items:center;justify-content:center;backdrop-filter:blur(7px);padding:20px;}
+  #pending-pop.active{display:flex;}
+  .pending-box{background:linear-gradient(135deg,#12101a,#1a0a2e);border:1px solid rgba(201,168,76,.3);border-radius:22px;padding:32px 22px;max-width:300px;width:100%;text-align:center;animation:popin .3s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes popin{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .pending-icon{font-size:46px;margin-bottom:12px;}
+  .pending-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;color:var(--gold2);margin-bottom:9px;}
+  .pending-txt{font-size:12px;color:rgba(255,255,255,.42);line-height:1.8;margin-bottom:14px;}
+  .pending-txn{background:rgba(255,255,255,.06);border:1px solid rgba(201,168,76,.2);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--gold);margin-bottom:16px;word-break:break-all;}
+  .pending-ok-btn{background:linear-gradient(135deg,var(--gold),var(--pink));border:none;border-radius:11px;padding:12px 26px;color:#fff;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+  
+  /* APPROVED BANNER */
+  #approved-banner{display:none;background:linear-gradient(135deg,rgba(37,211,102,.15),rgba(18,140,126,.1));border-bottom:1px solid rgba(37,211,102,.3);padding:8px 14px;text-align:center;font-size:12px;color:#25d366;font-weight:700;flex-shrink:0;}
+  #approved-banner.show{display:block;}
+  
+  /* LIGHTBOX */
+  #lbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:950;align-items:center;justify-content:center;}
+  #lbox.active{display:flex;}
+  #lbox img{max-width:96%;max-height:92dvh;object-fit:contain;border-radius:12px;pointer-events:none;}
+  .lclose{position:fixed;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  
+  /* TOAST */
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(30,30,40,.95);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:11px 20px;color:var(--white);font-size:13px;z-index:1050;transition:transform .4s cubic-bezier(.34,1.56,.64,1);backdrop-filter:blur(10px);white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  </style>
+  </head>
+  <body>
+  
+  <!-- ===== EDIT 1: HEADER — Subscribe button add kiya ===== -->
+  <div class="grp-hdr">
+    <button class="grp-back" onclick="history.back()">‹</button>
+    <div class="grp-avatar" id="grp-avatar-emoji">👑</div>
+    <div class="grp-info">
+      <div class="grp-name" id="grp-name-display">VIP Group</div>
+      <div class="grp-members"><div class="grp-mdot"></div><span id="grp-member-count">...</span> members</div>
+    </div>
+    <!-- Subscribe button — click karne par payment popup open hoga -->
+    <button id="hdr-sub-btn" onclick="openPayPopup()">💎 Subscribe</button>
+  </div>
+  <!-- ===================================================== -->
+  
+  <!-- APPROVED BANNER -->
+  <div id="approved-banner">✅ Subscription Active — Premium Access Unlocked!</div>
+  
+  <!-- LIVE COUNTDOWN BAR -->
+  <div id="live-countdown-bar">
+    <div class="cd-left">
+      <div class="cd-pulse" id="cd-pulse-dot"></div>
+      <div class="cd-label" id="cd-bar-label">🎥 Live Show Starts In</div>
+    </div>
+    <div class="cd-timer-wrap" id="cd-timer-wrap">
+      <div class="cd-unit"><div class="cd-num" id="cd-hh">00</div><div class="cd-sub">HRS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><div class="cd-num" id="cd-mm">00</div><div class="cd-sub">MIN</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><div class="cd-num" id="cd-ss">00</div><div class="cd-sub">SEC</div></div>
+    </div>
+    <button class="cd-join-btn" id="cd-join-btn" onclick="onJoinLiveClick()">Join Live 🔴</button>
+  </div>
+  
+  <!-- MAIN GROUP CHAT AREA -->
+  <div style="position:relative;flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div class="cspinner" id="cspinner">
+      <div class="spin"></div>
+      <div class="cspintxt">Loading group...</div>
+    </div>
+    <div class="grp-msgs" id="grp-msgs">
+      <div class="cdatebadge"><span id="today-badge">Today</span></div>
+    </div>
+    <div class="typingi" id="typingi">
+      <div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+    </div>
+    <div class="newmsgbadge" id="newmsgbadge" onclick="scrollBot()">⬇ New message</div>
+  </div>
+  
+  <!-- GROUP CHAT INPUT -->
+  <div class="grp-input-wrap">
+    <div class="grp-mprev" id="grp-mprev">
+      <img id="grp-mpthumb" class="grp-mpthumb" src="" alt="">
+      <span id="grp-mpname" class="grp-mpname"></span>
+      <button class="grp-mprem" onclick="removePendMedia()">✕</button>
+    </div>
+    <div id="input-zone"></div>
+  </div>
+  
+  <!-- LIVE STREAM OVERLAY -->
+  <div id="live-overlay">
+    <div class="live-top-half">
+      <video id="live-video-el" src="" autoplay muted playsinline loop
+        controlslist="nodownload noremoteplayback" disablepictureinpicture
+        oncontextmenu="return false"></video>
+      <div class="live-top-bar">
+        <div class="live-badge"><div class="live-dot-w"></div>LIVE</div>
+        <div class="live-viewers">👁 <span id="live-viewer-count">1,247</span> watching</div>
+        <button class="live-close-btn" onclick="closeLiveOverlay()">✕</button>
+      </div>
+      <div class="preview-bar-wrap" id="preview-bar-wrap" style="display:none;">
+        <div class="preview-bar-label">Free preview: <span id="preview-sec-left">4</span>s remaining</div>
+        <div class="preview-bar-bg"><div class="preview-bar-fill" id="preview-bar-fill"></div></div>
+      </div>
+    </div>
+    <div class="live-bottom-half">
+      <div class="live-chat-header">
+        <div class="live-chat-header-title">💬 Live Chat</div>
+        <div class="live-online-count">
+          <div class="live-odot"></div>
+          <span id="live-online-text">1,247 online</span>
+        </div>
+      </div>
+      <div class="live-chat-scroll" id="live-chat-scroll"></div>
+      <div class="live-chat-input-wrap">
+        <textarea id="live-chat-input-field" placeholder="Say something... 💬" rows="1"
+          oninput="autoResizeLive(this)" onkeydown="onLiveChatEnter(event)"></textarea>
+        <button class="live-chat-send-btn" onclick="sendLiveChatMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PAYMENT POPUP -->
+  <div id="pay-popup">
+    <div class="pay-sheet">
+      <div class="pay-handle-wrap">
+        <div class="pay-handle"></div>
+        <button class="pay-close-btn" onclick="closePayPopup()">✕</button>
+      </div>
+      <div class="pay-body">
+        <div class="pay-lock-top">
+          <div class="pay-lock-circle">🔒</div>
+          <div class="pay-main-title">Premium Content</div>
+          <div class="pay-main-sub">Sirf subscribers dekh sakte hain</div>
+        </div>
+        <div class="benefits-box">
+          <div class="benefits-title">✨ 1 Month me kya milega</div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> Roz 5 Exclusive Photos</div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> Roz 5 Exclusive Videos</div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> Group me sabhi locked content unlock</div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> daily night group cam  seat </div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> unlimited chat group </div>
+          <div class="benefit-item"><span class="benefit-icon">✓</span> Members-Only Special Content</div>
+        </div>
+        <div class="price-row">
+          <span class="price-label">1 Month Subscription</span>
+          <span class="price-val">₹99</span>
+        </div>
+        <div class="qr-section">
+          <div class="qr-wrap">
+            <img src="img17.jpg" alt="QR Code" onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=\'font-size:60px;padding:20px;\'>📱</div>'">
+            <div class="qr-name">Scan to Pay ₹99</div>
+          </div>
+          <ul class="scan-steps">
+            <li><span class="step-num">1</span> Apne UPI app se QR code scan karo</li>
+            <li><span class="step-num">2</span> Exactly <strong style="color:var(--gold)">₹99</strong> pay karo</li>
+            <li><span class="step-num">3</span> Transaction ID / UTR number copy karo</li>
+            <li><span class="step-num">4</span> Neeche paste karo aur submit karo</li>
+          </ul>
+        </div>
+        <label class="utr-label">📋 UTR / Transaction ID</label>
+        <div class="utr-row">
+          <input type="text" class="utr-input" id="utr-input" placeholder="e.g. 123456789012" maxlength="50" autocomplete="off">
+        </div>
+        <div class="utr-hint">⚠️ Galat ID dene par subscription activate nahi hogi.<br>✅ Admin 30 minutes mein manually verify karega.</div>
+        <button class="submit-pay-btn" onclick="submitPayment()">✅ Submit Payment Proof</button>
+        <span class="cancel-link" onclick="closePayPopup()">Cancel</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PENDING POPUP -->
+  <div id="pending-pop">
+    <div class="pending-box">
+      <div class="pending-icon">⏳</div>
+      <div class="pending-title">Verification Pending</div>
+      <div class="pending-txt">Tumhara payment proof receive ho gaya! Admin <strong style="color:var(--gold)">30 minutes</strong> mein verify karega.</div>
+      <div class="pending-txn" id="pending-txn-show"></div>
+      <button class="pending-ok-btn" onclick="closePendingPop()">Okay, Got It! 👍</button>
+    </div>
+  </div>
+  
+  <!-- LIGHTBOX -->
+  <div id="lbox">
+    <button class="lclose" onclick="closeLbox()">✕</button>
+    <img id="lboximg" src="" alt="" draggable="false">
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <!-- FIREBASE -->
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded, onValue, query, orderByChild, limitToLast, set, get }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const cfg={apiKey:"AIzaSyAt5S-K9Gu-fCjEgbqk38mGYAo6R7DwgHc",authDomain:"vipliveme.firebaseapp.com",projectId:"vipliveme",storageBucket:"vipliveme.firebasestorage.app",messagingSenderId:"212842409897",appId:"1:212842409897:web:b1feadb097db068fe95eb8",databaseURL:"https://vipliveme-default-rtdb.firebaseio.com"};
+  const app=initializeApp(cfg);
+  const db=getDatabase(app);
+  window._FB={db,ref,push,onChildAdded,onValue,query,orderByChild,limitToLast,set,get};
+  window._fbOk=true;
+  document.dispatchEvent(new Event('fb-ready'));
+  </script>
+  
+  <script>
+  const IMGBB_KEY='c4b4735988d74b7ebb4119130a8cb07c';
+  
+const LIVE_SHOW_TIME = '2026-05-22T16:00:00';
+  const LIVE_VIDEO_SRC = 'video.mp4';
+  const PREVIEW_DURATION = 4;
+  
+  let uname='', uid='';
+  let isAllowed=false, isSubscribed=false;
+  let pendMedia=null;
+  let countdownInterval=null, liveViewerInterval=null, liveChatInterval=null, previewTimer=null;
+  
+  const LIVE_CHAT_SIM=[
+    {n:'Priya❤️',e:'🌸',m:'Omg finally live!! 😍'},
+    {n:'Rahul_fan',e:'🔥',m:'Waiting for sooo long babe 🔥'},
+    {n:'Sneha22',e:'💕',m:'You look so beautiful today 😭'},
+    {n:'Vikram',e:'👑',m:'Queen has arrived 👑'},
+    {n:'Ananya',e:'✨',m:'❤️❤️❤️'},
+    {n:'Deep123',e:'💎',m:'Subbed just for this 💎'},
+    {n:'Riya_vip',e:'🌹',m:'Love you so much 😘'},
+    {n:'Arjun',e:'🎯',m:'Best content creator ever!'},
+    {n:'Kajal',e:'🌺',m:'More more more!! 🙌'},
+    {n:'Sonu_k',e:'💯',m:'Worth every rupee 💯'},
+  ];
+  
+  function pad(n){return String(n).padStart(2,'0');}
+  function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+  function waitFB(){return new Promise(r=>{if(window._fbOk){r();return;}document.addEventListener('fb-ready',()=>r(),{once:true});});}
+  async function uploadImgBB(dataUrl){
+    const b=dataUrl.split(',')[1],fd=new FormData();
+    fd.append('key',IMGBB_KEY);fd.append('image',b);
+    const r=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+    const j=await r.json();if(j.success)return j.data.url;throw new Error('fail');
+  }
+  
+  window.addEventListener('load',async()=>{
+    uname=localStorage.getItem('vip_uname')||'';
+    uid=localStorage.getItem('vip_uid')||'';
+    if(!uname||!uid){window.location.href='index.html';return;}
+    await waitFB();
+    registerGroupVisitor();
+    listenSettings();
+    listenSubStatus();
+    listenMessages();
+    listenTyping();
+    startCountdown();
+    setTimeout(()=>document.getElementById('cspinner').classList.add('hide'),1600);
+  });
+  
+  function registerGroupVisitor(){
+    const {db,ref,set,get}=window._FB;
+    set(ref(db,'groupVisitors/'+uid),{name:uname,uid:uid,lastSeen:Date.now()});
+    set(ref(db,'visitors/'+uid),{name:uname,uid:uid,lastSeen:Date.now()});
+    get(ref(db,'chats/'+uid+'/info')).then(snap=>{
+      if(!snap.exists()) set(ref(db,'chats/'+uid+'/info'),{username:uname,uid:uid,lastSeen:Date.now(),unread:false});
+    }).catch(()=>{});
+  }
+
+  // ===== EDIT 2: listenSubStatus — approved hone par Subscribe button hide karo =====
+  function listenSubStatus(){
+    const {db,ref,onValue}=window._FB;
+    onValue(ref(db,'subStatus/'+uid),snap=>{
+      const d=snap.val();
+      if(d&&d.status==='approved'){
+        isSubscribed=true;
+        document.getElementById('approved-banner').classList.add('show');
+        // Subscribe button hide karo — already subscribed hai
+        const subBtn=document.getElementById('hdr-sub-btn');
+        if(subBtn) subBtn.style.display='none';
+        showToast('✅ Premium Access Active!');
+      } else {
+        isSubscribed=false;
+        document.getElementById('approved-banner').classList.remove('show');
+        // Subscribe button wapas dikhao
+        const subBtn=document.getElementById('hdr-sub-btn');
+        if(subBtn) subBtn.style.display='flex';
+      }
+      renderInputZone();
+    });
+  }
+  // ==============================================================================
+  
+  function listenSettings(){
+    const {db,ref,onValue}=window._FB;
+    onValue(ref(db,'groupSettings'),snap=>{
+      const d=snap.val()||{};
+      document.getElementById('grp-name-display').textContent=d.name||'VIP Group';
+      document.getElementById('grp-member-count').textContent=Number(d.memberCount||1247).toLocaleString('en-IN');
+      if(d.avatarEmoji) document.getElementById('grp-avatar-emoji').textContent=d.avatarEmoji;
+      isAllowed=!!(d.allowedUsers&&d.allowedUsers[uid]);
+      renderInputZone();
+    });
+  }
+  
+  function renderInputZone(){
+    const z=document.getElementById('input-zone');
+    // Hamesha input box dikhao — subscriber ho ya na ho
+    // Send click karne par agar subscribed nahi to popup aayega, msg send nahi hoga
+    z.innerHTML=`
+      <input type="file" id="grp-fileInput" accept="image/*,video/*" onchange="onFileSelect(event)" style="display:none">
+      <div class="grp-input-row">
+        <button class="grp-att-btn" onclick="document.getElementById('grp-fileInput').click()">📎</button>
+        <textarea id="grp-text-input" placeholder="Type a message..." rows="1"
+          oninput="autoResize(this)" onkeydown="onEnterKey(event)"></textarea>
+        <button class="grp-send-btn" onclick="trySendMsg()">➤</button>
+      </div>`;
+  }
+  
+  function listenMessages(){
+    const {db,ref,onChildAdded,query,orderByChild,limitToLast}=window._FB;
+    const q=query(ref(db,'groupMessages'),orderByChild('timestamp'),limitToLast(200));
+    onChildAdded(q,snap=>{addBubble(snap.val(),snap.key);scrollIfNear();});
+  }
+  function listenTyping(){
+    const {db,ref,onValue}=window._FB;
+    onValue(ref(db,'groupTyping'),snap=>{
+      const el=document.getElementById('typingi');
+      if(snap.val()) el.classList.add('show'); else el.classList.remove('show');
+      scrollIfNear();
+    });
+  }
+  
+  function addBubble(msg,key){
+    const area=document.getElementById('grp-msgs');
+    if(key&&document.querySelector('[data-gk="'+key+'"]')) return;
+    const isMe=msg.senderUID===uid;
+    const isAdm=msg.sender==='admin';
+    const b=document.createElement('div');
+    b.className='mbubble '+(isMe?'sent':(isAdm?'admin-msg':'recv'));
+    if(key) b.setAttribute('data-gk',key);
+    if(!isMe){
+      const sn=document.createElement('div');
+      sn.className='msg-sender '+(isAdm?'admin-clr':'user-clr');
+      sn.textContent=isAdm?'👑 Admin':'👤 '+(msg.senderName||'User');
+      b.appendChild(sn);
+    }
+    const canViewLocked=isAllowed||isSubscribed;
+    if(msg.locked&&msg.mediaUrl){
+      if(canViewLocked){
+        if(msg.mediaType==='image'){const img=document.createElement('img');img.src=msg.mediaUrl;img.className='chat-img';img.draggable=false;img.setAttribute('oncontextmenu','return false');img.onclick=()=>openLbox(msg.mediaUrl);b.appendChild(img);}
+        else if(msg.mediaType==='video'){const v=document.createElement('video');v.src=msg.mediaUrl;v.controls=true;v.className='chat-vid';v.setAttribute('controlslist','nodownload noremoteplayback');v.setAttribute('disablepictureinpicture','');v.setAttribute('oncontextmenu','return false');b.appendChild(v);}
+      } else {
+        const wrap=document.createElement('div');wrap.className='locked-wrap';wrap.onclick=openPayPopup;
+        if(msg.mediaType==='image') wrap.innerHTML=`<img class="locked-img-bg" src="${msg.mediaUrl}" draggable="false" oncontextmenu="return false"><div class="locked-overlay"><div class="lock-big">🔒</div><div class="lock-tag">Subscribe to View</div></div>`;
+        else wrap.innerHTML=`<div class="locked-vid-bg"><div style="font-size:40px;">🔒</div></div><div class="locked-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;"><div class="lock-tag">Subscribe to Watch 🎬</div></div>`;
+        b.appendChild(wrap);
+      }
+    } else if(msg.mediaUrl){
+      if(msg.mediaType==='image'){const img=document.createElement('img');img.src=msg.mediaUrl;img.className='chat-img';img.draggable=false;img.setAttribute('oncontextmenu','return false');img.onclick=()=>openLbox(msg.mediaUrl);b.appendChild(img);}
+      else if(msg.mediaType==='video'){const v=document.createElement('video');v.src=msg.mediaUrl;v.controls=true;v.className='chat-vid';v.setAttribute('controlslist','nodownload noremoteplayback');v.setAttribute('disablepictureinpicture','');v.setAttribute('oncontextmenu','return false');b.appendChild(v);}
+    }
+    if(msg.text){const t=document.createElement('div');t.innerHTML=esc(msg.text);b.appendChild(t);}
+    const td=document.createElement('div');td.className='mtime';
+    const d=new Date(msg.timestamp||Date.now());
+    const ts=pad(d.getHours())+':'+pad(d.getMinutes());
+    td.innerHTML=isMe?`${ts} <span class="mticks">✓✓</span>`:ts;
+    b.appendChild(td);
+    area.appendChild(b);
+  }
+  
+  function trySendMsg(){
+    if(!isAllowed&&!isSubscribed){openPayPopup();return;}
+    sendMsg();
+  }
+  async function sendMsg(){
+    if(!window._fbOk){showToast('Connecting...');return;}
+    const {db,ref,push}=window._FB;
+    const inp=document.getElementById('grp-text-input');
+    const txt=inp?inp.value.trim():'';
+    if(!txt&&!pendMedia) return;
+    const msg={sender:'user',senderUID:uid,senderName:uname,text:txt||'',timestamp:Date.now(),mediaUrl:null,mediaType:null,locked:false};
+    if(pendMedia){
+      try{showToast('📤 Uploading...');msg.mediaUrl=await uploadImgBB(pendMedia.dataUrl);msg.mediaType='image';removePendMedia();}
+      catch(e){showToast('❌ Upload failed');return;}
+    }
+    if(inp){inp.value='';inp.style.height='auto';}
+    await push(ref(db,'groupMessages'),msg);
+    scrollBot();
+  }
+  function onEnterKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();trySendMsg();}}
+  function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+  
+  function onFileSelect(e){
+    const f=e.target.files[0];if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      pendMedia={dataUrl:ev.target.result,name:f.name,type:f.type.startsWith('video')?'video':'image'};
+      document.getElementById('grp-mpthumb').src=ev.target.result;
+      document.getElementById('grp-mpname').textContent=f.name;
+      document.getElementById('grp-mprev').classList.add('active');
+    };
+    r.readAsDataURL(f);e.target.value='';
+  }
+  function removePendMedia(){
+    pendMedia=null;
+    document.getElementById('grp-mprev').classList.remove('active');
+    document.getElementById('grp-mpthumb').src='';
+    document.getElementById('grp-mpname').textContent='';
+  }
+  
+  function scrollIfNear(){
+    const a=document.getElementById('grp-msgs');
+    const dist=a.scrollHeight-a.scrollTop-a.clientHeight;
+    if(dist<130) scrollBot();
+    else{document.getElementById('newmsgbadge').style.display='block';setTimeout(()=>document.getElementById('newmsgbadge').style.display='none',4000);}
+  }
+  function scrollBot(){const a=document.getElementById('grp-msgs');a.scrollTop=a.scrollHeight;document.getElementById('newmsgbadge').style.display='none';}
+  document.getElementById('grp-msgs').addEventListener('scroll',function(){if(this.scrollHeight-this.scrollTop-this.clientHeight<70) document.getElementById('newmsgbadge').style.display='none';});
+  
+  function startCountdown(){
+    const target=new Date(LIVE_SHOW_TIME).getTime();
+    const bar=document.getElementById('live-countdown-bar');
+    const label=document.getElementById('cd-bar-label');
+    const btn=document.getElementById('cd-join-btn');
+    function tick(){
+      const diff=target-Date.now();
+      if(diff<=0){
+        bar.classList.add('is-live');
+        label.textContent='🔴 Live Show is ON NOW!';
+        document.getElementById('cd-hh').textContent='00';
+        document.getElementById('cd-mm').textContent='00';
+        document.getElementById('cd-ss').textContent='00';
+        btn.textContent='Watch Live 🔴';
+        clearInterval(countdownInterval);
+      } else {
+        document.getElementById('cd-hh').textContent=pad(Math.floor(diff/3600000));
+        document.getElementById('cd-mm').textContent=pad(Math.floor((diff%3600000)/60000));
+        document.getElementById('cd-ss').textContent=pad(Math.floor((diff%60000)/1000));
+      }
+    }
+    tick();countdownInterval=setInterval(tick,1000);
+  }
+  
+  function onJoinLiveClick(){
+    const previewUsed=localStorage.getItem('live_preview_used_v1');
+    if(isSubscribed){openLiveStream(false);return;}
+    if(previewUsed){openPayPopup();return;}
+    openLiveStream(true);
+  }
+  
+  function openLiveStream(isPreview){
+    const overlay=document.getElementById('live-overlay');
+    const video=document.getElementById('live-video-el');
+    overlay.classList.add('active');
+    document.body.style.overflow='hidden';
+    video.src=LIVE_VIDEO_SRC;
+    video.currentTime=0;video.muted=false;
+    video.play().catch(()=>{video.muted=true;video.play();});
+    let vb=1100+Math.floor(Math.random()*400);
+    document.getElementById('live-viewer-count').textContent=vb.toLocaleString('en-IN');
+    document.getElementById('live-online-text').textContent=vb.toLocaleString('en-IN')+' online';
+    liveViewerInterval=setInterval(()=>{
+      vb+=Math.floor(Math.random()*7)-2;
+      if(vb<800) vb=800;
+      const fmt=vb.toLocaleString('en-IN');
+      document.getElementById('live-viewer-count').textContent=fmt;
+      document.getElementById('live-online-text').textContent=fmt+' online';
+    },2000);
+    startLiveChatSim();
+    if(isPreview) startPreviewCountdown();
+  }
+  
+  function startPreviewCountdown(){
+    const barWrap=document.getElementById('preview-bar-wrap');
+    const barFill=document.getElementById('preview-bar-fill');
+    const secLabel=document.getElementById('preview-sec-left');
+    barWrap.style.display='block';
+    let remaining=PREVIEW_DURATION;
+    barFill.style.width='100%';
+    secLabel.textContent=remaining;
+    localStorage.setItem('live_preview_used_v1','1');
+    const interval=setInterval(()=>{
+      remaining-=0.1;
+      barFill.style.width=Math.max(0,(remaining/PREVIEW_DURATION)*100)+'%';
+      secLabel.textContent=Math.ceil(remaining);
+      if(remaining<=0){clearInterval(interval);closeLiveOverlay();setTimeout(openPayPopup,300);}
+    },100);
+    previewTimer=interval;
+  }
+  
+  function closeLiveOverlay(){
+    const overlay=document.getElementById('live-overlay');
+    const video=document.getElementById('live-video-el');
+    overlay.classList.remove('active');
+    document.body.style.overflow='';
+    video.pause();video.src='';
+    clearInterval(liveViewerInterval);
+    clearInterval(liveChatInterval);
+    if(previewTimer) clearInterval(previewTimer);
+    document.getElementById('preview-bar-wrap').style.display='none';
+    document.getElementById('live-chat-scroll').innerHTML='';
+  }
+  
+  function startLiveChatSim(){
+    const container=document.getElementById('live-chat-scroll');
+    function addSimMsg(){
+      const item=LIVE_CHAT_SIM[Math.floor(Math.random()*LIVE_CHAT_SIM.length)];
+      const div=document.createElement('div');
+      div.className='live-chat-item';
+      div.innerHTML=`
+        <div class="live-chat-avatar">${item.e}</div>
+        <div class="live-chat-bubble">
+          <span class="live-chat-name">${item.n}</span>
+          ${item.m}
+        </div>`;
+      container.appendChild(div);
+      while(container.children.length>30) container.removeChild(container.firstChild);
+      container.scrollTop=container.scrollHeight;
+    }
+    addSimMsg();
+    liveChatInterval=setInterval(addSimMsg,900+Math.random()*1300);
+  }
+  
+  function autoResizeLive(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+  function onLiveChatEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendLiveChatMsg();}}
+  function sendLiveChatMsg(){
+    const field=document.getElementById('live-chat-input-field');
+    const txt=field.value.trim();
+    if(!txt) return;
+    const container=document.getElementById('live-chat-scroll');
+    const div=document.createElement('div');
+    div.className='live-chat-item';
+    div.innerHTML=`
+      <div class="live-chat-avatar" style="background:linear-gradient(135deg,#005c4b,#128c7e);">😊</div>
+      <div class="live-chat-bubble" style="background:var(--chat-me);">
+        <span class="live-chat-name" style="color:#25d366;">${esc(uname||'You')}</span>
+        ${esc(txt)}
+      </div>`;
+    container.appendChild(div);
+    while(container.children.length>30) container.removeChild(container.firstChild);
+    container.scrollTop=container.scrollHeight;
+    field.value='';
+    field.style.height='auto';
+    if(window._fbOk){
+      const {db,ref,push}=window._FB;
+      push(ref(db,'groupMessages'),{
+        sender:'user',senderUID:uid,senderName:uname,
+        text:txt,timestamp:Date.now(),mediaUrl:null,mediaType:null,locked:false
+      });
+    }
+  }
+  
+  function openPayPopup(){
+    const saved=localStorage.getItem('sub_txn_'+(uid||'g'));
+    if(saved){
+      document.getElementById('pending-txn-show').textContent='Transaction ID: '+saved;
+      document.getElementById('pending-pop').classList.add('active');
+      return;
+    }
+    document.getElementById('pay-popup').classList.add('active');
+  }
+  function closePayPopup(){document.getElementById('pay-popup').classList.remove('active');}
+  document.getElementById('pay-popup').addEventListener('click',function(e){if(e.target===this)closePayPopup();});
+  
+  async function submitPayment(){
+    const utr=document.getElementById('utr-input').value.trim();
+    if(!utr||utr.length<6){
+      document.getElementById('utr-input').style.borderColor='#e91e8c';
+      setTimeout(()=>document.getElementById('utr-input').style.borderColor='rgba(201,168,76,.28)',2000);
+      showToast('⚠️ Valid UTR/Transaction ID dalo!');return;
+    }
+    if(window._fbOk){
+      const {db,ref,push,set}=window._FB;
+      try{
+        await push(ref(db,'subscriptionRequests'),{uid:uid||'unknown',name:uname||'Unknown',txnId:utr,amount:99,submittedAt:Date.now(),status:'pending'});
+        await set(ref(db,'subStatus/'+(uid||'unknown')),{txnId:utr,status:'pending',submittedAt:Date.now(),name:uname||''});
+      }catch(e){}
+    }
+    localStorage.setItem('sub_txn_'+(uid||'g'),utr);
+    closePayPopup();
+    document.getElementById('pending-txn-show').textContent='Transaction ID: '+utr;
+    document.getElementById('pending-pop').classList.add('active');
+  }
+  function closePendingPop(){document.getElementById('pending-pop').classList.remove('active');}
+  
+  function openLbox(src){document.getElementById('lboximg').src=src;document.getElementById('lbox').classList.add('active');}
+  function closeLbox(){document.getElementById('lbox').classList.remove('active');}
+  document.getElementById('lbox').addEventListener('click',function(e){if(e.target===this)closeLbox();});
+  
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('copy',e=>e.preventDefault());
+  
+  window.trySendMsg=trySendMsg;window.sendMsg=sendMsg;window.onEnterKey=onEnterKey;
+  window.autoResize=autoResize;window.onFileSelect=onFileSelect;window.removePendMedia=removePendMedia;
+  window.openPayPopup=openPayPopup;window.closePayPopup=closePayPopup;
+  window.submitPayment=submitPayment;window.closePendingPop=closePendingPop;
+  window.openLbox=openLbox;window.closeLbox=closeLbox;window.scrollBot=scrollBot;
+  window.onJoinLiveClick=onJoinLiveClick;window.closeLiveOverlay=closeLiveOverlay;
+  window.sendLiveChatMsg=sendLiveChatMsg;window.onLiveChatEnter=onLiveChatEnter;window.autoResizeLive=autoResizeLive;
+  </script>
+  </body>
+  </html>
