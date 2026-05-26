@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vibe Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070f;--bg2:#0d0d1c;--bg3:#13132a;--bg4:#1a1a35;
+  --card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --purple:#7c3aed;--purple2:#a855f7;--pink:#ec4899;--pink2:#f472b6;
+  --white:#f0f0ff;--gray:#6b7280;--gray2:#9ca3af;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+  --grad:linear-gradient(135deg,#7c3aed,#ec4899);
+  --sidebar-w:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;overflow:hidden;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(124,58,237,.5);border-radius:4px;}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(124,58,237,.25),transparent 55%),radial-gradient(ellipse at 75% 80%,rgba(236,72,153,.18),transparent 50%),var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
+#loginScreen.hidden{display:none;}
+.login-box{width:min(360px,92vw);background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:24px;padding:36px 28px;text-align:center;animation:fadeUp .5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{width:62px;height:62px;background:var(--grad);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:14px;box-shadow:0 0 40px rgba(124,58,237,.4);}
+.login-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--gray2);margin-bottom:28px;letter-spacing:1.5px;text-transform:uppercase;}
+.login-inp{width:100%;background:rgba(255,255,255,.06);border:1.5px solid var(--border2);border-radius:12px;padding:13px 16px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:11px;transition:border-color .15s;}
+.login-inp:focus{border-color:var(--purple2);box-shadow:0 0 0 3px rgba(124,58,237,.12);}
+.login-inp::placeholder{color:rgba(255,255,255,.25);}
+.login-btn{width:100%;background:var(--grad);border:none;border-radius:12px;padding:13px;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .15s;margin-top:4px;}
+.login-btn:active{transform:scale(.97);}
+.login-error{font-size:12px;color:var(--red);margin-top:7px;display:none;}
+
+/* ── LAYOUT ── */
+#adminApp{display:flex;height:100vh;width:100vw;overflow:hidden;}
+#adminApp.hidden{display:none;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden;position:relative;z-index:10;}
+.sidebar-head{padding:20px 16px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sidebar-logo-icon{width:40px;height:40px;background:var(--grad);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sidebar-logo-txt{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sidebar-logo-sub{font-size:10px;color:var(--gray2);letter-spacing:1px;text-transform:uppercase;}
+.admin-info{display:flex;align-items:center;gap:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:11px;padding:9px 11px;}
+.admin-av{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.admin-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;}
+.admin-badge{font-size:9px;color:var(--purple2);background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:2px 7px;display:inline-block;margin-top:2px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+.nav-section{padding:14px 10px 5px;font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:11px;cursor:pointer;transition:all .15s;margin:2px 8px;position:relative;}
+.nav-item:hover{background:rgba(255,255,255,.05);}
+.nav-item.active{background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.28);}
+.nav-item.active .nav-label{color:var(--purple2);font-weight:600;}
+.nav-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0;}
+.nav-label{font-size:13px;color:var(--gray2);}
+.nav-badge{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.sidebar-footer{margin-top:auto;padding:14px 10px;border-top:1px solid var(--border);flex-shrink:0;}
+.exit-btn{display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:11px;cursor:pointer;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);transition:all .15s;}
+.exit-btn:hover{background:rgba(239,68,68,.15);}
+.exit-btn span{font-size:13px;color:var(--red);font-weight:600;}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.top-bar{padding:0 22px;height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(7,7,15,.8);backdrop-filter:blur(12px);}
+.top-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.top-actions{display:flex;align-items:center;gap:9px;}
+.top-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px;}
+.top-badge::before{content:'';width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.refresh-btn{background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:9px;padding:6px 12px;color:var(--gray2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.refresh-btn:hover{background:rgba(255,255,255,.1);color:var(--white);}
+
+/* ── PAGES ── */
+.page{display:none;flex:1;overflow-y:auto;padding:18px 22px 28px;}
+.page.active{display:block;}
+
+/* ── DASHBOARD STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;overflow:hidden;transition:transform .15s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;opacity:.12;}
+.stat-card.purple::before{background:var(--purple);}
+.stat-card.pink::before{background:var(--pink);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.red::before{background:var(--red);}
+.stat-icon{font-size:22px;margin-bottom:9px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;}
+.stat-card.purple .stat-val{color:var(--purple2);}
+.stat-card.pink .stat-val{color:var(--pink2);}
+.stat-card.green .stat-val{color:var(--green);}
+.stat-card.yellow .stat-val{color:var(--yellow);}
+.stat-card.blue .stat-val{color:var(--blue);}
+.stat-card.red .stat-val{color:var(--red);}
+.stat-label{font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;}
+
+/* ── SECTION CARDS ── */
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden;}
+.section-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.section-body{padding:14px 18px;}
+
+/* ── PINNED MSG ── */
+.pinned-area{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:13px;}
+.pinned-preview{font-size:13px;color:var(--gray2);min-height:36px;line-height:1.6;margin-bottom:11px;word-break:break-word;}
+.pinned-inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:10px;padding:10px 13px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:70px;transition:border-color .15s;}
+.pinned-inp:focus{border-color:var(--purple2);}
+.pinned-inp::placeholder{color:rgba(255,255,255,.25);}
+.act-btn{border:none;border-radius:9px;padding:9px 16px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.act-btn:active{transform:scale(.95);}
+.btn-grad{background:var(--grad);color:#fff;}
+.btn-green{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);}
+.btn-red{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:var(--red);}
+.btn-yellow{background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.28);color:var(--yellow);}
+.btn-blue{background:rgba(59,130,246,.13);border:1px solid rgba(59,130,246,.28);color:var(--blue);}
+.btn-gray{background:rgba(255,255,255,.07);border:1px solid var(--border2);color:var(--gray2);}
+
+/* ── BROADCAST ── */
+.broadcast-inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:10px;padding:10px 13px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;min-height:80px;margin-bottom:10px;transition:border-color .15s;}
+.broadcast-inp:focus{border-color:var(--purple2);}
+.broadcast-inp::placeholder{color:rgba(255,255,255,.25);}
+
+/* ── TABLES / LISTS ── */
+.data-list{display:flex;flex-direction:column;gap:8px;}
+.data-row{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;transition:background .15s;}
+.data-row:hover{background:rgba(255,255,255,.06);}
+.dr-av{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center;}
+.dr-info{flex:1;min-width:0;}
+.dr-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px;}
+.dr-meta{font-size:11px;color:var(--gray2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dr-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .12s;}
+.icon-btn:active{transform:scale(.88);}
+.ib-green{background:rgba(34,197,94,.15);}
+.ib-red{background:rgba(239,68,68,.14);}
+.ib-yellow{background:rgba(245,158,11,.14);}
+.ib-blue{background:rgba(59,130,246,.14);}
+.ib-gray{background:rgba(255,255,255,.07);}
+.badge{font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+.badge-green{color:var(--green);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);}
+.badge-yellow{color:var(--yellow);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);}
+.badge-red{color:var(--red);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);}
+.badge-purple{color:var(--purple2);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);}
+.badge-pink{color:var(--pink2);background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.28);}
+
+/* ── MESSAGES TABLE ── */
+.msg-row-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 13px;display:flex;gap:10px;align-items:flex-start;}
+.msg-row-item:hover{background:rgba(255,255,255,.06);}
+.msg-txt{flex:1;font-size:13px;line-height:1.5;word-break:break-word;color:rgba(255,255,255,.85);}
+.msg-time-sm{font-size:10px;color:var(--gray);white-space:nowrap;}
+
+/* ── PAYMENT CARDS ── */
+.pay-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.pay-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.pay-card-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.pay-utr-box{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:6px 11px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--purple2);margin-bottom:9px;word-break:break-all;}
+.pay-amount{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--green);}
+
+/* ── VERIFY PHOTO ── */
+.verify-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.selfie-img{width:100%;max-height:200px;object-fit:cover;border-radius:9px;margin-bottom:10px;display:block;}
+.selfie-img-placeholder{width:100%;height:140px;background:linear-gradient(135deg,var(--bg3),var(--bg4));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:10px;}
+
+/* ── SETTINGS ── */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-label{font-size:13px;font-weight:500;}
+.setting-desc{font-size:11px;color:var(--gray2);margin-top:2px;}
+.setting-inp{background:rgba(255,255,255,.06);border:1.5px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:180px;transition:border-color .15s;}
+.setting-inp:focus{border-color:var(--purple2);}
+.toggle{width:42px;height:23px;background:rgba(255,255,255,.1);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--purple);}
+.toggle::after{content:'';position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle.on::after{transform:translateX(19px);}
+
+/* ── MY PROFILE (OWNER) ── */
+.owner-hero{background:var(--grad);border-radius:16px;padding:26px 22px;display:flex;gap:16px;align-items:center;margin-bottom:14px;position:relative;overflow:hidden;}
+.owner-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 50%,rgba(255,255,255,.1),transparent 60%);}
+.owner-av{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden;flex-shrink:0;}
+.owner-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.owner-info{flex:1;}
+.owner-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:3px;}
+.owner-bio{font-size:13px;opacity:.8;margin-bottom:7px;}
+.owner-crown{font-size:11px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;display:inline-block;font-weight:700;}
+.form-label{font-size:11px;color:var(--purple2);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block;margin-top:12px;}
+.form-inp{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:10px;padding:10px 13px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;margin-bottom:4px;}
+.form-inp:focus{border-color:var(--purple2);}
+.form-inp::placeholder{color:rgba(255,255,255,.25);}
+.form-inp-file{display:none;}
+.media-grid-edit{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.mge-item{aspect-ratio:1;border-radius:9px;overflow:hidden;position:relative;background:rgba(255,255,255,.05);border:1px solid var(--border);}
+.mge-item img{width:100%;height:100%;object-fit:cover;}
+.mge-lock{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.mge-del{position:absolute;top:4px;right:4px;background:rgba(239,68,68,.85);border:none;border-radius:50%;width:20px;height:20px;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:44px 20px;color:var(--gray);}
+.empty-icon{font-size:42px;margin-bottom:12px;}
+.empty-txt{font-size:14px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;right:20px;background:rgba(13,13,28,.97);border:1px solid var(--border2);border-radius:12px;padding:11px 18px;font-size:13px;color:var(--white);z-index:9999;opacity:0;transform:translateY(12px);transition:all .25s;pointer-events:none;backdrop-filter:blur(10px);max-width:280px;}
+#toast.show{opacity:1;transform:translateY(0);}
+
+/* ── CONFIRM MODAL ── */
+#confirmModal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:8000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+#confirmModal.active{display:flex;}
+.confirm-box{background:var(--bg3);border:1px solid var(--border2);border-radius:18px;padding:24px;width:min(340px,88vw);text-align:center;}
+.confirm-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px;}
+.confirm-msg{font-size:13px;color:var(--gray2);margin-bottom:20px;line-height:1.6;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-btns button{flex:1;}
+
+/* ── TYPING INDICATOR ── */
+.typing-toggle{display:flex;align-items:center;gap:10px;}
+.typing-toggle-label{font-size:13px;color:var(--gray2);}
+
+/* ── MOBILE SIDEBAR OVERLAY ── */
+@media(max-width:600px){
+  .sidebar{position:fixed;inset:0 auto 0 0;z-index:100;transform:translateX(-100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+  .sidebar.open{transform:translateX(0);}
+  .menu-btn{display:flex!important;}
+  .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;display:none;}
+  .sidebar-overlay.show{display:block;}
+  .page{padding:14px 14px 28px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .top-bar{padding:0 14px;}
+}
+.menu-btn{display:none;background:none;border:none;color:var(--gray2);font-size:22px;cursor:pointer;padding:4px;}
+
+/* ── SPINNER ── */
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SEARCH BOX ── */
+.search-box{background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:11px;padding:9px 13px;display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.search-box input{flex:1;background:none;border:none;outline:none;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;}
+.search-box input::placeholder{color:rgba(255,255,255,.28);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🔥</div>
+    <div class="login-title">Vibe Admin</div>
+    <div class="login-sub">Secure Access Only</div>
+    <input type="text" class="login-inp" id="loginUser" placeholder="Admin Username" autocomplete="off">
+    <input type="password" class="login-inp" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Login</button>
+    <div class="login-error" id="loginErr">❌ Wrong credentials</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp" class="hidden">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🔥</div>
+        <div><div class="sidebar-logo-txt">Vibe Admin</div><div class="sidebar-logo-sub">Control Panel</div></div>
+      </div>
+      <div class="admin-info">
+        <div class="admin-av">🛡️</div>
+        <div><div class="admin-name">Admin</div><div class="admin-badge">SUPER ADMIN</div></div>
+      </div>
+    </div>
+
+    <div class="nav-section">USERS</div>
+    <div class="nav-item active" onclick="goPage('dashboard',this)"><div class="nav-icon">📊</div><div class="nav-label">Dashboard</div></div>
+    <div class="nav-item" onclick="goPage('members',this)"><div class="nav-icon">👥</div><div class="nav-label">Members</div></div>
+    <div class="nav-item" onclick="goPage('verification',this)"><div class="nav-icon">📸</div><div class="nav-label">Photo Verif.</div><div class="nav-badge" id="verifBadge" style="display:none;">0</div></div>
+    <div class="nav-item" onclick="goPage('banned',this)"><div class="nav-icon">🚫</div><div class="nav-label">Banned Users</div></div>
+
+    <div class="nav-section">CONTENT</div>
+    <div class="nav-item" onclick="goPage('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">Group Messages</div></div>
+    <div class="nav-item" onclick="goPage('privatechats',this)"><div class="nav-icon">🔒</div><div class="nav-label">Private Chats</div></div>
+    <div class="nav-item" onclick="goPage('broadcast',this)"><div class="nav-icon">📢</div><div class="nav-label">Broadcast</div></div>
+
+    <div class="nav-section">MONEY</div>
+    <div class="nav-item" onclick="goPage('payments',this)"><div class="nav-icon">💰</div><div class="nav-label">Payments</div><div class="nav-badge" id="payBadge" style="display:none;">0</div></div>
+
+    <div class="nav-section">OWNER</div>
+    <div class="nav-item" onclick="goPage('ownermessages',this)"><div class="nav-icon">💬</div><div class="nav-label">Owner Messages</div><div class="nav-badge" id="ownerMsgBadge" style="display:none;">0</div></div>
+    <div class="nav-item" onclick="goPage('ownerprofile',this)"><div class="nav-icon">👑</div><div class="nav-label">My Profile</div></div>
+
+    <div class="nav-section">CONFIG</div>
+    <div class="nav-item" onclick="goPage('settings',this)"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+
+    <div class="sidebar-footer">
+      <div class="exit-btn" onclick="doLogout()"><span style="font-size:17px;">🚪</span><span>Exit Admin</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="top-bar">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <button class="menu-btn" onclick="openSidebar()">☰</button>
+        <div class="top-title" id="topTitle">📊 Dashboard</div>
+      </div>
+      <div class="top-actions">
+        <div class="top-badge">🟢 Live</div>
+        <button class="refresh-btn" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card purple"><div class="stat-icon">👥</div><div class="stat-val" id="s-total">—</div><div class="stat-label">Total Members</div></div>
+        <div class="stat-card pink"><div class="stat-icon">📸</div><div class="stat-val" id="s-verif">—</div><div class="stat-label">Verif. Pending</div></div>
+        <div class="stat-card green"><div class="stat-icon">💬</div><div class="stat-val" id="s-msgs">—</div><div class="stat-label">Group Msgs</div></div>
+        <div class="stat-card yellow"><div class="stat-icon">💰</div><div class="stat-val" id="s-pay">—</div><div class="stat-label">Payments Pending</div></div>
+        <div class="stat-card blue"><div class="stat-icon">💎</div><div class="stat-val" id="s-paid">—</div><div class="stat-label">Paid Profiles</div></div>
+        <div class="stat-card red"><div class="stat-icon">🚫</div><div class="stat-val" id="s-banned">—</div><div class="stat-label">Banned Users</div></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">📌 Pinned Message (Group ke top mein dikhega)</div></div>
+        <div class="section-body">
+          <div class="pinned-area">
+            <div class="pinned-preview" id="pinnedPreview" style="color:var(--gray2);font-style:italic;">Loading pinned message...</div>
+            <textarea class="pinned-inp" id="pinnedInp" placeholder="Naya pinned message likho..."></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <button class="act-btn btn-grad" onclick="savePinned()">📌 Pin Message</button>
+              <button class="act-btn btn-red" onclick="clearPinned()">🗑️ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">⌨️ Typing Indicator</div></div>
+        <div class="section-body">
+          <div class="typing-toggle">
+            <div class="toggle" id="typingToggle" onclick="toggleTyping()"></div>
+            <span class="typing-toggle-label" id="typingLabel">OFF — Admin typing nahi dikh raha</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">🕐 Recent Activity</div></div>
+        <div class="section-body"><div id="recentActivity"><div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Loading...</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── MEMBERS ── -->
+    <div class="page" id="page-members">
+      <div class="search-box"><span>🔍</span><input type="text" placeholder="Search members by name or city..." id="memberSearchInp" oninput="filterMembersList(this.value)"></div>
+      <div class="data-list" id="membersList"><div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Loading members...</div></div></div>
+    </div>
+
+    <!-- ── PHOTO VERIFICATION ── -->
+    <div class="page" id="page-verification">
+      <div id="verifList"><div class="empty"><div class="empty-icon">📸</div><div class="empty-txt">Loading verification requests...</div></div></div>
+    </div>
+
+    <!-- ── BANNED ── -->
+    <div class="page" id="page-banned">
+      <div class="data-list" id="bannedList"><div class="empty"><div class="empty-icon">🚫</div><div class="empty-txt">Loading...</div></div></div>
+    </div>
+
+    <!-- ── GROUP MESSAGES ── -->
+    <div class="page" id="page-messages">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="act-btn btn-red" onclick="deleteAllMsgs()">🗑️ Delete All Messages</button>
+        <button class="act-btn btn-gray" onclick="loadMessages()">↻ Reload</button>
+      </div>
+      <div class="data-list" id="messagesList"><div class="empty"><div class="empty-icon">💬</div><div class="empty-txt">Loading messages...</div></div></div>
+    </div>
+
+    <!-- ── PRIVATE CHATS ── -->
+    <div class="page" id="page-privatechats">
+      <div class="data-list" id="privateChatsList"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-txt">Loading private chats...</div></div></div>
+    </div>
+
+    <!-- ── BROADCAST ── -->
+    <div class="page" id="page-broadcast">
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">📢 Broadcast Message</div><span style="font-size:11px;color:var(--gray2);">Sabko group chat mein message bhejo</span></div>
+        <div class="section-body">
+          <textarea class="broadcast-inp" id="broadcastInp" placeholder="Yahan broadcast message likho..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="act-btn btn-grad" onclick="sendBroadcast()">📢 Send to All</button>
+          </div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">📜 Broadcast History</div></div>
+        <div class="section-body"><div id="broadcastHistory"><div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No broadcasts yet</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAYMENTS ── -->
+    <div class="page" id="page-payments">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="act-btn btn-yellow" onclick="loadPayments('pending')">⏳ Pending</button>
+        <button class="act-btn btn-green" onclick="loadPayments('approved')">✅ Approved</button>
+        <button class="act-btn btn-red" onclick="loadPayments('rejected')">❌ Rejected</button>
+      </div>
+      <div id="paymentsList"><div class="empty"><div class="empty-icon">💰</div><div class="empty-txt">Loading payments...</div></div></div>
+    </div>
+<!-- ── OWNER MESSAGES ── -->
+<div class="page" id="page-ownermessages">
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+    <div style="font-size:13px;color:var(--gray2);">Users ke messages jo Owner ko aaye hain</div>
+  </div>
+  <div id="ownerChatsList" style="display:flex;flex-direction:column;gap:8px;">
+    <div class="empty"><div class="empty-icon">💬</div><div class="empty-txt">Loading...</div></div>
+  </div>
+  <!-- REPLY PANEL -->
+  <div id="ownerReplyPanel" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;flex-direction:column;">
+    <div style="padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top));display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);background:var(--bg2);">
+      <button onclick="closeOwnerReply()" style="background:none;border:none;color:var(--gray2);font-size:22px;cursor:pointer;line-height:1;">‹</button>
+      <div id="ownerReplyAvatar" style="width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;overflow:hidden;"></div>
+      <div>
+        <div id="ownerReplyName" style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;"></div>
+        <div style="font-size:11px;color:#22c55e;">Online</div>
+      </div>
+    </div>
+    <div id="ownerReplyMsgs" style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:3px;"></div>
+    <div style="border-top:1px solid var(--border);background:var(--bg2);padding:9px 11px;">
+      <div style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.14);border-radius:22px;padding:5px 5px 5px 13px;">
+        <textarea id="ownerReplyInp" placeholder="Reply as Owner..." rows="1" style="flex:1;background:none;border:none;outline:none;color:#f0f0ff;font-family:'DM Sans',sans-serif;font-size:14px;resize:none;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendOwnerReply();}"></textarea>
+        <button onclick="sendOwnerReply()" style="width:34px;height:34px;border-radius:50%;border:none;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- ── OWNER PROFILE ── -->
+    <div class="page" id="page-ownerprofile">
+      <div class="owner-hero" id="ownerHero">
+        <div class="owner-av" id="ownerHeroAv">👑</div>
+        <div class="owner-info">
+          <div class="owner-name" id="ownerHeroName">Owner</div>
+          <div class="owner-bio" id="ownerHeroBio">Admin & Owner of Vibe</div>
+          <div class="owner-crown">👑 Profile Owner</div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">👤 Basic Info</div></div>
+        <div class="section-body">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-inp" id="op-name" placeholder="Owner name..." maxlength="30" autocomplete="off">
+          <label class="form-label">Bio</label>
+          <input type="text" class="form-inp" id="op-bio" placeholder="Short bio..." maxlength="100" autocomplete="off">
+          <label class="form-label">Profile Photo URL (ya upload button use karo)</label>
+          <input type="text" class="form-inp" id="op-photo" placeholder="https://... ya imgbb link" autocomplete="off">
+          <input type="file" id="op-photo-file" accept="image/*" class="form-inp-file" onchange="ownerPhotoUpload(event)">
+          <button class="act-btn btn-blue" style="margin-top:6px;" onclick="document.getElementById('op-photo-file').click()">📷 Upload Photo</button>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">💎 Subscription Plan</div></div>
+        <div class="section-body">
+          <div style="display:flex;gap:9px;margin-bottom:13px;">
+            <div class="plan-opt" id="op-plan-free" onclick="opSelectPlan('free')" style="flex:1;padding:11px 7px;border-radius:11px;border:1.5px solid var(--border2);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .15s;">
+              <div style="font-size:20px;margin-bottom:3px;">🆓</div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray2);">Free</div>
+            </div>
+            <div class="plan-opt" id="op-plan-paid" onclick="opSelectPlan('paid')" style="flex:1;padding:11px 7px;border-radius:11px;border:1.5px solid var(--border2);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .15s;">
+              <div style="font-size:20px;margin-bottom:3px;">💎</div>
+              <div style="font-size:12px;font-weight:700;color:var(--gray2);">Paid</div>
+            </div>
+          </div>
+          <div id="op-paid-fields" style="display:none;">
+            <label class="form-label">Monthly Price (₹)</label>
+            <input type="number" class="form-inp" id="op-price" placeholder="e.g. 99" min="10" max="9999">
+            <label class="form-label">UPI ID</label>
+            <input type="text" class="form-inp" id="op-upi" placeholder="name@upi" maxlength="60" autocomplete="off">
+            <label class="form-label">UPI Name</label>
+            <input type="text" class="form-inp" id="op-upi-name" placeholder="e.g. Admin Name" maxlength="40" autocomplete="off">
+            <label class="form-label">Benefits</label>
+            <input type="text" class="form-inp" id="op-b1" placeholder="Benefit 1" maxlength="60" autocomplete="off">
+            <input type="text" class="form-inp" id="op-b2" placeholder="Benefit 2" maxlength="60" autocomplete="off">
+            <input type="text" class="form-inp" id="op-b3" placeholder="Benefit 3" maxlength="60" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">📸 Profile Media</div></div>
+        <div class="section-body">
+          <div style="display:flex;gap:7px;margin-bottom:9px;">
+            <button class="act-btn btn-gray" id="op-mtr-free" onclick="opSetMediaType('free',this)">🆓 Free</button>
+            <button class="act-btn btn-purple" id="op-mtr-locked" onclick="opSetMediaType('locked',this)" style="background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.28);color:var(--purple2);">🔒 Locked</button>
+          </div>
+          <div class="media-grid-edit" id="opMediaGrid"></div>
+          <input type="file" id="op-media-file" accept="image/*,video/*" multiple class="form-inp-file" onchange="opMediaSelect(event)">
+          <button class="act-btn btn-grad" onclick="document.getElementById('op-media-file').click()">+ Add Photos/Videos</button>
+        </div>
+      </div>
+      <button class="act-btn btn-grad" style="width:100%;padding:14px;font-size:15px;border-radius:13px;margin-top:4px;" onclick="saveOwnerProfile()">💾 Save Profile</button>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="section-card">
+        <div class="section-head"><div class="section-title">⚙️ Group Settings</div></div>
+        <div class="section-body">
+          <div class="setting-row">
+            <div><div class="setting-label">Group Name</div><div class="setting-desc">Group chat ka naam</div></div>
+            <input type="text" class="setting-inp" id="set-groupname" placeholder="Vibe Group" maxlength="30" autocomplete="off">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Admin Password</div><div class="setting-desc">Login ke liye password</div></div>
+            <input type="text" class="setting-inp" id="set-pass" placeholder="New password" maxlength="30" autocomplete="off">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">ImgBB API Key</div><div class="setting-desc">Image upload ke liye</div></div>
+            <input type="text" class="setting-inp" id="set-imgbb" placeholder="ImgBB key" maxlength="60" autocomplete="off">
+          </div>
+          <div style="margin-top:14px;">
+            <button class="act-btn btn-grad" onclick="saveSettings()">💾 Save Settings</button>
+          </div>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:14px;">
+        <div class="section-head"><div class="section-title">⚠️ Danger Zone</div></div>
+        <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+          <button class="act-btn btn-red" onclick="confirmAction('Delete ALL group messages?','deleteAllMsgs')">🗑️ Delete All Group Messages</button>
+          <button class="act-btn btn-red" onclick="confirmAction('Delete ALL users? This cannot be undone!','deleteAllUsers')">👥 Delete All Users</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button class="act-btn btn-gray" style="width:100%;padding:11px;" onclick="closeConfirm()">Cancel</button>
+      <button class="act-btn btn-red" style="width:100%;padding:11px;" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, set, onValue, get, remove, query, orderByChild, limitToLast, update }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const cfg = {
+  apiKey: "AIzaSyCn9bgrZxcaH3DF2CAYuLq7FT8nM0JFwjY",
+  authDomain: "mychat-9eb7c.firebaseapp.com",
+  databaseURL: "https://mychat-9eb7c-default-rtdb.firebaseio.com",
+  projectId: "mychat-9eb7c",
+  storageBucket: "mychat-9eb7c.firebasestorage.app",
+  messagingSenderId: "726638251919",
+  appId: "1:726638251919:web:c2c79f9b0e7b554bd485fa"
+};
+const app = initializeApp(cfg);
+const db = getDatabase(app);
+window._FB = { db, ref, push, onChildAdded, set, onValue, get, remove, query, orderByChild, limitToLast, update };
+</script>
+
+<script>
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'vibe@admin123';
+const IMGBB_KEY = 'c4b4735988d74b7ebb4119130a8cb07c';
+
+let currentPage = 'dashboard';
+let allUsersData = {};
+let allMsgsData = {};
+let allPaymentsData = {};
+let allVerifData = {};
+let opPlanSelected = 'free';
+let opMediaType = 'free';
+let opMediaItems = [];
+let typingOn = false;
+let confirmCallback = null;
+
+// ── LOGIN ──
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if(u === ADMIN_USER && p === ADMIN_PASS){
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminApp').classList.remove('hidden');
+    initAdmin();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    setTimeout(()=>document.getElementById('loginErr').style.display='none',2500);
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+window.doLogin = doLogin;
+
+function doLogout(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('adminApp').classList.add('hidden');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+window.doLogout = doLogout;
+
+// ── INIT ──
+function initAdmin(){
+  if(!window._FB){ setTimeout(initAdmin, 300); return; }
+  const {db,ref,onValue,query,orderByChild,limitToLast} = window._FB;
+
+  // Users
+  onValue(ref(db,'users'), snap => {
+    allUsersData = snap.val() || {};
+    updateStats();
+    if(currentPage==='members') renderMembers();
+    if(currentPage==='banned') renderBanned();
+  });
+
+  // Messages
+  onValue(query(ref(db,'groupMessages'), orderByChild('timestamp'), limitToLast(200)), snap => {
+    allMsgsData = snap.val() || {};
+    updateStats();
+    if(currentPage==='messages') renderMessages();
+    renderRecentActivity();
+  });
+
+  // Payments
+  onValue(ref(db,'paymentRequests'), snap => {
+    allPaymentsData = snap.val() || {};
+    updateStats();
+    const pending = Object.values(allPaymentsData).filter(p=>p.status!=='approved'&&p.status!=='rejected').length;
+    const badge = document.getElementById('payBadge');
+    badge.textContent = pending;
+    badge.style.display = pending>0?'flex':'none';
+    if(currentPage==='payments') loadPayments('pending');
+  });
+
+  // Verification
+  onValue(ref(db,'verificationRequests'), snap => {
+    allVerifData = snap.val() || {};
+    const pending = Object.values(allVerifData).filter(v=>v.status==='pending').length;
+    const badge = document.getElementById('verifBadge');
+    badge.textContent = pending;
+    badge.style.display = pending>0?'flex':'none';
+    updateStats();
+    if(currentPage==='verification') renderVerification();
+  });
+
+  // Pinned
+  onValue(ref(db,'pinnedMessage'), snap => {
+    const msg = snap.val()||'';
+    document.getElementById('pinnedPreview').textContent = msg || '(No pinned message)';
+    document.getElementById('pinnedPreview').style.fontStyle = msg?'normal':'italic';
+    document.getElementById('pinnedInp').value = msg;
+  });
+
+  // Typing
+  onValue(ref(db,'adminTyping'), snap => {
+    typingOn = !!snap.val();
+    document.getElementById('typingToggle').classList.toggle('on', typingOn);
+    document.getElementById('typingLabel').textContent = typingOn
+      ? 'ON — Admin typing dikh raha hai users ko'
+      : 'OFF — Admin typing nahi dikh raha';
+  });
+
+  // Owner profile
+  loadOwnerProfile();
+  loadBroadcastHistory();
+}
+
+// ── STATS ──
+function updateStats(){
+  const users = Object.values(allUsersData);
+  document.getElementById('s-total').textContent = users.filter(u=>u.verificationStatus!=='banned').length;
+  document.getElementById('s-verif').textContent = Object.values(allVerifData).filter(v=>v.status==='pending').length;
+  document.getElementById('s-msgs').textContent = Object.keys(allMsgsData).length;
+  document.getElementById('s-pay').textContent = Object.values(allPaymentsData).filter(p=>p.status!=='approved'&&p.status!=='rejected').length;
+  document.getElementById('s-paid').textContent = users.filter(u=>u.plan==='paid').length;
+  document.getElementById('s-banned').textContent = users.filter(u=>u.verificationStatus==='banned').length;
+}
+
+// ── RECENT ACTIVITY ──
+function renderRecentActivity(){
+  const msgs = Object.values(allMsgsData).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).slice(0,8);
+  const el = document.getElementById('recentActivity');
+  if(!msgs.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No messages yet</div></div>'; return; }
+  el.innerHTML = msgs.map(m=>`
+    <div class="msg-row-item" style="margin-bottom:7px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden;${m.senderPhoto?`background-image:url('${m.senderPhoto}');background-size:cover;`:''}">${m.senderPhoto?'':initial(m.senderName)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--purple2);margin-bottom:2px;">${esc(m.senderName||'?')}</div>
+        <div class="msg-txt">${m.mediaUrl?'📎 Media':''}${m.text?esc(m.text.substring(0,80)):''}</div>
+      </div>
+      <div class="msg-time-sm">${fmt(m.timestamp)}</div>
+    </div>`).join('');
+}
+
+// ── NAV ──
+function goPage(page, navEl){
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const titles={dashboard:'📊 Dashboard',members:'👥 Members',verification:'📸 Photo Verification',banned:'🚫 Banned Users',messages:'💬 Group Messages',privatechats:'🔒 Private Chats',broadcast:'📢 Broadcast',payments:'💰 Payments',ownermessages:'💬 Owner Messages',ownerprofile:'👑 My Profile',settings:'⚙️ Settings'};
+  document.getElementById('topTitle').textContent = titles[page]||page;
+  closeSidebar();
+
+  if(page==='members') renderMembers();
+  if(page==='verification') renderVerification();
+  if(page==='banned') renderBanned();
+  if(page==='messages') renderMessages();
+  if(page==='privatechats') renderPrivateChats();
+  if(page==='payments') loadPayments('pending');
+  if(page==='ownerprofile') loadOwnerProfile();if(page==='ownermessages') renderOwnerChats();
+  if(page==='broadcast') loadBroadcastHistory();
+}
+window.goPage = goPage;
+
+// ── MEMBERS ──
+let memberFilter = '';
+function renderMembers(){
+  const users = Object.values(allUsersData).filter(u=>u.verificationStatus!=='banned');
+  const filtered = memberFilter ? users.filter(u=>(u.name||'').toLowerCase().includes(memberFilter)||(u.city||'').toLowerCase().includes(memberFilter)) : users;
+  const el = document.getElementById('membersList');
+  if(!filtered.length){ el.innerHTML='<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">No members found</div></div>'; return; }
+  el.innerHTML = filtered.map(u=>{
+    const vs = u.verificationStatus||'approved';
+    const badge = u.gender==='Female'
+      ? (vs==='approved'?'<span class="badge badge-green">✅ Verified</span>':vs==='pending'?'<span class="badge badge-yellow">⏳ Pending</span>':'<span class="badge badge-red">❌ Unverified</span>')
+      : (u.plan==='paid'?'<span class="badge badge-purple">💎 Paid</span>':'<span class="badge badge-pink">'+esc(u.gender||'')+'</span>');
+    return `<div class="data-row">
+      <div class="dr-av" style="${u.photoUrl?`background-image:url('${u.photoUrl}');background-size:cover;`:'background:linear-gradient(135deg,#7c3aed,#ec4899);'}">${u.photoUrl?'':initial(u.name)}</div>
+      <div class="dr-info">
+        <div class="dr-name">${esc(u.name||'?')} ${badge}</div>
+        <div class="dr-meta">${u.age||''} · ${esc(u.city||'')}${u.height?' · '+esc(u.height):''} · Joined ${new Date(u.joinedAt||0).toLocaleDateString()}</div>
+      </div>
+      <div class="dr-actions">
+        ${u.gender==='Female'&&vs==='pending'?`<button class="icon-btn ib-green" onclick="approveVerif('${u.uid}')" title="Approve">✅</button><button class="icon-btn ib-red" onclick="rejectVerif('${u.uid}')" title="Reject">❌</button>`:''}
+        <button class="icon-btn ib-red" onclick="banUser('${u.uid}','${esc(u.name||'')}')" title="Ban">🚫</button>
+        <button class="icon-btn ib-red" onclick="deleteUser('${u.uid}','${esc(u.name||'')}')" title="Delete">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.filterMembersList = function(q){ memberFilter=q.toLowerCase(); renderMembers(); };
+
+// ── VERIFICATION ──
+function renderVerification(){
+  const verifs = Object.values(allVerifData).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+  const el = document.getElementById('verifList');
+  if(!verifs.length){ el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-txt">No verification requests</div></div>'; return; }
+  el.innerHTML = '<div class="data-list">'+verifs.map(v=>{
+    const stBadge = v.status==='approved'?'<span class="badge badge-green">✅ Approved</span>':v.status==='rejected'?'<span class="badge badge-red">❌ Rejected</span>':'<span class="badge badge-yellow">⏳ Pending</span>';
+    return `<div class="verify-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">${esc(v.name||'?')}</div><div style="font-size:12px;color:var(--gray2);">${v.age||''} · ${esc(v.city||'')} · Submitted ${new Date(v.submittedAt||0).toLocaleDateString()}</div></div>
+        ${stBadge}
+      </div>
+      ${v.selfieUrl?`<img src="${v.selfieUrl}" class="selfie-img" loading="lazy" onerror="this.style.display='none'">`:`<div class="selfie-img-placeholder">🤳</div>`}
+      ${v.status==='pending'?`<div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="act-btn btn-green" onclick="approveVerif('${v.uid}')">✅ Approve</button>
+        <button class="act-btn btn-red" onclick="rejectVerif('${v.uid}')">❌ Reject</button>
+        <button class="act-btn btn-red" onclick="banUser('${v.uid}','${esc(v.name||'')}')">🚫 Ban</button>
+      </div>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function approveVerif(uid){
+  if(!window._FB) return;
+  const {db,ref,set,update} = window._FB;
+  update(ref(db,'users/'+uid),{verificationStatus:'approved'}).catch(()=>{});
+  update(ref(db,'verificationRequests/'+uid),{status:'approved'}).catch(()=>{});
+  toast('✅ Verification approved!');
+}
+function rejectVerif(uid){
+  if(!window._FB) return;
+  const {db,ref,update} = window._FB;
+  update(ref(db,'users/'+uid),{verificationStatus:'rejected'}).catch(()=>{});
+  update(ref(db,'verificationRequests/'+uid),{status:'rejected'}).catch(()=>{});
+  toast('❌ Verification rejected');
+}
+window.approveVerif=approveVerif; window.rejectVerif=rejectVerif;
+
+// ── BAN / DELETE ──
+function banUser(uid, name){
+  confirmAction(`Ban "${name}"? Woh kisi bhi device ya browser se dobara access nahi kar payega.`, ()=>{
+    if(!window._FB) return;
+    const {db,ref,update,set,get} = window._FB;
+    update(ref(db,'users/'+uid),{verificationStatus:'banned'}).catch(()=>{});
+    get(ref(db,'users/'+uid)).then(snap=>{
+      const u=snap.val();
+      if(u&&u.fingerprint){
+        set(ref(db,'bannedDevices/'+u.fingerprint),true).catch(()=>{});
+      }
+      set(ref(db,'bannedUids/'+uid),true).catch(()=>{});
+    }).catch(()=>{});
+    toast('🚫 User permanently banned: '+name);
+  });
+}
+function deleteUser(uid, name){
+  confirmAction(`Delete user "${name}"? Yeh permanent hai!`, ()=>{
+    if(!window._FB) return;
+    const {db,ref,remove} = window._FB;
+    remove(ref(db,'users/'+uid)).catch(()=>{});
+    toast('🗑️ User deleted: '+name);
+  });
+}
+function unbanUser(uid, name){
+  if(!window._FB) return;
+  const {db,ref,update,remove,get} = window._FB;
+  update(ref(db,'users/'+uid),{verificationStatus:'approved'}).catch(()=>{});
+  get(ref(db,'users/'+uid)).then(snap=>{
+    const u=snap.val();
+    if(u&&u.fingerprint){
+      remove(ref(db,'bannedDevices/'+u.fingerprint)).catch(()=>{});
+    }
+    remove(ref(db,'bannedUids/'+uid)).catch(()=>{});
+  }).catch(()=>{});
+  toast('✅ User unbanned: '+name);
+}
+window.banUser=banUser; window.deleteUser=deleteUser; window.unbanUser=unbanUser;
+
+// ── BANNED LIST ──
+function renderBanned(){
+  const banned = Object.values(allUsersData).filter(u=>u.verificationStatus==='banned');
+  const el = document.getElementById('bannedList');
+  if(!banned.length){ el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-txt">No banned users</div></div>'; return; }
+  el.innerHTML = banned.map(u=>`
+    <div class="data-row">
+      <div class="dr-av" style="${u.photoUrl?`background-image:url('${u.photoUrl}');background-size:cover;`:''}">
+        ${u.photoUrl?'':initial(u.name)}
+      </div>
+      <div class="dr-info">
+        <div class="dr-name">${esc(u.name||'?')} <span class="badge badge-red">🚫 Banned</span></div>
+        <div class="dr-meta">${u.age||''} · ${esc(u.city||'')}</div>
+      </div>
+      <div class="dr-actions">
+        <button class="icon-btn ib-green" onclick="unbanUser('${u.uid}','${esc(u.name||'')}')" title="Unban">✅</button>
+        <button class="icon-btn ib-red" onclick="deleteUser('${u.uid}','${esc(u.name||'')}')" title="Delete">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── MESSAGES ──
+function renderMessages(){ loadMessages(); }
+function loadMessages(){
+  if(!window._FB) return;
+  const el = document.getElementById('messagesList');
+  const msgs = Object.entries(allMsgsData).sort((a,b)=>(b[1].timestamp||0)-(a[1].timestamp||0));
+  if(!msgs.length){ el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-txt">No messages</div></div>'; return; }
+  el.innerHTML = msgs.map(([k,m])=>`
+    <div class="data-row" style="align-items:flex-start;">
+      <div class="dr-av" style="margin-top:3px;${m.senderPhoto?`background-image:url('${m.senderPhoto}');background-size:cover;`:'background:linear-gradient(135deg,#7c3aed,#ec4899);'}">
+        ${m.senderPhoto?'':initial(m.senderName)}
+      </div>
+      <div class="dr-info">
+        <div class="dr-name">${esc(m.senderName||'?')}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:3px;line-height:1.5;word-break:break-word;">
+          ${m.mediaUrl?`<a href="${m.mediaUrl}" target="_blank" style="color:var(--purple2);">📎 Media${m.locked?' (Locked)':''}</a> `:''}${esc(m.text||'')}
+        </div>
+        <div style="font-size:10px;color:var(--gray);margin-top:3px;">${new Date(m.timestamp||0).toLocaleString()}</div>
+      </div>
+      <button class="icon-btn ib-red" onclick="deleteMsg('${k}')" title="Delete">🗑️</button>
+    </div>`).join('');
+}
+function deleteMsg(key){
+  if(!window._FB) return;
+  const {db,ref,remove} = window._FB;
+  remove(ref(db,'groupMessages/'+key)).then(()=>toast('🗑️ Message deleted')).catch(()=>{});
+}
+function deleteAllMsgs(){
+  confirmAction('Delete ALL group messages? This cannot be undone!', ()=>{
+    if(!window._FB) return;
+    const {db,ref,remove} = window._FB;
+    remove(ref(db,'groupMessages')).then(()=>toast('🗑️ All messages deleted')).catch(()=>{});
+  });
+}
+window.deleteMsg=deleteMsg; window.deleteAllMsgs=deleteAllMsgs; window.loadMessages=loadMessages;
+
+// ── PRIVATE CHATS ──
+function renderPrivateChats(){
+  if(!window._FB) return;
+  const {db,ref,get} = window._FB;
+  const el = document.getElementById('privateChatsList');
+  el.innerHTML='<div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Loading...</div></div>';
+  get(ref(db,'privateChats')).then(snap=>{
+    const chats = snap.val()||{};
+    const entries = Object.entries(chats);
+    if(!entries.length){ el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-txt">No private chats</div></div>'; return; }
+    el.innerHTML = entries.map(([chatId, chatData])=>{
+      const msgs = chatData.messages ? Object.values(chatData.messages) : [];
+      const latest = msgs.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))[0];
+      const parts = chatId.split('_').filter(p=>p!=='u'&&p.length>5);
+      return `<div class="data-row">
+        <div style="font-size:22px;">💬</div>
+        <div class="dr-info">
+          <div class="dr-name">${esc(chatId)}</div>
+          <div class="dr-meta">${msgs.length} messages · Last: ${latest?esc((latest.text||'📎 Media').substring(0,40)):'-'}</div>
+        </div>
+        <button class="icon-btn ib-red" onclick="deletePChat('${chatId}')" title="Delete">🗑️</button>
+      </div>`;
+    }).join('');
+  }).catch(()=>{ el.innerHTML='<div class="empty"><div class="empty-icon">❌</div><div class="empty-txt">Failed to load</div></div>'; });
+}
+function deletePChat(chatId){
+  confirmAction(`Delete private chat "${chatId}"?`, ()=>{
+    if(!window._FB) return;
+    const {db,ref,remove} = window._FB;
+    remove(ref(db,'privateChats/'+chatId)).then(()=>{ toast('🗑️ Chat deleted'); renderPrivateChats(); }).catch(()=>{});
+  });
+}
+window.deletePChat=deletePChat;
+
+// ── BROADCAST ──
+function sendBroadcast(){
+  const txt = document.getElementById('broadcastInp').value.trim();
+  if(!txt){ toast('⚠️ Message khali hai!'); return; }
+  if(!window._FB){ toast('❌ Not connected'); return; }
+  const {db,ref,push,set} = window._FB;
+  const msg = {
+    sender:'admin_broadcast', senderName:'📢 Admin Broadcast',
+    senderPhoto:'', senderInitial:'📢', text:txt, timestamp:Date.now(),
+    mediaUrl:null, locked:false, isBroadcast:true
+  };
+  push(ref(db,'groupMessages'), msg).then(()=>{
+    push(ref(db,'broadcastHistory'),{text:txt,timestamp:Date.now()}).catch(()=>{});
+    document.getElementById('broadcastInp').value='';
+    toast('📢 Broadcast sent to all!');
+    loadBroadcastHistory();
+  }).catch(()=>toast('❌ Send failed'));
+}
+function loadBroadcastHistory(){
+  if(!window._FB) return;
+  const {db,ref,get,query,orderByChild,limitToLast} = window._FB;
+  get(query(ref(db,'broadcastHistory'),orderByChild('timestamp'),limitToLast(20))).then(snap=>{
+    const el = document.getElementById('broadcastHistory');
+    const items = snap.val()||{};
+    const arr = Object.values(items).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    if(!arr.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No broadcasts yet</div></div>'; return; }
+    el.innerHTML = arr.map(b=>`
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px;">
+        <div style="font-size:13px;line-height:1.5;margin-bottom:5px;">${esc(b.text||'')}</div>
+        <div style="font-size:10px;color:var(--gray);">${new Date(b.timestamp||0).toLocaleString()}</div>
+      </div>`).join('');
+  }).catch(()=>{});
+}
+window.sendBroadcast=sendBroadcast;
+
+// ── PAYMENTS ──
+function loadPayments(filter='pending'){
+  const el = document.getElementById('paymentsList');
+  const all = Object.entries(allPaymentsData);
+  const filtered = filter==='pending'
+    ? all.filter(([k,p])=>p.status!=='approved'&&p.status!=='rejected')
+    : all.filter(([k,p])=>p.status===filter);
+  if(!filtered.length){ el.innerHTML=`<div class="empty"><div class="empty-icon">💰</div><div class="empty-txt">No ${filter} payments</div></div>`; return; }
+  el.innerHTML = '<div class="data-list">'+filtered.sort((a,b)=>(b[1].submittedAt||0)-(a[1].submittedAt||0)).map(([k,p])=>
+    `<div class="pay-card">
+      <div class="pay-card-head">
+        <div><div class="pay-card-name">${esc(p.name||'?')}</div><div style="font-size:11px;color:var(--gray2);">${new Date(p.submittedAt||0).toLocaleString()}</div></div>
+        ${p.status==='approved'?'<span class="badge badge-green">✅ Approved</span>':p.status==='rejected'?'<span class="badge badge-red">❌ Rejected</span>':'<span class="badge badge-yellow">⏳ Pending</span>'}
+      </div>
+      <div class="pay-utr-box">UTR: ${esc(p.utrId||'—')}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+        <div class="pay-amount">₹${p.amount||99}</div>
+        <div style="font-size:11px;color:var(--gray2);">For: ${esc(p.creatorName||'Group')}</div>
+      </div>
+      ${p.status==='pending'||!p.status?`<div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="act-btn btn-green" onclick="approvePayment('${k}','${p.uid}')">✅ Approve</button>
+        <button class="act-btn btn-red" onclick="rejectPayment('${k}')">❌ Reject</button>
+      </div>`:''}
+    </div>`
+  ).join('')+'</div>';
+}
+function approvePayment(key, uid){
+  if(!window._FB) return;
+  const {db,ref,update} = window._FB;
+  update(ref(db,'paymentRequests/'+key),{status:'approved',approvedAt:Date.now()}).catch(()=>{});
+  if(uid) update(ref(db,'users/'+uid),{isSubscribed:true}).catch(()=>{});
+  toast('✅ Payment approved!');
+}
+function rejectPayment(key){
+  if(!window._FB) return;
+  const {db,ref,update} = window._FB;
+  update(ref(db,'paymentRequests/'+key),{status:'rejected',rejectedAt:Date.now()}).catch(()=>{});
+  toast('❌ Payment rejected');
+}
+window.loadPayments=loadPayments; window.approvePayment=approvePayment; window.rejectPayment=rejectPayment;
+
+// ── PINNED ──
+function savePinned(){
+  const txt = document.getElementById('pinnedInp').value.trim();
+  if(!window._FB){ toast('❌ Not connected'); return; }
+  const {db,ref,set} = window._FB;
+  set(ref(db,'pinnedMessage'), txt||null).then(()=>toast('📌 Pinned message saved!')).catch(()=>toast('❌ Failed'));
+}
+function clearPinned(){
+  if(!window._FB) return;
+  const {db,ref,remove} = window._FB;
+  remove(ref(db,'pinnedMessage')).then(()=>{ document.getElementById('pinnedInp').value=''; toast('🗑️ Pinned message cleared'); }).catch(()=>{});
+}
+window.savePinned=savePinned; window.clearPinned=clearPinned;
+
+// ── TYPING ──
+function toggleTyping(){
+  if(!window._FB) return;
+  const {db,ref,set} = window._FB;
+  set(ref(db,'adminTyping'), !typingOn ? true : null).catch(()=>{});
+}
+window.toggleTyping=toggleTyping;
+
+// ── OWNER PROFILE ──
+let opPlan = 'free';
+function loadOwnerProfile(){
+  if(!window._FB) return;
+  const {db,ref,get} = window._FB;
+  get(ref(db,'ownerProfile')).then(snap=>{
+    const op = snap.val()||{};
+    document.getElementById('op-name').value = op.name||'';
+    document.getElementById('op-bio').value = op.bio||'';
+    document.getElementById('op-photo').value = op.photoUrl||'';
+    document.getElementById('op-price').value = op.subscriptionPrice||99;
+    document.getElementById('op-upi').value = op.upiId||'';
+    document.getElementById('op-upi-name').value = op.upiName||'';
+    const b = op.benefits||['','',''];
+    document.getElementById('op-b1').value = b[0]||'';
+    document.getElementById('op-b2').value = b[1]||'';
+    document.getElementById('op-b3').value = b[2]||'';
+    opMediaItems = (op.profileMedia||[]).map(m=>({...m,uploading:false}));
+    opSelectPlan(op.plan||'free');
+    renderOpMediaGrid();
+    // Update hero
+    document.getElementById('ownerHeroName').textContent = op.name||'Owner';
+    document.getElementById('ownerHeroBio').textContent = op.bio||'Admin & Owner of Vibe';
+    const av = document.getElementById('ownerHeroAv');
+    if(op.photoUrl){ av.innerHTML=`<img src="${op.photoUrl}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`; } else { av.textContent='👑'; }
+  }).catch(()=>{});
+}
+function opSelectPlan(plan){
+  opPlan = plan;
+  const free = document.getElementById('op-plan-free');
+  const paid = document.getElementById('op-plan-paid');
+  free.style.borderColor = plan==='free'?'var(--purple2)':'var(--border2)';
+  free.style.background = plan==='free'?'rgba(124,58,237,.14)':'rgba(255,255,255,.03)';
+  paid.style.borderColor = plan==='paid'?'var(--purple2)':'var(--border2)';
+  paid.style.background = plan==='paid'?'rgba(124,58,237,.14)':'rgba(255,255,255,.03)';
+  document.getElementById('op-paid-fields').style.display = plan==='paid'?'block':'none';
+}
+function opSetMediaType(type, btn){
+  opMediaType = type;
+  document.querySelectorAll('#page-ownerprofile .act-btn').forEach(b=>{
+    if(b.id==='op-mtr-free'||b.id==='op-mtr-locked') b.style.opacity='.6';
+  });
+  btn.style.opacity='1';
+}
+function opMediaSelect(e){
+  const files = Array.from(e.target.files); if(!files.length) return;
+  files.forEach(f=>{
+    const r = new FileReader();
+    r.onload = ev => {
+      opMediaItems.push({dataUrl:ev.target.result,url:'',type:f.type.startsWith('video')?'video':'image',locked:opMediaType==='locked',uploading:false});
+      renderOpMediaGrid();
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value='';
+}
+function renderOpMediaGrid(){
+  const grid = document.getElementById('opMediaGrid');
+  grid.innerHTML = opMediaItems.map((item,i)=>`
+    <div class="mge-item">
+      <img src="${item.dataUrl||item.url}" loading="lazy">
+      ${item.locked?'<div class="mge-lock">🔒</div>':''}
+      <button class="mge-del" onclick="opRemoveMedia(${i})">✕</button>
+    </div>`).join('');
+}
+function opRemoveMedia(i){ opMediaItems.splice(i,1); renderOpMediaGrid(); }
+async function ownerPhotoUpload(e){
+  const f = e.target.files[0]; if(!f) return;
+  toast('📤 Uploading photo...');
+  const r = new FileReader();
+  r.onload = async ev => {
+    try{
+      const compressed = await compressImg(ev.target.result, 600, 0.8);
+      const url = await uploadImg(compressed);
+      document.getElementById('op-photo').value = url;
+      const av = document.getElementById('ownerHeroAv');
+      av.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+      toast('✅ Photo uploaded!');
+    }catch(ex){ toast('❌ Upload failed'); }
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+async function saveOwnerProfile(){
+  if(!window._FB){ toast('❌ Not connected'); return; }
+  const btn = document.querySelector('#page-ownerprofile > button.act-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving...';
+  // Upload new media
+  for(let i=0;i<opMediaItems.length;i++){
+    if(opMediaItems[i].dataUrl&&!opMediaItems[i].url){
+      btn.innerHTML=`<span class="spinner"></span>Uploading ${i+1}/${opMediaItems.length}...`;
+      try{
+        const comp = await compressImg(opMediaItems[i].dataUrl,900,0.8);
+        opMediaItems[i].url = await uploadImg(comp);
+        opMediaItems[i].dataUrl='';
+      }catch(ex){}
+    }
+  }
+  const op = {
+    name: document.getElementById('op-name').value.trim()||'Owner',
+    bio: document.getElementById('op-bio').value.trim(),
+    photoUrl: document.getElementById('op-photo').value.trim(),
+    plan: opPlan,
+    subscriptionPrice: parseInt(document.getElementById('op-price').value)||99,
+    upiId: document.getElementById('op-upi').value.trim(),
+    upiName: document.getElementById('op-upi-name').value.trim(),
+    benefits: [document.getElementById('op-b1').value.trim(),document.getElementById('op-b2').value.trim(),document.getElementById('op-b3').value.trim()].filter(Boolean),
+    profileMedia: opMediaItems.map(m=>({url:m.url||'',type:m.type,locked:m.locked})).filter(m=>m.url),
+    updatedAt: Date.now()
+  };
+  const {db,ref,set} = window._FB;
+  set(ref(db,'ownerProfile'),op).then(()=>{
+    toast('✅ Owner profile saved!');
+    document.getElementById('ownerHeroName').textContent=op.name;
+    document.getElementById('ownerHeroBio').textContent=op.bio||'Admin & Owner of Vibe';
+    if(op.photoUrl){ const av=document.getElementById('ownerHeroAv'); av.innerHTML=`<img src="${op.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`; }
+  }).catch(()=>toast('❌ Save failed'));
+  btn.disabled=false; btn.innerHTML='💾 Save Profile';
+}
+window.opSelectPlan=opSelectPlan; window.opSetMediaType=opSetMediaType; window.opMediaSelect=opMediaSelect;
+window.opRemoveMedia=opRemoveMedia; window.ownerPhotoUpload=ownerPhotoUpload; window.saveOwnerProfile=saveOwnerProfile;
+// ── OWNER MESSAGES ──
+let currentOwnerChatUid = null;
+let ownerMsgListeners = {};
+
+function renderOwnerChats(){
+  if(!window._FB) return;
+  const {db,ref,get,onValue,query,orderByChild,limitToLast} = window._FB;
+  const el = document.getElementById('ownerChatsList');
+  el.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div class="empty-txt">Loading...</div></div>';
+
+  get(ref(db,'privateChats')).then(snap=>{
+    const allChats = snap.val()||{};
+    // Filter chats involving 'owner'
+    const ownerChats = Object.entries(allChats).filter(([id])=>id.includes('owner'));
+    if(!ownerChats.length){
+      el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-txt">Koi message nahi abhi tak</div></div>';
+      return;
+    }
+    // Sort by latest message
+    const withLatest = ownerChats.map(([chatId, chatData])=>{
+      const msgs = chatData.messages ? Object.values(chatData.messages) : [];
+      const latest = msgs.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0))[0];
+      const userUid = chatId.replace('_owner','').replace('owner_','');
+      const user = allUsersData[userUid]||{};
+      return {chatId, msgs, latest, userUid, user};
+    }).sort((a,b)=>(b.latest?.timestamp||0)-(a.latest?.timestamp||0));
+
+    el.innerHTML = '';
+    withLatest.forEach(({chatId,msgs,latest,userUid,user})=>{
+      const div = document.createElement('div');
+      div.className = 'data-row';
+      div.style.cursor = 'pointer';
+      div.onclick = ()=>openOwnerReply(userUid, user);
+
+      const avStyle = user.photoUrl
+        ? `background-image:url('${user.photoUrl}');background-size:cover;background-position:center;`
+        : 'background:linear-gradient(135deg,#7c3aed,#ec4899);';
+
+      div.innerHTML = `
+        <div class="dr-av" style="${avStyle}">${user.photoUrl?'':initial(user.name||'?')}</div>
+        <div class="dr-info">
+          <div class="dr-name">${esc(user.name||userUid)}</div>
+          <div class="dr-meta">${latest ? esc((latest.text||'📎 Media').substring(0,50)) : 'No messages'} · ${latest?fmt(latest.timestamp):''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <span style="font-size:11px;color:var(--gray2);">${msgs.length} msgs</span>
+          <button class="icon-btn ib-grad" style="background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:12px;width:auto;padding:4px 10px;border-radius:8px;color:#fff;font-weight:700;">Reply</button>
+        </div>`;
+      el.appendChild(div);
+    });
+
+    // Badge count
+    const badge = document.getElementById('ownerMsgBadge');
+    badge.textContent = ownerChats.length;
+    badge.style.display = ownerChats.length>0?'flex':'none';
+  }).catch(()=>{
+    el.innerHTML='<div class="empty"><div class="empty-icon">❌</div><div class="empty-txt">Load failed</div></div>';
+  });
+}
+
+function openOwnerReply(userUid, user){
+  currentOwnerChatUid = userUid;
+  const panel = document.getElementById('ownerReplyPanel');
+  panel.style.display = 'flex';
+
+  // Set avatar
+  const av = document.getElementById('ownerReplyAvatar');
+  if(user.photoUrl){
+    av.style.backgroundImage = `url('${user.photoUrl}')`;
+    av.style.backgroundSize = 'cover';
+    av.innerHTML = '';
+  } else {
+    av.style.backgroundImage = '';
+    av.textContent = initial(user.name||'?');
+  }
+  document.getElementById('ownerReplyName').textContent = user.name||userUid;
+
+  // Load messages
+  loadOwnerReplyMsgs(userUid);
+}
+
+function loadOwnerReplyMsgs(userUid){
+  if(!window._FB) return;
+  const {db,ref,onValue,query,orderByChild,limitToLast} = window._FB;
+  const chatId = [userUid,'owner'].sort().join('_');
+  const msgsEl = document.getElementById('ownerReplyMsgs');
+  msgsEl.innerHTML = '';
+
+  onValue(query(ref(db,'privateChats/'+chatId+'/messages'),orderByChild('timestamp'),limitToLast(100)), snap=>{
+    const msgs = snap.val()||{};
+    const sorted = Object.values(msgs).sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+    msgsEl.innerHTML = '';
+    sorted.forEach(msg=>{
+      const isOwner = msg.sender==='owner';
+      const div = document.createElement('div');
+      div.className = 'msg-row' + (isOwner?' mine':'');
+      div.style.cssText = 'display:flex;gap:7px;align-items:flex-end;margin-bottom:3px;'+(isOwner?'flex-direction:row-reverse;':'');
+      div.innerHTML = `
+        <div style="max-width:75%;">
+          <div style="font-size:10px;color:${isOwner?'#f472b6':'#a855f7'};font-weight:600;margin-bottom:2px;${isOwner?'text-align:right;':''}padding:0 11px;">${isOwner?'You (Owner)':esc(msg.senderName||'User')}</div>
+          <div style="background:${isOwner?'#1e1040':'#111827'};border-radius:${isOwner?'17px 17px 4px 17px':'17px 17px 17px 4px'};padding:9px 13px;font-size:14px;line-height:1.5;word-break:break-word;border:1px solid ${isOwner?'rgba(124,58,237,.3)':'rgba(255,255,255,.08)'};">${esc(msg.text||'')}</div>
+          <div style="font-size:9px;color:#6b7280;margin-top:2px;${isOwner?'text-align:right;':''}padding:0 3px;">${fmt(msg.timestamp)}</div>
+        </div>`;
+      msgsEl.appendChild(div);
+    });
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  });
+}
+
+async function sendOwnerReply(){
+  const inp = document.getElementById('ownerReplyInp');
+  const txt = inp.value.trim();
+  if(!txt||!currentOwnerChatUid) return;
+  if(!window._FB){ toast('❌ Not connected'); return; }
+  const {db,ref,push} = window._FB;
+  const chatId = [currentOwnerChatUid,'owner'].sort().join('_');
+
+  // Get owner profile name
+  const {get} = window._FB;
+  let ownerName = 'Owner';
+  try{
+    const snap = await get(ref(db,'ownerProfile'));
+    ownerName = snap.val()?.name || 'Owner';
+  }catch(e){}
+
+  push(ref(db,'privateChats/'+chatId+'/messages'),{
+    sender:'owner',
+    senderName: ownerName,
+    text: txt,
+    timestamp: Date.now()
+  }).then(()=>{
+    inp.value='';
+    inp.style.height='auto';
+  }).catch(()=>toast('❌ Send failed'));
+}
+
+function closeOwnerReply(){
+  document.getElementById('ownerReplyPanel').style.display='none';
+  currentOwnerChatUid = null;
+  renderOwnerChats();
+}
+window.closeOwnerReply=closeOwnerReply;
+window.sendOwnerReply=sendOwnerReply;
+window.openOwnerReply=openOwnerReply;
+// ── SETTINGS ──
+function saveSettings(){
+  if(!window._FB){ toast('❌ Not connected'); return; }
+  const {db,ref,set} = window._FB;
+  const gn = document.getElementById('set-groupname').value.trim();
+  if(gn) set(ref(db,'groupSettings/name'),gn).catch(()=>{});
+  toast('✅ Settings saved!');
+}
+function deleteAllUsers(){
+  if(!window._FB) return;
+  const {db,ref,remove} = window._FB;
+  remove(ref(db,'users')).then(()=>toast('🗑️ All users deleted')).catch(()=>{});
+}
+window.saveSettings=saveSettings; window.deleteAllUsers=deleteAllUsers;
+
+// ── CONFIRM MODAL ──
+function confirmAction(msg, cb){
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmModal').classList.add('active');
+  confirmCallback = cb;
+}
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('active'); confirmCallback=null; }
+document.getElementById('confirmOkBtn').onclick = ()=>{ if(confirmCallback) confirmCallback(); closeConfirm(); };
+document.getElementById('confirmModal').addEventListener('click',e=>{ if(e.target===document.getElementById('confirmModal')) closeConfirm(); });
+window.confirmAction=confirmAction; window.closeConfirm=closeConfirm; window.refreshCurrent=()=>{ if(window._FB) initAdmin(); };
+
+// ── SIDEBAR MOBILE ──
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+window.openSidebar=openSidebar; window.closeSidebar=closeSidebar;
+
+// ── UTILS ──
+function toast(m, d=3000){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),d); }
+function initial(n){ return (n||'?')[0].toUpperCase(); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(ts){ const d=new Date(ts||Date.now()); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function compressImg(dataUrl, maxW=800, quality=0.78){
+  return new Promise(resolve=>{
+    const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let w=img.width,h=img.height; if(w>maxW){h=Math.round(h*maxW/w);w=maxW;} c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); resolve(c.toDataURL('image/jpeg',quality)); }; img.onerror=()=>resolve(dataUrl); img.src=dataUrl; });
+}
+async function uploadImg(dataUrl){
+  const b64=dataUrl.split(',')[1]; const fd=new FormData(); fd.append('key',IMGBB_KEY); fd.append('image',b64);
+  const r=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd}); const j=await r.json();
+  if(j.success) return j.data.url; throw new Error('upload fail');
+}
+</script>
+</body>
+</html>
