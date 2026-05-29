@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vibe — Connect & Chat</title>
+<title>Vibe — Connect & Chat</title>
+
+<!-- PWA Meta Tags -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vibe">
+<meta name="application-name" content="Vibe">
+<meta name="theme-color" content="#7c3aed">
+<meta name="msapplication-TileColor" content="#07070f">
+<meta name="msapplication-TileImage" content="icons/icon-144.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1778,5 +1792,18 @@ window.saveEditProfile = saveEditProfile;
 window.onSelfieSelect = onSelfieSelect;
 window.skipSelfieVerification = skipSelfieVerification;
 </script>
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[Vibe PWA] Ready ✓'))
+      .catch(err => console.warn('[Vibe PWA] Failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
 </body>
 </html>  
