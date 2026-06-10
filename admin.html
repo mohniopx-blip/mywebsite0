@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VIBE Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#D4AF37;--gold2:#F5D97A;--black:#080808;--dark:#0F0F0F;
+  --card:#161616;--card2:#1e1e1e;--border:rgba(212,175,55,0.16);
+  --text:#F0EAD6;--muted:#666;--green:#48BB78;--red:#E53E3E;--blue:#4299E1;
+  --premium:linear-gradient(135deg,#D4AF37,#F5D97A,#B8860B);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;}
+
+/* ══ LOGIN ══ */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;background:var(--black);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background-image:radial-gradient(ellipse at 50% 20%,rgba(212,175,55,0.09) 0%,transparent 65%);
+}
+.login-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:28px;padding:40px 28px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.8);}
+.l-logo{font-family:'Playfair Display',serif;font-size:44px;font-weight:900;background:var(--premium);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.l-sub{font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:32px;margin-top:4px;}
+.l-input{width:100%;padding:16px 18px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;margin-bottom:14px;-webkit-appearance:none;}
+.l-input:focus{border-color:var(--gold);}
+.l-btn{width:100%;padding:17px;border:none;border-radius:14px;background:var(--premium);color:#000;font-weight:700;font-family:'DM Sans',sans-serif;font-size:16px;cursor:pointer;letter-spacing:.5px;}
+.l-err{color:var(--red);font-size:13px;margin-top:10px;display:none;}
+
+/* ══ APP SHELL ══ */
+#appShell{display:none;flex-direction:column;height:100%;position:fixed;inset:0;}
+#appShell.show{display:flex;}
+
+/* TOP BAR */
+.topbar{
+  background:rgba(8,8,8,0.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  padding-top:env(safe-area-inset-top,0);
+}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;background:var(--premium);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);}
+.topbar-action{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;padding:6px;}
+
+/* PAGES WRAPPER */
+.pages-wrap{flex:1;overflow:hidden;position:relative;}
+.page{
+  position:absolute;inset:0;overflow-y:auto;
+  padding:16px 16px calc(72px + var(--safe-bottom));
+  display:none;
+  -webkit-overflow-scrolling:touch;
+}
+.page.active{display:block;}
+
+/* ══ BOTTOM NAV ══ */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,10,10,0.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:stretch;
+  height:calc(60px + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  z-index:100;flex-shrink:0;
+}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;position:relative;transition:all .15s;padding:8px 4px;}
+.bn-item .bn-icon{font-size:22px;line-height:1;transition:transform .2s;}
+.bn-item .bn-label{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);transition:color .15s;font-weight:600;}
+.bn-item.active .bn-label{color:var(--gold);}
+.bn-item.active .bn-icon{transform:translateY(-2px);}
+.bn-badge{position:absolute;top:6px;right:calc(50% - 14px);background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;display:none;}
+.bn-badge.show{display:flex;}
+
+/* ══ MORE MENU ══ */
+#moreMenu{
+  position:fixed;bottom:calc(64px + var(--safe-bottom));left:8px;right:8px;
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:8px;z-index:200;display:none;
+  box-shadow:0 -16px 40px rgba(0,0,0,0.7);
+}
+#moreMenu.show{display:block;}
+.more-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;cursor:pointer;font-size:15px;transition:background .15s;}
+.more-item:hover,.more-item:active{background:rgba(255,255,255,0.05);}
+.more-item .mi-icon{font-size:20px;width:24px;text-align:center;}
+.more-item.danger{color:var(--red);}
+.more-overlay{position:fixed;inset:0;z-index:199;display:none;}
+.more-overlay.show{display:block;}
+
+/* ══ COMPONENTS ══ */
+.section-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;margin-top:4px;display:flex;align-items:center;gap:8px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Stat row */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 16px;}
+.stat-val{font-size:34px;font-weight:800;background:var(--premium);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;}
+.stat-label{font-size:11px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.8px;}
+
+/* List cards */
+.list-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:16px;}
+.list-card-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.list-card-head h3{font-size:13px;font-weight:700;color:var(--gold);}
+.list-item{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:12px;}
+.list-item:last-child{border:none;}
+.list-item:active{background:rgba(255,255,255,0.03);}
+.li-avatar{width:40px;height:40px;border-radius:12px;background:var(--premium);display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;font-size:16px;flex-shrink:0;}
+.li-avatar.round{border-radius:50%;}
+.li-avatar img,.li-avatar video{width:100%;height:100%;object-fit:cover;border-radius:inherit;}
+.li-info{flex:1;min-width:0;}
+.li-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+
+/* Badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.badge.pending{background:rgba(234,179,8,.15);color:#EAB308;}
+.badge.approved{background:rgba(72,187,120,.15);color:var(--green);}
+.badge.rejected{background:rgba(229,62,62,.15);color:var(--red);}
+.badge.free{background:rgba(66,153,225,.15);color:var(--blue);}
+.badge.paid{background:rgba(212,175,55,.15);color:var(--gold);}
+.badge.premium{background:rgba(212,175,55,.15);color:var(--gold);}
+
+/* Buttons */
+.btn-gold{padding:14px;border:none;border-radius:14px;background:var(--premium);color:#000;font-weight:700;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;width:100%;}
+.btn-outline{padding:10px 16px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-green{padding:10px 16px;border-radius:10px;background:rgba(72,187,120,.15);color:var(--green);border:none;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-red{padding:10px 16px;border-radius:10px;background:rgba(229,62,62,.15);color:var(--red);border:none;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* Form */
+.form-group{margin-bottom:16px;}
+.form-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block;}
+.form-input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;}
+.form-input:focus{border-color:var(--gold);}
+.form-select{width:100%;padding:14px 16px;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;}
+.form-select option{background:var(--card);}
+textarea.form-input{resize:none;min-height:100px;}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:32px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);}
+.upload-zone:active{border-color:var(--gold);}
+.upload-zone input{display:none;}
+.uz-icon{font-size:36px;margin-bottom:8px;}
+.uz-text{font-size:14px;color:var(--muted);}
+.uz-text strong{color:var(--gold);}
+.progress-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:12px;overflow:hidden;display:none;}
+.progress-fill{height:100%;background:var(--premium);width:0;transition:width .4s;}
+#upPreview{margin-top:12px;display:none;}
+#upPreview img,#upPreview video{width:100%;max-height:200px;object-fit:cover;border-radius:12px;border:1px solid var(--border);}
+
+/* ══ CHAT PAGE ══ */
+.chat-user-list{display:flex;flex-direction:column;gap:0;}
+#mobileChatWindow{
+  position:fixed;inset:0;z-index:300;background:var(--black);
+  display:none;flex-direction:column;
+}
+#mobileChatWindow.show{display:flex;}
+.mcw-header{
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  background:var(--dark);display:flex;align-items:center;gap:12px;
+  padding-top:calc(14px + env(safe-area-inset-top,0));
+  flex-shrink:0;
+}
+.mcw-back{background:none;border:none;color:var(--gold);font-size:24px;cursor:pointer;padding:4px;}
+.mcw-avatar{width:38px;height:38px;border-radius:50%;background:var(--premium);display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;font-size:15px;flex-shrink:0;}
+.mcw-name{flex:1;font-weight:700;font-size:15px;}
+.mcw-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+.msg{max-width:78%;}
+.msg.admin-msg{align-self:flex-end;}
+.msg-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+.msg.user-msg .msg-bubble{background:var(--card2);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg.admin-msg .msg-bubble{background:var(--premium);color:#000;font-weight:500;border-bottom-right-radius:4px;}
+.msg-time{font-size:10px;color:var(--muted);margin-top:3px;}
+.msg.admin-msg .msg-time{text-align:right;}
+.mcw-input{
+  padding:10px 12px;border-top:1px solid var(--border);background:var(--dark);
+  display:flex;gap:8px;align-items:flex-end;
+  padding-bottom:calc(10px + var(--safe-bottom));flex-shrink:0;
+}
+.mcw-input textarea{
+  flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  border-radius:22px;padding:11px 16px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  resize:none;max-height:100px;-webkit-appearance:none;
+}
+.mcw-input textarea:focus{border-color:var(--gold);}
+.mcw-send{width:44px;height:44px;border-radius:50%;background:var(--premium);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mcw-send svg{width:18px;height:18px;fill:#000;}
+
+/* QR page */
+.qr-upload-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center;}
+.qr-img-wrap{width:180px;height:180px;border:3px solid var(--gold);border-radius:20px;margin:0 auto 20px;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(255,255,255,0.02);}
+.qr-img-wrap img{width:100%;height:100%;object-fit:cover;}
+.qr-placeholder{font-size:48px;color:var(--border);}
+
+/* Detail modals */
+.detail-sheet{
+  position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.75);
+  display:none;align-items:flex-end;
+}
+.detail-sheet.show{display:flex;}
+.ds-box{
+  background:var(--card);border-radius:24px 24px 0 0;border-top:1px solid var(--border);
+  padding:24px 20px calc(24px + var(--safe-bottom));width:100%;max-height:85vh;overflow-y:auto;
+}
+.ds-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.ds-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;margin-bottom:4px;}
+.ds-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.ds-row:last-child{border:none;}
+.ds-key{font-size:13px;color:var(--muted);}
+.ds-val{font-size:13px;font-weight:600;text-align:right;max-width:55%;word-break:break-all;}
+.ds-actions{display:flex;gap:10px;margin-top:20px;}
+.ds-actions button{flex:1;padding:14px;border-radius:14px;border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:calc(72px + 12px + var(--safe-bottom));left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:50px;padding:12px 24px;font-size:13px;font-weight:600;
+  white-space:nowrap;opacity:0;transition:all .25s;z-index:9999;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Empty state */
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;}
+.empty .empty-icon{font-size:40px;margin-bottom:12px;display:block;}
+
+.badge.banned{background:rgba(229,62,62,.15);color:var(--red);}
+::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="l-logo">VIBE</div>
+    <div class="l-sub">Admin Panel</div>
+    <input class="l-input" type="password" id="adminPass" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="l-btn" onclick="doLogin()">Enter Panel</button>
+    <div class="l-err" id="loginErr">⚠ Wrong password</div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══ -->
+<div id="appShell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">VIBE</div>
+    <div class="topbar-title" id="topTitle">Dashboard</div>
+    <button class="topbar-action" onclick="toggleMore()">⋮</button>
+  </div>
+
+  <!-- PAGES -->
+  <div class="pages-wrap">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="pg-dashboard">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="st-users">0</div><div class="stat-label">Users</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-premium">0</div><div class="stat-label">Premium</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-posts">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-pending" style="color:var(--red);-webkit-text-fill-color:var(--red)">0</div><div class="stat-label">Pending Pay</div></div>
+      </div>
+
+      <div class="section-title">Recent Payments</div>
+      <div class="list-card" id="dashPayList"><div class="empty"><span class="empty-icon">💳</span>No payments yet</div></div>
+
+      <div class="section-title">Recent Users</div>
+      <div class="list-card" id="dashUserList"><div class="empty"><span class="empty-icon">👤</span>No users yet</div></div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="page" id="pg-upload">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" type="text" id="upTitle" placeholder="Post title…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Content Type</label>
+        <select class="form-select" id="upType">
+          <option value="free">🆓 Free</option>
+          <option value="paid">👑 Premium</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Media</label>
+        <div class="upload-zone" onclick="document.getElementById('upFile').click()">
+          <input type="file" id="upFile" accept="image/*,video/*" onchange="previewUpload(this)">
+          <div class="uz-icon">☁️</div>
+          <div class="uz-text"><strong>Tap to select</strong><br>Photo or Video</div>
+        </div>
+        <div class="progress-bar" id="upBar"><div class="progress-fill" id="upFill"></div></div>
+        <div id="upPreview"></div>
+      </div>
+      <button class="btn-gold" onclick="doUpload()">📤 Upload Post</button>
+      <div id="upMsg" style="margin-top:12px;text-align:center;font-size:13px;color:var(--muted)"></div>
+    </div>
+
+    <!-- POSTS -->
+    <div class="page" id="pg-posts">
+      <div class="list-card" id="postsList"><div class="empty"><span class="empty-icon">🖼️</span>No posts yet</div></div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="page" id="pg-payments">
+      <div class="list-card" id="payList"><div class="empty"><span class="empty-icon">💳</span>No payments yet</div></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="pg-users">
+      <div class="list-card" id="usersList"><div class="empty"><span class="empty-icon">👥</span>No users yet</div></div>
+    </div>
+
+    <!-- CHATS -->
+    <div class="page" id="pg-chats">
+      <div class="list-card chat-user-list" id="chatUserList"><div class="empty"><span class="empty-icon">💬</span>No chats yet</div></div>
+    </div>
+
+    <!-- QR -->
+    <div class="page" id="pg-qr">
+      <div class="qr-upload-box">
+        <div class="qr-img-wrap" id="qrWrap" onclick="document.getElementById('qrFile').click()">
+          <div class="qr-placeholder" id="qrPlaceholder">+</div>
+          <img id="qrImg" style="display:none">
+        </div>
+        <input type="file" id="qrFile" accept="image/*" style="display:none" onchange="uploadQR(this)">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Tap to upload your UPI QR code.<br>Users will see this in the payment popup.</p>
+        <button class="btn-gold" onclick="document.getElementById('qrFile').click()">📷 Upload QR Code</button>
+        <div id="qrMsg" style="margin-top:12px;font-size:13px;color:var(--muted);text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- MORE PAGES -->
+    <div class="page" id="pg-notif">
+      <div class="form-group">
+        <label class="form-label">Notification Title</label>
+        <input class="form-input" type="text" id="notifTitle" placeholder="e.g. New content uploaded!">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-input" id="notifMsg" placeholder="Write your message…"></textarea>
+      </div>
+      <button class="btn-gold" onclick="sendNotif()">📣 Send to All Users</button>
+    </div>
+
+  </div><!-- /pages-wrap -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="bn-item active" onclick="showPage('dashboard','Dashboard',this)">
+      <span class="bn-icon">📊</span>
+      <span class="bn-label">Home</span>
+    </div>
+    <div class="bn-item" onclick="showPage('upload','Upload',this)">
+      <span class="bn-icon">📤</span>
+      <span class="bn-label">Upload</span>
+    </div>
+    <div class="bn-item" onclick="showPage('payments','Payments',this)">
+      <span class="bn-icon">💳</span>
+      <span class="bn-label">Pay</span>
+      <div class="bn-badge" id="payBadge">0</div>
+    </div>
+    <div class="bn-item" onclick="showPage('chats','Chats',this)">
+      <span class="bn-icon">💬</span>
+      <span class="bn-label">Chats</span>
+    </div>
+    <div class="bn-item" onclick="toggleMore()">
+      <span class="bn-icon">⋯</span>
+      <span class="bn-label">More</span>
+    </div>
+  </div>
+
+</div><!-- /appShell -->
+
+<!-- MORE OVERLAY -->
+<div class="more-overlay" id="moreOverlay" onclick="closeMore()"></div>
+<div id="moreMenu">
+  <div class="more-item" onclick="showPage('posts','Posts',null);closeMore()"><span class="mi-icon">🖼️</span> Manage Posts</div>
+  <div class="more-item" onclick="showPage('users','Users',null);closeMore()"><span class="mi-icon">👥</span> Users</div>
+  <div class="more-item" onclick="showPage('qr','QR Code',null);closeMore()"><span class="mi-icon">📱</span> QR Code</div>
+  <div class="more-item" onclick="showPage('notif','Notifications',null);closeMore()"><span class="mi-icon">🔔</span> Notifications</div>
+  <div class="more-item danger" onclick="doLogout();closeMore()"><span class="mi-icon">🚪</span> Logout</div>
+</div>
+
+<!-- MOBILE CHAT WINDOW -->
+<div id="mobileChatWindow">
+  <div class="mcw-header">
+    <button class="mcw-back" onclick="closeChatWindow()">←</button>
+    <div class="mcw-avatar" id="mcwAvatar">U</div>
+    <div class="mcw-name" id="mcwName">User</div>
+  </div>
+  <div class="mcw-msgs" id="mcwMsgs"></div>
+  <div class="mcw-input">
+    <textarea id="mcwInput" placeholder="Reply…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminReply();}" oninput="autoGrow(this)"></textarea>
+    <button class="mcw-send" onclick="adminReply()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- DETAIL SHEET (payments / users) -->
+<div class="detail-sheet" id="detailSheet">
+  <div class="ds-box">
+    <div class="ds-handle"></div>
+    <div id="dsContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const cfg = {
+  apiKey:"AIzaSyCn9bgrZxcaH3DF2CAYuLq7FT0nM0JFwjY",
+  authDomain:"mychat-9eb7c.firebaseapp.com",
+  databaseURL:"https://mychat-9eb7c-default-rtdb.firebaseio.com",
+  projectId:"mychat-9eb7c",
+  storageBucket:"mychat-9eb7c.firebasestorage.app",
+  messagingSenderId:"726638251919",
+  appId:"1:726638251919:web:c2c79f9b0e7b554bd485fa"
+};
+const app = initializeApp(cfg);
+const db = getDatabase(app);
+
+const PASS = 'vibe@admin2024';
+let activeChatUser = null;
+
+// ── LOGIN ──
+window.doLogin = () => {
+  if (document.getElementById('adminPass').value === PASS) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').classList.add('show');
+    initAll();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+};
+window.doLogout = () => {
+  document.getElementById('appShell').classList.remove('show');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminPass').value = '';
+};
+
+function initAll() {
+  loadDashboard();
+  loadPayments();
+  loadUsers();
+  loadPosts();
+  loadChats();
+  loadQR();
+}
+
+// ── NAV ──
+window.showPage = (id, title, el) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + id).classList.add('active');
+  document.getElementById('topTitle').textContent = title;
+  if (el) {
+    document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+};
+window.toggleMore = () => {
+  document.getElementById('moreMenu').classList.toggle('show');
+  document.getElementById('moreOverlay').classList.toggle('show');
+};
+window.closeMore = () => {
+  document.getElementById('moreMenu').classList.remove('show');
+  document.getElementById('moreOverlay').classList.remove('show');
+};
+
+// ── TOAST ──
+window.toast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+};
+
+// ── DASHBOARD ──
+function loadDashboard() {
+  onValue(ref(db,'users'), snap => {
+    const all = Object.values(snap.val() || {});
+    document.getElementById('st-users').textContent = all.length;
+    document.getElementById('st-premium').textContent = all.filter(u=>u.isPremium).length;
+
+    const ul = document.getElementById('dashUserList');
+    if (!all.length) { ul.innerHTML='<div class="empty"><span class="empty-icon">👤</span>No users yet</div>'; return; }
+    ul.innerHTML = '';
+    all.slice(-6).reverse().forEach(u => {
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      d.innerHTML = `<div class="li-avatar round">${u.username[0].toUpperCase()}</div>
+        <div class="li-info"><div class="li-name">${u.username}</div><div class="li-sub">${u.createdAt?new Date(u.createdAt).toLocaleDateString():''}</div></div>
+        <div class="li-right"><span class="badge ${u.isPremium?'premium':'free'}">${u.isPremium?'Premium':'Free'}</span></div>`;
+      ul.appendChild(d);
+    });
+  });
+
+  onValue(ref(db,'posts'), snap => {
+    document.getElementById('st-posts').textContent = Object.keys(snap.val()||{}).length;
+  });
+
+  onValue(ref(db,'payments'), snap => {
+    const pays = Object.entries(snap.val() || {});
+    const pending = pays.filter(([,p])=>p.status==='pending');
+    document.getElementById('st-pending').textContent = pending.length;
+    const badge = document.getElementById('payBadge');
+    if (pending.length > 0) { badge.textContent = pending.length; badge.classList.add('show'); }
+    else badge.classList.remove('show');
+
+    const pl = document.getElementById('dashPayList');
+    if (!pays.length) { pl.innerHTML='<div class="empty"><span class="empty-icon">💳</span>No payments yet</div>'; return; }
+    pl.innerHTML = '';
+    pays.slice(-5).reverse().forEach(([id,p]) => {
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      d.onclick = () => openPayDetail(id, p);
+      d.innerHTML = `<div class="li-avatar round" style="background:var(--card2);color:var(--gold);font-size:18px">💳</div>
+        <div class="li-info"><div class="li-name">${p.user}</div><div class="li-sub">${p.utr}</div></div>
+        <div class="li-right"><span class="badge ${p.status}">${p.status}</span></div>`;
+      pl.appendChild(d);
+    });
+  });
+}
+
+// ── PAYMENTS ──
+function loadPayments() {
+  onValue(ref(db,'payments'), snap => {
+    const pays = Object.entries(snap.val() || {}).reverse();
+    const pl = document.getElementById('payList');
+    if (!pays.length) { pl.innerHTML='<div class="empty"><span class="empty-icon">💳</span>No payments yet</div>'; return; }
+    pl.innerHTML = '';
+    pays.forEach(([id,p]) => {
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      d.onclick = () => openPayDetail(id, p);
+      d.innerHTML = `<div class="li-avatar round" style="background:var(--card2);font-size:20px">💳</div>
+        <div class="li-info">
+          <div class="li-name">${p.user}</div>
+          <div class="li-sub" style="font-family:monospace">${p.utr}</div>
+        </div>
+        <div class="li-right">
+          <span class="badge ${p.status}">${p.status}</span>
+          <span style="font-size:11px;color:var(--muted)">${p.timestamp?new Date(p.timestamp).toLocaleDateString():''}</span>
+        </div>`;
+      pl.appendChild(d);
+    });
+  });
+}
+
+window.openPayDetail = (id, p) => {
+  const ds = document.getElementById('dsContent');
+  ds.innerHTML = `
+    <div class="ds-title">Payment Detail</div>
+    <div class="ds-row"><span class="ds-key">User</span><span class="ds-val">${p.user}</span></div>
+    <div class="ds-row"><span class="ds-key">UTR / Txn ID</span><span class="ds-val" style="font-family:monospace">${p.utr}</span></div>
+    <div class="ds-row"><span class="ds-key">Status</span><span class="ds-val"><span class="badge ${p.status}">${p.status}</span></span></div>
+    <div class="ds-row"><span class="ds-key">Time</span><span class="ds-val">${p.timestamp?new Date(p.timestamp).toLocaleString():'-'}</span></div>
+    ${p.status==='pending' ? `
+    <div class="ds-actions">
+      <button class="ds-actions" style="flex:1;padding:14px;border-radius:14px;background:rgba(72,187,120,.2);color:var(--green);border:none;font-weight:700;font-size:15px;cursor:pointer" onclick="approveP('${id}','${p.user}')">✓ Approve</button>
+      <button style="flex:1;padding:14px;border-radius:14px;background:rgba(229,62,62,.15);color:var(--red);border:none;font-weight:700;font-size:15px;cursor:pointer" onclick="rejectP('${id}')">✗ Reject</button>
+    </div>` : ''}
+  `;
+  document.getElementById('detailSheet').classList.add('show');
+};
+document.getElementById('detailSheet').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailSheet')) closeDetail();
+});
+window.closeDetail = () => document.getElementById('detailSheet').classList.remove('show');
+
+window.approveP = async (id, user) => {
+  await update(ref(db,'payments/'+id), {status:'approved'});
+  await update(ref(db,'users/'+user), {isPremium:true, premiumSince:Date.now(), premiumExpiry:Date.now()+604800000});
+  closeDetail(); toast('✅ Approved! User upgraded to Premium.');
+};
+window.rejectP = async (id) => {
+  await update(ref(db,'payments/'+id), {status:'rejected'});
+  closeDetail(); toast('❌ Payment rejected.');
+};
+
+// ── USERS ──
+function loadUsers() {
+  onValue(ref(db,'users'), snap => {
+    const users = Object.entries(snap.val()||{}).reverse();
+    const ul = document.getElementById('usersList');
+    if (!users.length) { ul.innerHTML='<div class="empty"><span class="empty-icon">👥</span>No users yet</div>'; return; }
+    ul.innerHTML = '';
+    users.forEach(([key,u]) => {
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      d.onclick = () => openUserDetail(key, u);
+      const statusBadge = u.isBanned
+        ? '<span class="badge banned">&#x1F6AB; Banned</span>'
+        : `<span class="badge ${u.isPremium?'premium':'free'}">${u.isPremium?'&#x1F451; Premium':'Free'}</span>`;
+      d.innerHTML = `<div class="li-avatar round" style="opacity:${u.isBanned?0.4:1}">${u.username[0].toUpperCase()}</div>
+        <div class="li-info">
+          <div class="li-name" style="color:${u.isBanned?'var(--red)':'var(--text)'}">${u.username}${u.isBanned?' &#x1F6AB;':''}</div>
+          <div class="li-sub">Joined ${u.createdAt?new Date(u.createdAt).toLocaleDateString():'-'}</div>
+        </div>
+        <div class="li-right">${statusBadge}</div>`;
+      ul.appendChild(d);
+    });
+  });
+}
+
+window.openUserDetail = (key, u) => {
+  const ds = document.getElementById('dsContent');
+  const banBtn = u.isBanned
+    ? `<button style="flex:1;padding:14px;border-radius:14px;background:rgba(72,187,120,.2);color:var(--green);border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="unbanUser('${key}')">&#x2705; Unban User</button>`
+    : `<button style="flex:1;padding:14px;border-radius:14px;background:rgba(229,62,62,.15);color:var(--red);border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="banUser('${key}')">&#x1F6AB; Ban User</button>`;
+  const premBtn = !u.isPremium && !u.isBanned
+    ? `<button style="flex:1;padding:14px;border-radius:14px;background:rgba(212,175,55,.2);color:var(--gold);border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="makePremium('${key}')">&#x1F451; Make Premium</button>`
+    : (!u.isBanned ? `<button style="flex:1;padding:14px;border-radius:14px;background:rgba(229,62,62,.1);color:var(--red);border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="revokeP('${key}')">Revoke Premium</button>` : '');
+  ds.innerHTML = `
+    <div class="ds-title">${u.username}</div>
+    <div class="ds-row"><span class="ds-key">Status</span><span class="ds-val">
+      ${u.isBanned ? '<span class="badge banned">&#x1F6AB; Banned</span>' : `<span class="badge ${u.isPremium?'premium':'free'}">${u.isPremium?'Premium':'Free'}</span>`}
+    </span></div>
+    <div class="ds-row"><span class="ds-key">Joined</span><span class="ds-val">${u.createdAt?new Date(u.createdAt).toLocaleString():'-'}</span></div>
+    <div class="ds-row"><span class="ds-key">Last Seen</span><span class="ds-val">${u.lastSeen?new Date(u.lastSeen).toLocaleString():'-'}</span></div>
+    ${u.isBanned && u.banReason ? `<div class="ds-row"><span class="ds-key">Ban Reason</span><span class="ds-val" style="color:var(--red)">${u.banReason}</span></div>` : ''}
+    <div class="ds-actions" style="display:flex;gap:10px;margin-top:20px">
+      ${banBtn}
+      ${premBtn}
+    </div>
+  `;
+  document.getElementById('detailSheet').classList.add('show');
+};
+window.makePremium = async (k) => { await update(ref(db,'users/'+k),{isPremium:true}); closeDetail(); toast('&#x1F451; User made Premium!'); };
+window.revokeP = async (k) => { await update(ref(db,'users/'+k),{isPremium:false}); closeDetail(); toast('Premium revoked.'); };
+
+window.banUser = async (k) => {
+  const reason = prompt('Ban reason (optional):') || 'Violated terms';
+  await update(ref(db,'users/'+k), {isBanned:true, banReason:reason, bannedAt:Date.now()});
+  closeDetail();
+  toast('&#x1F6AB; User banned.');
+};
+
+window.unbanUser = async (k) => {
+  await update(ref(db,'users/'+k), {isBanned:false, banReason:null});
+  closeDetail();
+  toast('&#x2705; User unbanned.');
+};
+
+// ── POSTS ──
+function loadPosts() {
+  onValue(ref(db,'posts'), snap => {
+    const posts = Object.entries(snap.val()||{}).reverse();
+    const pl = document.getElementById('postsList');
+    if (!posts.length) { pl.innerHTML='<div class="empty"><span class="empty-icon">🖼️</span>No posts yet</div>'; return; }
+    pl.innerHTML = '';
+    posts.forEach(([id,p]) => {
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      const thumb = p.mediaType==='video'
+        ? `<video src="${p.url}" style="width:100%;height:100%;object-fit:cover;border-radius:12px"></video>`
+        : `<img src="${p.url}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`;
+      d.innerHTML = `<div class="li-avatar" style="border-radius:12px;overflow:hidden">${thumb}</div>
+        <div class="li-info">
+          <div class="li-name">${p.title||'Untitled'}</div>
+          <div class="li-sub">❤ ${p.likes||0}  💬 ${Object.keys(p.comments||{}).length}</div>
+        </div>
+        <div class="li-right">
+          <span class="badge ${p.type}">${p.type}</span>
+          <button style="background:rgba(229,62,62,.15);color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer" onclick="delPost('${id}',event)">🗑</button>
+        </div>`;
+      pl.appendChild(d);
+    });
+  });
+}
+window.delPost = async (id, e) => {
+  e.stopPropagation();
+  if (!confirm('Delete this post?')) return;
+  await remove(ref(db,'posts/'+id));
+  toast('Post deleted.');
+};
+
+// ── UPLOAD ──
+window.previewUpload = (input) => {
+  const file = input.files[0]; if (!file) return;
+  const prev = document.getElementById('upPreview');
+  prev.style.display = 'block';
+  const url = URL.createObjectURL(file);
+  prev.innerHTML = file.type.startsWith('video')
+    ? `<video src="${url}" controls></video>`
+    : `<img src="${url}">`;
+};
+window.doUpload = async () => {
+  const file = document.getElementById('upFile').files[0];
+  const title = document.getElementById('upTitle').value.trim();
+  const type = document.getElementById('upType').value;
+  if (!file || !title) { toast('Fill title & select media'); return; }
+  const msg = document.getElementById('upMsg');
+  msg.textContent = 'Uploading…';
+  document.getElementById('upBar').style.display = 'block';
+  const fd = new FormData();
+  fd.append('file',file); fd.append('upload_preset','vibe_upload');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/dszhtdlpw/${file.type.startsWith('video')?'video':'image'}/upload`,{method:'POST',body:fd});
+  const data = await res.json();
+  document.getElementById('upFill').style.width = '100%';
+  if (!data.secure_url) { msg.textContent='Upload failed.'; return; }
+  await push(ref(db,'posts'),{title,type,url:data.secure_url,mediaType:file.type.startsWith('video')?'video':'image',likes:0,comments:{},createdAt:Date.now()});
+  msg.textContent = '✅ Posted!';
+  document.getElementById('upTitle').value='';
+  document.getElementById('upFile').value='';
+  document.getElementById('upPreview').style.display='none';
+  document.getElementById('upBar').style.display='none';
+  document.getElementById('upFill').style.width='0';
+  toast('✅ Post uploaded!');
+};
+
+// ── CHATS ──
+function loadChats() {
+  onValue(ref(db,'adminChats'), snap => {
+    const all = snap.val()||{};
+    const list = document.getElementById('chatUserList');
+    if (!Object.keys(all).length) { list.innerHTML='<div class="empty"><span class="empty-icon">💬</span>No chats yet</div>'; return; }
+    list.innerHTML = '';
+    Object.entries(all).forEach(([user, msgs]) => {
+      const last = Object.values(msgs).sort((a,b)=>b.time-a.time)[0];
+      const d = document.createElement('div');
+      d.className = 'list-item';
+      d.style.cursor='pointer';
+      d.onclick = () => openChatWindow(user);
+      d.innerHTML = `<div class="li-avatar round">${user[0].toUpperCase()}</div>
+        <div class="li-info">
+          <div class="li-name">${user}</div>
+          <div class="li-sub">${last?.text||'[media]'}</div>
+        </div>
+        <div class="li-right"><span style="font-size:11px;color:var(--muted)">${last?.time?new Date(last.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</span></div>`;
+      list.appendChild(d);
+    });
+  });
+}
+
+window.openChatWindow = (user) => {
+  activeChatUser = user;
+  document.getElementById('mcwAvatar').textContent = user[0].toUpperCase();
+  document.getElementById('mcwName').textContent = user;
+  document.getElementById('mobileChatWindow').classList.add('show');
+  onValue(ref(db,'adminChats/'+user), snap => {
+    const msgs = snap.val()||{};
+    const container = document.getElementById('mcwMsgs');
+    container.innerHTML='';
+    Object.values(msgs).sort((a,b)=>a.time-b.time).forEach(m => {
+      const el = document.createElement('div');
+      el.className = 'msg ' + (m.from==='admin'?'admin-msg':'user-msg');
+      let c = m.text?`<div class="msg-bubble">${m.text}</div>`:'';
+      if (m.mediaUrl) c += `<div style="margin-top:6px"><img src="${m.mediaUrl}" style="max-width:160px;border-radius:10px"></div>`;
+      el.innerHTML = c + `<div class="msg-time">${new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
+      container.appendChild(el);
+    });
+    container.scrollTop = container.scrollHeight;
+  });
+};
+window.closeChatWindow = () => {
+  document.getElementById('mobileChatWindow').classList.remove('show');
+  activeChatUser = null;
+};
+window.adminReply = async () => {
+  if (!activeChatUser) return;
+  const input = document.getElementById('mcwInput');
+  const text = input.value.trim(); if (!text) return;
+  const msg = {from:'admin',text,time:Date.now()};
+  await push(ref(db,'adminChats/'+activeChatUser), msg);
+  await push(ref(db,'chats/'+activeChatUser), msg);
+  input.value=''; input.style.height='auto';
+};
+window.autoGrow = (el) => {
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+};
+
+// ── QR ──
+function loadQR() {
+  onValue(ref(db,'settings/qrUrl'), snap => {
+    if (snap.val()) {
+      document.getElementById('qrPlaceholder').style.display='none';
+      const img = document.getElementById('qrImg');
+      img.src=snap.val(); img.style.display='block';
+    }
+  });
+}
+window.uploadQR = async (input) => {
+  const file=input.files[0]; if (!file) return;
+  document.getElementById('qrMsg').textContent='Uploading…';
+  const fd=new FormData(); fd.append('file',file); fd.append('upload_preset','vibe_upload');
+  const res=await fetch('https://api.cloudinary.com/v1_1/dszhtdlpw/image/upload',{method:'POST',body:fd});
+  const data=await res.json();
+  if (data.secure_url) {
+    await set(ref(db,'settings/qrUrl'),data.secure_url);
+    document.getElementById('qrPlaceholder').style.display='none';
+    const img=document.getElementById('qrImg'); img.src=data.secure_url; img.style.display='block';
+    document.getElementById('qrMsg').textContent='✅ QR updated!';
+    toast('QR Code updated!');
+  }
+};
+
+// ── NOTIF ──
+window.sendNotif = async () => {
+  const title=document.getElementById('notifTitle').value.trim();
+  const msg=document.getElementById('notifMsg').value.trim();
+  if (!title||!msg) { toast('Fill both fields'); return; }
+  await set(ref(db,'notifications/latest'),{title,msg,time:Date.now()});
+  document.getElementById('notifTitle').value='';
+  document.getElementById('notifMsg').value='';
+  toast('📣 Notification sent!');
+};
+</script>
+</body>
+</html>
