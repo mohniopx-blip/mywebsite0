@@ -619,7 +619,7 @@ function openVideoModal(id){
       </div>
       <div class="likeRow">
         <button class="likeBtn ${liked?'liked':''}" id="likeBtnEl" onclick="toggleLike('${id}')">${heartIconSvg()} <span id="likeBtnCount">${v.likes?Object.keys(v.likes).length:0}</span></button>
-        <span style="font-size:12px;color:var(--muted);">${unlocked ? 'Full video unlocked' : 'Preview clip'}</span>
+        <span style="font-size:12px;color:var(--muted);">${unlocked ? 'Full video unlocked' : 'demo clip subscribe for full video '}</span>
       </div>
     </div>
   </div>`;
