@@ -361,19 +361,25 @@
 
   /* Modal */
   .modalOverlay{
-    position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
-    display:flex;align-items:flex-end;justify-content:center;z-index:200;
+    position:fixed;inset:0;background:var(--bg);
+    display:flex;align-items:stretch;justify-content:center;z-index:200;
   }
-  @media(min-width:640px){.modalOverlay{align-items:center;}}
   .modalCard{
     width:100%;max-width:480px;background:linear-gradient(180deg,var(--surface),var(--surface2));
-    border:1px solid var(--border);border-radius:20px 20px 0 0;padding:22px;max-height:92vh;overflow-y:auto;
-    animation:slideUp .3s cubic-bezier(.2,.8,.2,1);
-    box-shadow:0 -20px 60px rgba(0,0,0,0.45), 0 0 0 1px var(--hairline) inset;
+    border:none;border-radius:0;padding:22px;padding-top:calc(22px + env(safe-area-inset-top));
+    height:100vh;min-height:100dvh;overflow-y:auto;
+    animation:slideUp .25s ease;
+    box-shadow:none;
   }
-  @media(min-width:640px){.modalCard{border-radius:20px;}}
   @keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
   .modalClose{float:right;color:var(--muted);font-size:20px;padding:4px 8px;}
+  .modalScrollHint{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));
+    width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+    border:1px solid rgba(224,178,94,0.45);display:flex;align-items:center;justify-content:center;
+    z-index:210;pointer-events:none;transition:opacity .25s;
+  }
+  .modalScrollHint svg{width:17px;height:17px;color:var(--gold2);animation:bounceDown 1.4s ease-in-out infinite;stroke-width:2.5;}
   .modalTitle{font-family:'Fraunces',serif;font-size:20px;color:var(--gold2);margin-bottom:14px;}
 
   .videoPlayerWrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;}
@@ -388,6 +394,10 @@
   .planCard.selected{border-color:var(--gold);background:rgba(224,178,94,0.08);box-shadow:0 8px 22px -12px var(--glow), 0 0 0 1px var(--hairline) inset;}
   .planCard .price{font-family:'Fraunces',serif;font-size:24px;color:var(--gold2);font-weight:700;}
   .planCard .dur{font-size:12px;color:var(--muted);margin-top:4px;}
+  .planCard.demoCard{width:100%;flex:none;margin-top:10px;margin-bottom:16px;position:relative;border-color:var(--rose);background:rgba(193,66,90,0.08);box-shadow:0 8px 22px -12px rgba(193,66,90,0.35), 0 0 0 1px rgba(193,66,90,0.2) inset;}
+  .planCard.demoCard .price{color:var(--rose);}
+  .planCard.demoCard.selected{border-color:var(--rose);background:rgba(193,66,90,0.16);box-shadow:0 8px 22px -12px rgba(193,66,90,0.55), 0 0 0 1px rgba(193,66,90,0.3) inset;}
+  .demoBadgeTag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--rose);color:#fff;font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;white-space:nowrap;}
 
   /* Coupon code box */
   .couponBox{margin:2px 0 18px;padding-top:16px;border-top:1px dashed var(--border);}
@@ -559,7 +569,7 @@
   /* About / Intro Section */
   .aboutSection{
     background:linear-gradient(180deg,var(--surface),var(--surface2));
-    border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;
+    border:1px solid var(--border);border-radius:16px;padding:20px 20px 26px;margin-bottom:18px;
     box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 16px 34px -18px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline) inset;
     text-align:center;
   }
@@ -569,12 +579,12 @@
   .aboutText{font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-line;}
   .aboutText b{color:var(--gold2);font-weight:800;}
   .aboutScrollHint{
-    margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:3px;
-    color:var(--gold);opacity:0.75;cursor:pointer;
+    margin-top:22px;margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:6px;
+    color:var(--gold);opacity:1;cursor:pointer;
   }
-  .aboutScrollHint svg{width:20px;height:20px;animation:bounceDown 1.5s ease-in-out infinite;}
-  .aboutScrollHint span{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;font-weight:800;}
-  .aboutScrollHint:active{opacity:1;}
+  .aboutScrollHint svg{width:32px;height:32px;animation:bounceDown 1.5s ease-in-out infinite;stroke-width:3;}
+  .aboutScrollHint span{font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:800;}
+  .aboutScrollHint:active{opacity:0.7;}
   @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
 </style>
 </head>
@@ -861,7 +871,7 @@ function initPresence(){
 
    BOLD TEXT SUPPORT: admin panel se text likhte waqt jis part ko bold
    dikhana ho usse **do stars** ke beech me likho, e.g.
-   "Use code FIRSTTIME to unlock content for just **₹50**."
+   "Use code FIRSTTIME to unlock content for just **₹20**."
    Yeh automatically <b> (gold color, bold) me render hota hai.
 */
 function scrollToVideos(){
@@ -875,7 +885,7 @@ function bindAboutListener(){
 }
 function formatAboutText(text){
   const escaped = escapeHtml(text || '');
-  return escaped.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  return escaped.replace(/\*\*(.+?)\*\*/gs, '<b>$1</b>');
 }
 function renderAbout(data){
   const wrap = document.getElementById('aboutSection');
@@ -1412,24 +1422,37 @@ function openSubscribeModal(){
           <div class="dur">15 Days</div>
         </div>
       </div>
-      <div class="couponBox">
-        <div class="couponPromoBanner">🎉 use WELCOME50 coupon code <span style="color:var(--gold);font-size:15px;"></span> and get discount </div>
-        <label class="fieldLabel">Have a coupon code?</label>
-        <div id="activeCouponsArea" style="margin-bottom:8px;"></div>
-        <div class="couponRow">
-          <input id="couponInput" class="authInput" placeholder="Enter coupon code" maxlength="20">
-          <button class="couponApplyBtn" onclick="applyCoupon()">Apply</button>
-        </div>
-        <div id="couponMsg" class="couponMsg"></div>
+      <div class="planCard demoCard" id="plan7" onclick="selectPlan('7')">
+        <div class="demoBadgeTag">DEMO OFFER</div>
+        <div class="price">₹20</div>
+        <div class="dur">7 Days Demo Access</div>
       </div>
       <div id="qrArea"></div>
       <button class="goldBtn hidden" id="proceedBtn" onclick="proceedToPay()">Continue</button>
     </div>
   </div>`;
-  loadActiveCoupons();
+  setTimeout(attachModalScrollHint, 50);
 }
 
 function checkIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;}
+
+function attachModalScrollHint(){
+  const modal = document.getElementById('modalRoot');
+  const card = modal.querySelector('.modalCard');
+  if(!card) return;
+  const old = modal.querySelector('.modalScrollHint'); if(old) old.remove();
+  if(card.scrollHeight <= card.clientHeight + 10) return;
+  const hint = document.createElement('div');
+  hint.className = 'modalScrollHint';
+  hint.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>`;
+  modal.appendChild(hint);
+  const onScroll = ()=>{
+    const atBottom = card.scrollHeight - card.scrollTop - card.clientHeight < 20;
+    hint.style.opacity = atBottom ? '0' : '1';
+  };
+  card.addEventListener('scroll', onScroll);
+  onScroll();
+}
 
 /* ============ ACTIVE COUPON CHIPS (tap-to-fill) ============
    coupons/{CODE} jo active:true hai aur currentUser ne pehle use nahi kiya,
@@ -1470,11 +1493,8 @@ function selectPlan(p){
   appliedCoupon = null;
   document.getElementById('plan30').classList.toggle('selected', p==='30');
   document.getElementById('plan15').classList.toggle('selected', p==='15');
+  document.getElementById('plan7').classList.toggle('selected', p==='7');
   document.getElementById('proceedBtn').classList.remove('hidden');
-  const couponInput = document.getElementById('couponInput');
-  const couponMsg = document.getElementById('couponMsg');
-  if(couponInput) couponInput.value = '';
-  if(couponMsg){ couponMsg.textContent = ''; couponMsg.className = 'couponMsg'; }
 }
 
 async function applyCoupon(){
@@ -1535,7 +1555,7 @@ async function proceedToPay(){
   });
   const settingsSnap = await db.ref('settings').once('value');
   const settings = settingsSnap.val() || {};
-  const amount = appliedCoupon ? appliedCoupon.amount : (selectedPlan==='30' ? 799 : 399);
+  const amount = appliedCoupon ? appliedCoupon.amount : (selectedPlan==='30' ? 799 : selectedPlan==='15' ? 399 : 20);
   const qrArea = document.getElementById('qrArea');
   qrArea.innerHTML = `
     <div class="qrBox">
@@ -1549,6 +1569,7 @@ async function proceedToPay(){
     <button class="goldBtn" id="submitPaymentBtn" onclick="submitPayment(${amount})">Submit for Approval</button>
   `;
   document.getElementById('proceedBtn').classList.add('hidden');
+  setTimeout(attachModalScrollHint, 50);
 }
 
 function expandIconSvg(){return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>`;}
@@ -1597,10 +1618,8 @@ async function submitPayment(amount){
   }
 
   const payId = db.ref('payments').push().key;
-  const days = appliedCoupon ? appliedCoupon.days : (selectedPlan==='30' ? 30 : 15);
-  const planLabel = appliedCoupon
-    ? (appliedCoupon.days + ' Days (Coupon: ' + appliedCoupon.code + ')')
-    : (selectedPlan==='30' ? '30 Days' : '15 Days');
+  const days = appliedCoupon ? appliedCoupon.days : (selectedPlan==='30' ? 30 : selectedPlan==='15' ? 15 : 7);
+  const planLabel = selectedPlan==='30' ? '30 Days' : selectedPlan==='15' ? '15 Days' : '7 Days Demo';
   db.ref('payments/'+payId).set({
     username: currentUser,
     plan: planLabel,
