@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VIBE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0e;
+    --surface:#151318;
+    --surface2:#1d1a22;
+    --border:#2b2733;
+    --gold:#e0b25e;
+    --gold2:#f4d998;
+    --rose:#c1425a;
+    --text:#f2ede4;
+    --muted:#9a94a6;
+    --live:#e14b5a;
+    --glow: rgba(224,178,94,0.35);
+    --glass: rgba(21,19,24,0.62);
+    --hairline: rgba(224,178,94,0.22);
+  }
+  body.light-theme{
+    --bg:#f7f5f0;
+    --surface:#ffffff;
+    --surface2:#f1ede4;
+    --border:#e3ddd0;
+    --gold:#b5862f;
+    --gold2:#8f6a25;
+    --rose:#c1425a;
+    --text:#211d14;
+    --muted:#78715f;
+    --live:#e14b5a;
+    --glow: rgba(181,134,47,0.28);
+    --glass: rgba(255,255,255,0.66);
+    --hairline: rgba(181,134,47,0.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:radial-gradient(ellipse at top, #17141c 0%, #0b0b0e 55%);
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    transition:background .25s ease, color .25s ease;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    position:relative;
+  }
+  body.light-theme{
+    background:radial-gradient(ellipse at top, #ffffff 0%, #f7f5f0 55%);
+  }
+  body::before, body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(90px);opacity:0.16;
+  }
+  body::before{
+    width:340px;height:340px;top:-100px;right:-80px;
+    background:radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    animation:driftA 22s ease-in-out infinite;
+  }
+  body::after{
+    width:300px;height:300px;bottom:10vh;left:-100px;
+    background:radial-gradient(circle, var(--rose) 0%, transparent 70%);
+    animation:driftB 26s ease-in-out infinite;
+  }
+  body.light-theme::before, body.light-theme::after{opacity:0.10;}
+  @keyframes driftA{0%,100%{transform:translate(0,0);}50%{transform:translate(-30px,40px);}}
+  @keyframes driftB{0%,100%{transform:translate(0,0);}50%{transform:translate(30px,-30px);}}
+  #loadingScreen, #authScreen, #appShell, #blockedScreen{position:relative;z-index:1;}
+  ::selection{background:var(--gold);color:#000;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input{font-family:inherit;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-thumb{background:#3a3542;border-radius:4px;}
+
+  .hidden{display:none !important;}
+
+  /* ---------- Loading ---------- */
+  #loadingScreen{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);z-index:9999;flex-direction:column;gap:14px;
+  }
+  .brandmark{font-family:'Fraunces',serif;font-size:38px;letter-spacing:3px;color:var(--gold);font-weight:600;text-shadow:0 0 24px var(--glow);}
+  .brandmark span{color:var(--text);}
+  .spinner{width:26px;height:26px;border-radius:50%;border:2px solid #2b2733;border-top-color:var(--gold);animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- Auth ---------- */
+  #authScreen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .authCard{
+    width:100%;max-width:380px;background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:1px solid var(--border);border-radius:18px;padding:36px 28px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline) inset, 0 1px 0 rgba(255,255,255,0.04) inset;
+  }
+  .authCard .brandmark{text-align:center;margin-bottom:6px;}
+  .authSub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:0.5px;text-transform:uppercase;}
+  .fieldLabel{font-size:12px;color:var(--muted);margin-bottom:8px;display:block;letter-spacing:0.3px;}
+  .authInput{
+    width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--border);
+    background:#0f0d13;color:var(--text);font-size:15px;outline:none;transition:border-color .2s;
+  }
+  .authInput:focus{border-color:var(--gold);}
+  .goldBtn{
+    width:100%;margin-top:20px;padding:14px;border-radius:10px;
+    background:linear-gradient(135deg,var(--gold2),var(--gold));
+    color:#1a1408;font-weight:700;font-size:15px;letter-spacing:0.3px;
+    transition:transform .15s, box-shadow .15s;
+    position:relative;overflow:hidden;
+    box-shadow:0 10px 24px -8px var(--glow);
+  }
+  .goldBtn::before{
+    content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-20deg);animation:foilSweep 3.2s ease-in-out infinite;
+  }
+  @keyframes foilSweep{0%{left:-60%;}45%,100%{left:130%;}}
+  .goldBtn:active{transform:scale(0.97);box-shadow:0 4px 14px -6px var(--glow);}
+  .authMsg{margin-top:14px;font-size:13px;text-align:center;min-height:16px;}
+  .authMsg.err{color:var(--rose);}
+  .authMsg.ok{color:#7fd99a;}
+  .blockedMsg{color:var(--rose);text-align:center;padding:40px 20px;font-size:15px;}
+
+  /* ---------- App Shell ---------- */
+  #appShell{min-height:100vh;padding-bottom:78px;}
+  header.topbar{
+    position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 20px;background:var(--glass);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);
+    border-bottom:1px solid transparent;
+    background-image:linear-gradient(var(--glass),var(--glass)), linear-gradient(90deg, transparent, var(--hairline) 50%, transparent);
+    background-origin:border-box;background-clip:padding-box, border-box;
+  }
+  header.topbar .brandmark{font-size:22px;}
+  .headerRight{display:flex;align-items:center;gap:10px;}
+  .themeToggleBtn{
+    width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:transform .15s;
+  }
+  .themeToggleBtn:active{transform:scale(0.88);}
+  .userChip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  .userChip b{color:var(--gold);font-weight:700;}
+  .subBadge{font-size:10px;padding:3px 8px;border-radius:20px;background:#1f2a1f;color:#7fd99a;border:1px solid #2c3d2c;font-weight:700;letter-spacing:0.3px;}
+  .subBadge.locked{background:#2a1d22;color:var(--rose);border-color:#3d2a30;}
+  body.light-theme .subBadge{background:#e3f5e6;color:#2f8c47;border-color:#c9ead0;}
+  body.light-theme .subBadge.locked{background:#fbe4e8;color:var(--rose);border-color:#f2c9d0;}
+
+  main{padding:20px;max-width:900px;margin:0 auto;}
+  .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--gold);opacity:0.85;margin-bottom:4px;display:block;}
+  .sectionTitle{font-family:'Fraunces',serif;font-size:23px;margin-bottom:16px;color:var(--gold2);letter-spacing:0.3px;}
+
+  .topSubscribeBar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(135deg, rgba(224,178,94,0.16), rgba(193,66,90,0.12));
+    border:1px solid var(--gold);border-radius:14px;padding:14px 16px;margin-bottom:18px;
+    box-shadow:0 14px 34px -18px var(--glow), 0 0 0 1px var(--hairline) inset;
+  }
+  body.light-theme .topSubscribeBar{background:linear-gradient(135deg, rgba(181,134,47,0.12), rgba(193,66,90,0.08));}
+  .tsbText{min-width:0;}
+  .tsbTitle{font-weight:800;font-size:14px;color:var(--gold2);margin-bottom:2px;}
+  .tsbSub{font-size:11px;color:var(--muted);}
+  .tsbBtn{
+    background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1408;font-weight:800;
+    font-size:13px;padding:11px 18px;border-radius:10px;flex-shrink:0;transition:transform .15s;
+    position:relative;overflow:hidden;box-shadow:0 8px 18px -8px var(--glow);
+  }
+  .tsbBtn::before{
+    content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-20deg);animation:foilSweep 3.2s ease-in-out infinite;
+  }
+  .tsbBtn:active{transform:scale(0.94);}
+
+  /* Video grid */
+  .videoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+  .vCard{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+    transition:transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s, border-color .18s;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 14px 30px -14px rgba(0,0,0,0.55);
+  }
+  .vCard:active{transform:scale(0.96);box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 6px 16px -8px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline);}
+  .vThumbWrap{position:relative;aspect-ratio:9/13;background:#1a1720;overflow:hidden;}
+  .vThumbWrap img{width:100%;height:100%;object-fit:cover;display:block;}
+  .lockTag{
+    position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+    border:1px solid rgba(224,178,94,0.4);border-radius:20px;padding:4px 9px;font-size:11px;
+    display:flex;align-items:center;gap:4px;color:var(--gold2);
+  }
+  .playOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,0.75) 100%);
+  }
+  .playOverlay svg{width:38px;height:38px;opacity:0.9;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));}
+  .previewRibbon{
+    position:absolute;bottom:8px;left:8px;right:8px;
+    background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);border:1px solid rgba(224,178,94,0.35);
+    border-radius:8px;padding:5px 8px;font-size:9.5px;font-weight:700;color:var(--gold2);
+    display:flex;align-items:center;gap:4px;letter-spacing:0.2px;
+  }
+  .previewRibbon svg{width:10px;height:10px;flex-shrink:0;}
+  .previewBanner{
+    display:flex;align-items:flex-start;gap:9px;background:rgba(224,178,94,0.08);
+    border:1px solid rgba(224,178,94,0.3);border-radius:10px;padding:11px 13px;margin-bottom:12px;
+    font-size:12.5px;color:var(--muted);line-height:1.5;
+  }
+  .previewBanner svg{width:16px;height:16px;flex-shrink:0;color:var(--gold);margin-top:1px;}
+  .previewBanner b{color:var(--gold2);}
+  .vMeta{padding:10px 12px;}
+  .vTitle{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .vStats{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;}
+
+  /* Linked demo <-> full video tags */
+  .fullVideoLinkTag{
+    width:100%;margin-top:8px;padding:7px 8px;border-radius:8px;
+    background:rgba(224,178,94,0.1);border:1px solid rgba(224,178,94,0.35);
+    color:var(--gold2);font-size:10.5px;font-weight:700;letter-spacing:0.2px;
+    display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;line-height:1.3;
+  }
+  .fullVideoLinkTag svg{width:11px;height:11px;flex-shrink:0;}
+  .fullVideoLinkTag:active{transform:scale(0.97);}
+  .demoLinkTag{
+    width:100%;margin-top:8px;padding:7px 8px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+    color:var(--gold2);font-size:10.5px;font-weight:700;letter-spacing:0.2px;
+    display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;
+  }
+  .demoLinkTag svg{width:11px;height:11px;flex-shrink:0;}
+  .demoLinkTag:active{transform:scale(0.97);}
+
+  /* Stories */
+  .storyRow{
+    display:flex;gap:14px;padding:12px 16px 14px;overflow-x:auto;
+    background:var(--glass);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);
+    border-bottom:1px solid var(--hairline);position:sticky;top:65px;z-index:45;
+  }
+  .storyItem{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;position:relative;}
+  .storyRing{width:70px;height:70px;border-radius:50%;padding:3px;background:conic-gradient(from 0deg, var(--gold2), var(--rose), var(--gold), var(--gold2));
+    animation:storyPulse 1.8s ease-in-out infinite;}
+  @keyframes storyPulse{
+    0%{box-shadow:0 0 0 0 rgba(224,178,94,0.55);}
+    70%{box-shadow:0 0 0 12px rgba(224,178,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(224,178,94,0);}
+  }
+  .storyRing.seen{background:var(--border);animation:none;}
+  .storyRingInner{width:100%;height:100%;border-radius:50%;background:var(--bg);padding:2px;}
+  .storyAvatar{width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:#1a1408;}
+  .storyTapBadge{
+    position:absolute;bottom:20px;right:-2px;width:22px;height:22px;border-radius:50%;
+    background:var(--rose);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;
+    animation:bounceDown 1.2s ease-in-out infinite;
+  }
+  .storyTapBadge svg{width:11px;height:11px;color:#fff;}
+  .storyLabel{font-size:10.5px;color:var(--gold2);font-weight:800;max-width:70px;text-align:center;}
+  .storyHint{font-size:9px;color:var(--rose);font-weight:800;letter-spacing:0.3px;text-transform:uppercase;max-width:70px;text-align:center;}
+  .storyViewerOverlay{position:fixed;inset:0;background:#000;z-index:350;display:flex;flex-direction:column;}
+  .storyProgressRow{display:flex;gap:4px;padding:10px 10px 0;flex-shrink:0;}
+  .storyProgressBar{flex:1;height:2.5px;background:rgba(255,255,255,0.3);border-radius:2px;overflow:hidden;}
+  .storyProgressFill{height:100%;width:0%;background:#fff;}
+  .storyViewerTop{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;flex-shrink:0;}
+  .storyViewerTop .left{display:flex;align-items:center;gap:9px;}
+  .storyViewerAvatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:13px;color:#1a1408;}
+  .storyViewerName{color:#fff;font-size:13px;font-weight:700;}
+  .storyViewerTime{color:rgba(255,255,255,0.6);font-size:11px;}
+  .storyViewerClose{color:#fff;font-size:24px;padding:4px 8px;}
+  .storyViewerStage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .storyViewerStage img, .storyViewerStage video{max-width:100%;max-height:100%;object-fit:contain;}
+  .storyTapZone{position:absolute;top:0;bottom:0;width:35%;z-index:2;}
+  .storyTapZone.left{left:0;} .storyTapZone.right{right:0;}
+  .storyCaption{position:absolute;bottom:24px;left:16px;right:16px;color:#fff;font-size:14px;text-align:center;background:rgba(0,0,0,0.4);padding:10px 14px;border-radius:12px;backdrop-filter:blur(4px);}
+
+  /* Live section */
+  .liveGrid{display:flex;flex-direction:column;gap:12px;}
+  .liveCard{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 26px -16px rgba(0,0,0,0.5);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .liveCard:active{transform:scale(0.98);}
+  .liveThumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;background:#1a1720;position:relative;overflow:hidden;}
+  .liveThumb img{width:100%;height:100%;object-fit:cover;}
+  .liveDot{position:absolute;top:6px;left:6px;background:var(--live);color:#fff;font-size:9px;font-weight:800;
+    padding:2px 6px;border-radius:4px;letter-spacing:0.5px;animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}
+  .liveInfo{flex:1;min-width:0;}
+  .liveInfo .t{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .liveInfo .s{font-size:12px;color:var(--muted);}
+  .liveGo{padding:9px 14px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--gold2);white-space:nowrap;}
+  .liveGo.now{background:var(--live);color:#fff;border-color:var(--live);}
+  .countdownTxt{color:var(--gold2);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0.3px;}
+
+  /* Completed shows */
+  .completedSectionTitle{font-family:'Fraunces',serif;font-size:18px;margin:26px 0 12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .completedGrid{display:flex;flex-direction:column;gap:10px;}
+  .completedCard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;opacity:0.85;}
+  .completedThumb{width:56px;height:56px;border-radius:10px;flex-shrink:0;background:#1a1720;object-fit:cover;filter:grayscale(0.3);}
+  .completedInfo{flex:1;min-width:0;}
+  .completedInfo .t{font-size:13px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .completedInfo .d{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .completedStats{display:flex;gap:12px;font-size:11px;color:var(--muted);}
+  .completedStats span{display:flex;align-items:center;gap:4px;}
+  .completedStats svg{width:12px;height:12px;}
+  .completedPill{font-size:9px;padding:3px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);font-weight:700;letter-spacing:0.4px;flex-shrink:0;}
+
+  .emptyState{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px;}
+
+  /* Full Length Videos section */
+  .fullVideoSectionTitle{font-family:'Fraunces',serif;font-size:18px;margin:30px 0 14px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .fullVideoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+  .fvCard{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .15s;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 14px 30px -14px rgba(0,0,0,0.55);}
+  .fvCard:active{transform:scale(0.96);}
+  .fvThumbWrap{position:relative;aspect-ratio:9/13;background:#1a1720;overflow:hidden;}
+  .fvThumbWrap img{width:100%;height:100%;object-fit:cover;display:block;filter:blur(6px) brightness(0.55);transform:scale(1.08);}
+  .fvLockCenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .fvLockCenter .lockCircle{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
+    border:1px solid rgba(224,178,94,0.4);display:flex;align-items:center;justify-content:center;}
+  .fvLockCenter .lockCircle svg{width:19px;height:19px;color:var(--gold2);}
+  .fvLockCenter .fvHint{font-size:10.5px;color:var(--gold2);font-weight:700;letter-spacing:0.3px;background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:20px;}
+  .fvDurBadge{
+    position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
+    border:1px solid rgba(224,178,94,0.35);border-radius:20px;padding:4px 9px;font-size:11px;font-weight:700;
+    color:var(--gold2);display:flex;align-items:center;gap:4px;
+  }
+  .fvDurBadge svg{width:11px;height:11px;}
+  .fvMeta{padding:10px 12px;}
+  .fvTitle{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* Bottom nav */
+  nav.bottomNav{
+    position:fixed;bottom:0;left:0;right:0;z-index:60;
+    background:var(--glass);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+    border-top:1px solid transparent;
+    background-image:linear-gradient(var(--glass),var(--glass)), linear-gradient(90deg, transparent, var(--hairline) 50%, transparent);
+    background-origin:border-box;background-clip:padding-box, border-box;
+    display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom));
+    overflow-x:auto;
+  }
+  .navBtn{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;color:var(--muted);letter-spacing:0.2px;flex:1;min-width:52px;padding:6px 2px;position:relative;transition:color .2s;}
+  .navBtn svg{width:19px;height:19px;transition:transform .2s;}
+  .navBtn.active{color:var(--gold);}
+  .navBtn.active svg{transform:translateY(-1px);filter:drop-shadow(0 0 6px var(--glow));}
+  .navBtn.active::before{
+    content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:26px;height:3px;
+    background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:0 0 4px 4px;
+  }
+  .navBadgeDot{position:absolute;margin-left:12px;margin-top:-2px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid var(--bg);}
+
+  /* Real Meet */
+  .rmIntro{color:var(--muted);font-size:13px;margin-bottom:18px;line-height:1.5;}
+  .rmCategoryGrid{display:flex;gap:12px;}
+  .rmCategoryCard{flex:1;border:1.5px solid var(--border);border-radius:14px;padding:26px 12px;text-align:center;background:var(--surface);transition:.15s;}
+  .rmCategoryCard:active{transform:scale(0.96);border-color:var(--gold);}
+  .rmCategoryCard .ico{font-size:30px;margin-bottom:10px;}
+  .rmCategoryCard .lbl{font-weight:700;font-size:14px;}
+  .rmBackLink{color:var(--muted);font-size:12px;margin-bottom:12px;display:inline-block;}
+  .rmPhotoUpload{width:100%;border:1.5px dashed var(--border);border-radius:12px;padding:18px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:14px;background:var(--surface2);display:block;}
+  .rmPhotoUpload img{width:76px;height:76px;object-fit:cover;border-radius:10px;margin:0 auto 8px;display:block;}
+
+  /* Private chat */
+  .privateChatWrap{display:flex;flex-direction:column;height:calc(100vh - 232px);min-height:320px;}
+  .privateChatMessages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 12px;}
+  .pcMsg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.4;}
+  .pcMsg.fromUser{align-self:flex-end;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1408;border-bottom-right-radius:4px;}
+  .pcMsg.fromAdmin{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;}
+  .pcMsg img{max-width:100%;border-radius:10px;margin-top:6px;display:block;}
+  .pcMsgTime{font-size:10px;opacity:0.6;margin-top:4px;}
+  .privateChatInputRow{display:flex;align-items:center;gap:8px;padding:10px 2px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);flex-shrink:0;}
+  .privateChatInputRow input[type=text]{flex:1;padding:12px 16px;border-radius:24px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;}
+  .privateChatImgBtn{width:40px;height:40px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:18px;}
+  .privateChatSendBtn{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--gold2),var(--rose));display:flex;align-items:center;justify-content:center;}
+  .privateChatSendBtn svg{width:17px;height:17px;color:#1a1408;}
+  .privateChatImgPreview{font-size:11px;color:var(--gold2);padding:0 2px 6px;display:none;}
+
+  .tabPage{display:none;}
+  .tabPage.active{display:block;}
+
+  /* Profile */
+  .profileCard{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 20px 40px -20px rgba(0,0,0,0.5);
+  }
+  .avatarCircle{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));
+    display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:#1a1408;
+    box-shadow:0 0 0 4px var(--surface2), 0 0 0 5px var(--hairline), 0 10px 26px -10px var(--glow);}
+  .profileName{font-size:18px;font-weight:700;margin-bottom:4px;}
+  .profileSince{color:var(--muted);font-size:12px;margin-bottom:16px;}
+  .planRow{display:flex;justify-content:space-between;padding:12px 16px;background:var(--surface2);border-radius:10px;font-size:13px;margin-bottom:10px;}
+  .planRow .l{color:var(--muted);}
+  .notSubText{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    font-size:12px;color:var(--rose);background:rgba(193,66,90,0.1);border:1px solid rgba(193,66,90,0.25);
+    border-radius:9px;padding:9px 12px;margin-bottom:14px;font-weight:600;
+  }
+  .notSubText svg{width:14px;height:14px;flex-shrink:0;}
+  .logoutBtn{margin-top:8px;color:var(--rose);font-size:13px;font-weight:600;padding:10px;}
+
+  /* Modal */
+  .modalOverlay{
+    position:fixed;inset:0;background:var(--bg);
+    display:flex;align-items:stretch;justify-content:center;z-index:200;
+  }
+  .modalCard{
+    width:100%;max-width:480px;background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:none;border-radius:0;padding:22px;padding-top:calc(22px + env(safe-area-inset-top));
+    height:100vh;min-height:100dvh;overflow-y:auto;
+    animation:slideUp .25s ease;
+    box-shadow:none;
+  }
+  @keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .modalClose{float:right;color:var(--muted);font-size:20px;padding:4px 8px;}
+  .modalScrollHint{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));
+    width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+    border:1px solid rgba(224,178,94,0.45);display:flex;align-items:center;justify-content:center;
+    z-index:210;pointer-events:none;transition:opacity .25s;
+  }
+  .modalScrollHint svg{width:17px;height:17px;color:var(--gold2);animation:bounceDown 1.4s ease-in-out infinite;stroke-width:2.5;}
+  .modalTitle{font-family:'Fraunces',serif;font-size:20px;color:var(--gold2);margin-bottom:14px;}
+
+  .videoPlayerWrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+  video{width:100%;display:block;max-height:70vh;background:#000;}
+  .likeRow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .likeBtn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:13px;}
+  .likeBtn.liked{color:var(--rose);border-color:var(--rose);}
+  .likeBtn svg{width:16px;height:16px;}
+
+  .planOptions{display:flex;gap:10px;margin-bottom:16px;}
+  .planCard{flex:1;border:1.5px solid var(--border);border-radius:12px;padding:16px 10px;text-align:center;transition:.15s;}
+  .planCard.selected{border-color:var(--gold);background:rgba(224,178,94,0.08);box-shadow:0 8px 22px -12px var(--glow), 0 0 0 1px var(--hairline) inset;}
+  .planCard .price{font-family:'Fraunces',serif;font-size:24px;color:var(--gold2);font-weight:700;}
+  .planCard .dur{font-size:12px;color:var(--muted);margin-top:4px;}
+  .planCard.demoCard{width:100%;flex:none;margin-top:10px;margin-bottom:16px;position:relative;border-color:var(--rose);background:rgba(193,66,90,0.08);box-shadow:0 8px 22px -12px rgba(193,66,90,0.35), 0 0 0 1px rgba(193,66,90,0.2) inset;}
+  .planCard.demoCard .price{color:var(--rose);}
+  .planCard.demoCard.selected{border-color:var(--rose);background:rgba(193,66,90,0.16);box-shadow:0 8px 22px -12px rgba(193,66,90,0.55), 0 0 0 1px rgba(193,66,90,0.3) inset;}
+  .demoBadgeTag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--rose);color:#fff;font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;white-space:nowrap;}
+
+  /* Coupon code box */
+  .couponBox{margin:2px 0 18px;padding-top:16px;border-top:1px dashed var(--border);}
+.couponPromoBanner{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg, rgba(224,178,94,0.18), rgba(193,66,90,0.1));
+  border:1px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:14px;
+  font-size:13px;font-weight:700;color:var(--gold2);line-height:1.4;
+}
+.couponPromoBanner svg{width:18px;height:18px;flex-shrink:0;color:var(--gold);}
+  .couponBox .fieldLabel{margin-bottom:8px;}
+  .couponChip{
+    display:inline-flex;align-items:center;gap:5px;background:rgba(224,178,94,0.1);
+    border:1px solid rgba(224,178,94,0.35);color:var(--gold2);font-size:11.5px;font-weight:700;
+    padding:7px 12px;border-radius:20px;margin-right:6px;margin-bottom:8px;
+  }
+  .couponChip:active{transform:scale(0.94);}
+  .couponRow{display:flex;gap:8px;}
+  .couponRow .authInput{flex:1;text-transform:uppercase;}
+  .couponApplyBtn{
+    width:auto;flex-shrink:0;padding:0 18px;border-radius:10px;
+    background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1408;
+    font-weight:800;font-size:13px;letter-spacing:0.3px;
+    box-shadow:0 8px 18px -8px var(--glow);transition:transform .15s;
+  }
+  .couponApplyBtn:active{transform:scale(0.94);}
+  .couponMsg{margin-top:10px;font-size:12.5px;min-height:14px;}
+  .couponMsg.err{color:var(--rose);}
+  .couponMsg.ok{color:#7fd99a;font-weight:700;}
+
+  .benefitsList{margin-bottom:18px;padding:14px 16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);}
+  .benefitItem{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);padding:6px 0;}
+  .benefitItem svg{width:15px;height:15px;color:var(--gold);flex-shrink:0;}
+
+  .qrBox{text-align:center;padding:14px;background:var(--surface2);border-radius:14px;margin-bottom:14px;}
+  .qrBox img{width:190px;height:190px;object-fit:contain;border-radius:10px;background:#fff;padding:8px;cursor:zoom-in;}
+  .qrTapHint{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .qrFullscreenOverlay{position:fixed;inset:0;background:rgba(5,5,7,0.97);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+  .qrFullscreenOverlay img{width:min(88vw,420px);height:min(88vw,420px);object-fit:contain;background:#fff;border-radius:16px;padding:16px;}
+  .qrFullscreenClose{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text);}
+  .qrFullscreenText{margin-top:18px;font-size:14px;color:var(--muted);text-align:center;}
+  .qrFullscreenText b{color:var(--gold2);}
+  .upiText{font-size:13px;color:var(--muted);margin-top:10px;}
+  .upiText b{color:var(--text);}
+
+  .pendingBox{text-align:center;padding:30px 16px;}
+  .pendingBox .ico{font-size:34px;margin-bottom:10px;}
+
+  .teaserBox{text-align:center;padding:10px 6px 6px;}
+  .teaserBox .teaserIco{width:60px;height:60px;border-radius:50%;background:rgba(224,178,94,0.12);border:1px solid rgba(224,178,94,0.35);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  .teaserBox .teaserIco svg{width:26px;height:26px;color:var(--gold2);}
+  .teaserBox .teaserTitle{font-family:'Fraunces',serif;font-size:19px;color:var(--gold2);margin-bottom:8px;}
+  .teaserBox .teaserSub{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:18px;}
+  .teaserDur{
+    display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;color:var(--gold2);margin-bottom:22px;
+  }
+  .teaserDur svg{width:14px;height:14px;}
+
+  .depositNote{
+    background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--gold);
+    border-radius:10px;padding:14px 16px;margin-bottom:16px;
+  }
+  .depositNote .dnTitle{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13px;color:var(--gold2);margin-bottom:6px;}
+  .depositNote .dnTitle svg{width:15px;height:15px;flex-shrink:0;}
+  .depositNote ul{margin:0;padding-left:18px;}
+  .depositNote li{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:3px;}
+  .depositNote li b{color:var(--text);}
+
+  /* Live viewer */
+  .liveViewerWrap{display:flex;flex-direction:column;height:80vh;max-height:640px;}
+  .chatBox{flex:1;overflow-y:auto;padding:10px 4px;display:flex;flex-direction:column;gap:8px;}
+  .chatMsg{font-size:13px;line-height:1.4;}
+  .chatMsg b{color:var(--gold2);margin-right:6px;}
+  .chatInputRow{display:flex;gap:8px;padding-top:10px;border-top:1px solid var(--border);}
+  .chatInputRow input{flex:1;padding:11px 14px;border-radius:20px;border:1px solid var(--border);background:#0f0d13;color:var(--text);font-size:13px;}
+  .chatInputRow button{padding:10px 16px;border-radius:20px;background:var(--gold);color:#1a1408;font-weight:700;font-size:13px;}
+  .memberCount{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:8px;}
+  .liveStageWrap{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+  .liveStageWrap video{width:100%;display:block;max-height:60vh;background:#000;pointer-events:none;}
+  .liveBadgeOverlay{position:absolute;top:10px;left:10px;background:var(--live);color:#fff;font-size:10px;font-weight:800;
+    padding:4px 9px 4px 7px;border-radius:6px;display:flex;align-items:center;gap:5px;letter-spacing:0.5px;z-index:2;}
+  .liveBadgeOverlay .dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite;}
+  .stageBtn{position:absolute;bottom:10px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.55);
+    backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;}
+  .stageBtn svg{width:16px;height:16px;color:#fff;}
+  #muteToggleBtn{right:52px;}
+  #fsToggleBtn{right:10px;}
+  .countdownBig{text-align:center;padding:40px 10px;}
+  .countdownBig .num{font-family:'Fraunces',serif;font-size:52px;color:var(--gold);}
+
+  /* ---------- Full-screen live experience ---------- */
+  .liveFull{position:fixed;inset:0;z-index:300;background:#000;display:flex;flex-direction:column;}
+  .liveFullTop{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;background:#0d0d10;flex-shrink:0;}
+  .liveFullTop .left{display:flex;flex-direction:column;gap:2px;}
+  .liveFullTop .titleTxt{font-size:14px;font-weight:700;}
+  .liveFullTop .subRow{display:flex;align-items:center;gap:8px;}
+  .liveBadgePill{background:var(--live);color:#fff;font-size:10px;font-weight:800;padding:4px 9px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+  .liveBadgePill .dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite;}
+  .watchingPill{background:var(--surface2);color:var(--muted);font-size:11px;padding:4px 9px;border-radius:20px;display:flex;align-items:center;gap:4px;}
+  .homeBtn{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;padding:8px 14px;border-radius:20px;font-weight:600;flex-shrink:0;}
+
+  .liveFullStage{position:relative;flex-shrink:0;background:#000;overflow:hidden;height:40vh;min-height:220px;}
+  .liveFullStage video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+  .stageTimerPill{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);color:var(--text);
+    font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:0.5px;z-index:2;font-variant-numeric:tabular-nums;}
+
+  .reactionRow{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;flex-shrink:0;background:#0b0b0e;}
+  .reactionChip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:20px;padding:8px 13px;font-size:13px;flex-shrink:0;transition:transform .12s;}
+  .reactionChip:active{transform:scale(0.9);}
+  .reactionChip .cnt{color:var(--muted);font-size:12px;font-weight:700;}
+
+  .liveChatLabel{display:flex;align-items:center;gap:7px;padding:6px 14px 10px;color:var(--gold2);font-size:12px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;}
+  .liveFullChat{flex:1;overflow-y:auto;padding:2px 14px;display:flex;flex-direction:column;gap:12px;min-height:0;}
+  .chatRow{display:flex;gap:9px;align-items:flex-start;}
+  .chatAvatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;color:#1a1408;flex-shrink:0;}
+  .chatBody .cname{font-size:12px;font-weight:700;margin-bottom:2px;}
+  .chatBody .ctext{font-size:13px;color:var(--text);line-height:1.3;}
+
+  .liveFullInputRow{display:flex;align-items:center;gap:9px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:#0d0d10;border-top:1px solid var(--border);flex-shrink:0;}
+  .liveFullInputRow input{flex:1;padding:12px 16px;border-radius:24px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;}
+  .sendCircleBtn{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--gold2),var(--rose));
+    display:flex;align-items:center;justify-content:center;}
+  .sendCircleBtn svg{width:17px;height:17px;color:#1a1408;}
+
+  /* ---------- Skeleton Loaders ---------- */
+  @keyframes shimmer{0%{background-position:-450px 0;}100%{background-position:450px 0;}}
+  .skeleton{
+    background:linear-gradient(90deg, var(--surface) 25%, var(--surface2) 37%, var(--surface) 63%);
+    background-size:800px 100%;
+    animation:shimmer 1.4s linear infinite;
+    border:1px solid var(--border);
+  }
+  .skelVCard{border-radius:14px;overflow:hidden;}
+  .skelVCard .skelThumb{aspect-ratio:9/13;}
+  .skelVCard .skelMeta{padding:10px 12px;}
+  .skelLine{height:10px;border-radius:5px;margin-bottom:6px;}
+  .skelLiveCard{border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);}
+  .skelLiveThumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;}
+  .skelLiveInfo{flex:1;}
+  .skelPcMsg{height:38px;border-radius:14px;margin-bottom:10px;}
+  .skelPcMsg.left{width:60%;}
+  .skelPcMsg.right{width:50%;margin-left:auto;}
+
+  /* ---------- Onboarding ---------- */
+  .onboardingOverlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);z-index:400;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .onboardingCard{
+    width:100%;max-width:360px;background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:1px solid var(--border);border-radius:20px;padding:32px 26px;text-align:center;
+    animation:slideUp .25s ease;
+  }
+  .obStepDots{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+  .obStepDots span{width:6px;height:6px;border-radius:50%;background:var(--border);transition:.2s;}
+  .obStepDots span.active{background:var(--gold);width:18px;border-radius:4px;}
+  .obIcon{font-size:40px;margin-bottom:14px;}
+  .obTitle{font-family:'Fraunces',serif;font-size:19px;color:var(--gold2);margin-bottom:8px;}
+  .obDesc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:26px;}
+  .obBtnRow{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .obSkip{color:var(--muted);font-size:13px;font-weight:600;padding:10px;flex-shrink:0;}
+  .obNextBtn{width:auto;margin-top:0;padding:12px 26px;flex-shrink:0;}
+
+  /* About / Intro Section */
+  .aboutSection{
+    background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:1px solid var(--border);border-radius:16px;padding:20px 20px 26px;margin-bottom:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 16px 34px -18px rgba(0,0,0,0.5), 0 0 0 1px var(--hairline) inset;
+    text-align:center;
+  }
+  .aboutImg{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:0 auto 14px;
+    border:2px solid var(--gold);box-shadow:0 0 0 4px var(--surface2), 0 10px 26px -10px var(--glow);}
+  .aboutTitle{font-family:'Fraunces',serif;font-size:19px;color:var(--gold2);margin-bottom:8px;letter-spacing:0.3px;}
+  .aboutText{font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-line;}
+  .aboutText b{color:var(--gold2);font-weight:800;}
+  .aboutScrollHint{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(78px + 14px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    border:1px solid rgba(224,178,94,0.45);border-radius:20px;padding:8px 18px;
+    color:var(--gold2);opacity:1;cursor:pointer;z-index:40;transition:opacity .2s;
+  }
+  .aboutScrollHint svg{width:20px;height:20px;animation:bounceDown 1.5s ease-in-out infinite;stroke-width:3;}
+  .aboutScrollHint span{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;font-weight:800;}
+  .aboutScrollHint:active{opacity:0.7;}
+  .aboutScrollHint.hide{opacity:0;pointer-events:none;}
+  @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen">
+  <div class="brandmark">VI<span>BE</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- AUTH -->
+<div id="authScreen" class="hidden">
+  <div class="authCard">
+    <div class="brandmark">VI<span>BE</span></div>
+    <div class="authSub">Premium Content</div>
+    <label class="fieldLabel">Choose a username</label>
+    <input id="usernameInput" class="authInput" placeholder="e.g. midnight_rider" maxlength="24" autocomplete="off">
+    <button class="goldBtn" id="enterBtn">Enter VIBE</button>
+    <div id="authMsg" class="authMsg"></div>
+  </div>
+</div>
+
+<!-- BLOCKED -->
+<div id="blockedScreen" class="hidden">
+  <div class="blockedMsg">
+    <div class="brandmark" style="margin-bottom:20px;">VI<span>BE</span></div>
+    This account has been blocked.<br>Contact support if you think this is a mistake.
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appShell" class="hidden">
+  <header class="topbar">
+    <div class="brandmark" style="font-size:20px;">VI<span>BE</span></div>
+    <div class="headerRight">
+      <button class="themeToggleBtn" id="themeToggleBtn" title="Toggle theme">🌙</button>
+      <div class="userChip">
+        <b id="userChipName"></b>
+        <span id="subBadge" class="subBadge">Locked</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="storyRow hidden" id="storyRow"></div>
+
+  <main>
+    <!-- VIDEOS TAB -->
+    <div class="tabPage active" id="tab-videos">
+      <div class="aboutSection hidden" id="aboutSection">
+        <img class="aboutImg hidden" id="aboutImg">
+        <div class="aboutTitle" id="aboutTitle"></div>
+        <div class="aboutText" id="aboutText"></div>
+        <div class="aboutScrollHint" onclick="scrollToVideos()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          <span>Scroll down</span>
+        </div>
+      </div>
+      <span class="eyebrow">Curated Selects</span>
+      <div class="sectionTitle">For You</div>
+      <div class="topSubscribeBar" id="topSubscribeBar">
+        <div class="tsbText">
+          <div class="tsbTitle">Unlock Premium</div>
+          <div class="tsbSub">Full videos, live streams & private chat</div>
+        </div>
+        <button class="tsbBtn" onclick="openSubscribeModal()">Subscribe</button>
+      </div>
+      <div class="videoGrid" id="videoGrid"></div>
+      <div class="emptyState hidden" id="videoEmpty">No content yet. Check back soon.</div>
+    </div>
+
+    <!-- FULL LENGTH VIDEOS TAB -->
+    <div class="tabPage" id="tab-fullvideos">
+      <span class="eyebrow">Subscribers Only</span>
+      <div class="sectionTitle">🎬 Full Length Videos</div>
+      <div class="fullVideoGrid" id="fullVideoGrid"></div>
+      <div class="emptyState hidden" id="fullVideoEmpty">No full length videos yet.</div>
+    </div>
+
+    <!-- LIVE TAB -->
+    <div class="tabPage" id="tab-live">
+      <span class="eyebrow">On Air & Upcoming</span>
+      <div class="sectionTitle">Live Streaming</div>
+      <div class="liveGrid" id="liveGrid"></div>
+      <div class="emptyState hidden" id="liveEmpty">No streams scheduled right now.</div>
+
+      <div class="completedSectionTitle">Completed Shows</div>
+      <div class="completedGrid" id="completedGrid"></div>
+      <div class="emptyState hidden" id="completedEmpty">No completed shows yet.</div>
+    </div>
+
+    <!-- CHAT TAB -->
+    <div class="tabPage" id="tab-chat">
+      <div class="sectionTitle">Chat</div>
+      <div class="privateChatWrap">
+        <div class="privateChatMessages" id="privateChatMessages"></div>
+        <div class="privateChatImgPreview" id="privateChatImgPreview"></div>
+        <div class="privateChatInputRow">
+          <label class="privateChatImgBtn" for="privateChatImgInput">📷</label>
+          <input type="file" id="privateChatImgInput" accept="image/*" class="hidden" onchange="handlePrivateChatImgSelect()">
+          <input type="text" id="privateChatInput" placeholder="Type a message...">
+          <button class="privateChatSendBtn" onclick="sendPrivateMessage()"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REAL MEET TAB -->
+    <div class="tabPage" id="tab-realmeet">
+      <div class="sectionTitle">Real Meet</div>
+      <div id="realMeetContent"></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="tabPage" id="tab-profile">
+      <div class="profileCard">
+        <div class="avatarCircle" id="avatarInitial"></div>
+        <div class="profileName" id="profileName"></div>
+        <div class="profileSince" id="profileSince"></div>
+        <div class="planRow"><span class="l">Subscription</span><span id="profilePlanStatus">Locked</span></div>
+        <div class="planRow"><span class="l">Valid until</span><span id="profileExpiry">—</span></div>
+        <div class="notSubText hidden" id="notSubText"></div>
+        <button class="goldBtn" id="profileSubscribeBtn">Subscribe Now</button>
+        <button class="logoutBtn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottomNav">
+    <button class="navBtn active" data-tab="videos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Videos
+    </button>
+    <button class="navBtn" data-tab="fullvideos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M9 9l6 3-6 3z" fill="currentColor" stroke="none"/></svg>
+      Full Videos
+    </button>
+    <button class="navBtn" data-tab="live">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+      Live
+    </button>
+    <button class="navBtn" data-tab="chat" style="position:relative;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      Chat
+      <span class="navBadgeDot hidden" id="chatNavDot"></span>
+    </button>
+    <button class="navBtn" data-tab="realmeet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>
+      Real Meet
+    </button>
+    <button class="navBtn" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Profile
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL ROOT -->
+<div id="modalRoot"></div>
+
+<!-- ONBOARDING -->
+<div id="onboardingOverlay" class="onboardingOverlay hidden">
+  <div class="onboardingCard">
+    <div class="obStepDots" id="obDots"></div>
+    <div class="obIcon" id="obIcon"></div>
+    <div class="obTitle" id="obTitle"></div>
+    <div class="obDesc" id="obDesc"></div>
+    <div class="obBtnRow">
+      <button class="obSkip" id="obSkipBtn">Skip</button>
+      <button class="goldBtn obNextBtn" id="obNextBtn">Next</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+/* ============ FIREBASE ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCbsJdwyFXHW-NY1w6j3fS26_7JXDE_x4I",
+  authDomain: "vibe-v2-94f63.firebaseapp.com",
+  databaseURL: "https://vibe-v2-94f63-default-rtdb.firebaseio.com",
+  projectId: "vibe-v2-94f63",
+  storageBucket: "vibe-v2-94f63.firebasestorage.app",
+  messagingSenderId: "55743932257",
+  appId: "1:55743932257:web:baab152e46c13ec7100720",
+  measurementId: "G-MP828T2Q3N"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const CLOUDINARY_CLOUD = "xi6uqius";
+const CLOUDINARY_PRESET = "vibe_uploads";
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`;
+
+function uploadToCloudinary(file){
+  return new Promise((resolve, reject)=>{
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET);
+    fetch(CLOUDINARY_URL, { method:'POST', body: fd })
+      .then(r=>r.json())
+      .then(res=> res.secure_url ? resolve(res.secure_url) : reject(res))
+      .catch(reject);
+  });
+}
+
+/* ============ DEVICE ID (persists across usernames on this browser) ============ */
+function getDeviceId(){
+  let id = localStorage.getItem('vibe_device_id');
+  if(!id){
+    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+    localStorage.setItem('vibe_device_id', id);
+  }
+  return id;
+}
+const DEVICE_ID = getDeviceId();
+
+/* ============ STATE ============ */
+let currentUser = null;   // username string
+let userData = null;      // db data for user
+let videosCache = {};
+let fullVideosCache = {};
+let schedulesCache = {};
+let liveTimers = {};
+let storiesCache = {};
+
+/* ============ INIT ============ */
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  initTheme();
+  renderVideoSkeletons();
+  renderLiveSkeletons();
+  renderFullVideoSkeletons();
+  renderPrivateChatSkeleton();
+  bindAboutListener();
+  bindStoriesListener();
+  initPresence();
+
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('resettest') === '1'){
+    localStorage.removeItem('vibe_username');
+    localStorage.removeItem('vibe_onboarding_seen');
+    alert('Test data reset — logged out.');
+  }
+  const saved = localStorage.getItem('vibe_username');
+  if(saved){
+    loginAs(saved, true);
+  } else {
+    showAuth();
+  }
+  document.getElementById('enterBtn').addEventListener('click', handleSignup);
+  document.getElementById('usernameInput').addEventListener('keydown', e=>{ if(e.key==='Enter') handleSignup(); });
+  document.querySelectorAll('.navBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+  });
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('profileSubscribeBtn').addEventListener('click', ()=> openSubscribeModal());
+  document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+  document.getElementById('obNextBtn').addEventListener('click', handleOnboardingNext);
+  document.getElementById('obSkipBtn').addEventListener('click', closeOnboarding);
+  document.addEventListener('click', playClickSound, true);
+}
+
+/* ============ LIVE PRESENCE (admin panel me "kitne active h" ke liye) ============
+   Firebase structure: presence/{DEVICE_ID} = { username, lastActive }
+   .info/connected + onDisconnect() ki wajah se tab/app band hote hi
+   ya net cut hote hi yeh entry apne aap Firebase se hat jaati hai —
+   isliye admin panel me sirf is node ke keys count karne se
+   real-time "kitne log active hai" mil jaata hai.
+*/
+function initPresence(){
+  const presenceRef = db.ref('presence/'+DEVICE_ID);
+  db.ref('.info/connected').on('value', snap=>{
+    if(snap.val() === true){
+      presenceRef.onDisconnect().remove();
+      presenceRef.set({
+        username: currentUser || null,
+        lastActive: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+  });
+}
+
+/* ============ ABOUT / INTRO SECTION ============
+   Firebase: settings/about = { title, text, imageUrl }
+   Admin panel se yahi node update hoga. Jab tak title/text set nahi hai,
+   section hidden rehta hai (koi khaali box nahi dikhta).
+
+   BOLD TEXT SUPPORT: admin panel se text likhte waqt jis part ko bold
+   dikhana ho usse **do stars** ke beech me likho, e.g.
+   "Use code FIRSTTIME to unlock content for just **₹99**."
+   Yeh automatically <b> (gold color, bold) me render hota hai.
+*/
+function scrollToVideos(){
+  const el = document.getElementById('videoGrid');
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function bindAboutListener(){
+  db.ref('settings/about').on('value', snap=>{
+    renderAbout(snap.val());
+  });
+}
+function updateAboutScrollHint(){
+  const hint = document.querySelector('.aboutScrollHint');
+  const about = document.getElementById('aboutSection');
+  if(!hint || !about || about.classList.contains('hidden')){ if(hint) hint.classList.add('hide'); return; }
+  const rect = about.getBoundingClientRect();
+  const shouldShow = rect.bottom > window.innerHeight - 90 && rect.top < window.innerHeight;
+  hint.classList.toggle('hide', !shouldShow);
+}
+window.addEventListener('scroll', updateAboutScrollHint, {passive:true});
+window.addEventListener('resize', updateAboutScrollHint);
+function formatAboutText(text){
+  const escaped = escapeHtml(text || '');
+  return escaped.replace(/\*\*(.+?)\*\*/gs, '<b>$1</b>');
+}
+function renderAbout(data){
+  const wrap = document.getElementById('aboutSection');
+  if(!wrap) return;
+  if(!data || (!data.title && !data.text)){
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  const img = document.getElementById('aboutImg');
+  if(data.imageUrl){
+    img.src = data.imageUrl;
+    img.classList.remove('hidden');
+  } else {
+    img.classList.add('hidden');
+  }
+  document.getElementById('aboutTitle').textContent = data.title || '';
+  document.getElementById('aboutText').innerHTML = formatAboutText(data.text);
+  setTimeout(updateAboutScrollHint, 50);
+}
+/* ============ STORIES ============ */
+const STORY_LIFETIME_MS = 24*60*60*1000;
+function bindStoriesListener(){ db.ref('stories').on('value', snap=>{ storiesCache = snap.val()||{}; renderStoryRing(); }); }
+function activeStoryIds(){ return Object.keys(storiesCache).filter(id=>(Date.now()-(storiesCache[id].createdAt||0))<STORY_LIFETIME_MS).sort((a,b)=>(storiesCache[a].createdAt||0)-(storiesCache[b].createdAt||0)); }
+function getSeenStoryIds(){ try{ return JSON.parse(localStorage.getItem('vibe_seen_stories')||'[]'); }catch(e){ return []; } }
+function markStoriesSeen(ids){ const seen=new Set(getSeenStoryIds()); ids.forEach(id=>seen.add(id)); localStorage.setItem('vibe_seen_stories', JSON.stringify([...seen])); }
+function renderStoryRing(){
+  const row = document.getElementById('storyRow'); if(!row) return;
+  const ids = activeStoryIds();
+  if(ids.length===0){ row.classList.add('hidden'); row.innerHTML=''; return; }
+  row.classList.remove('hidden');
+  const seen = getSeenStoryIds(); const allSeen = ids.every(id=>seen.includes(id));
+  row.innerHTML = `<div class="storyItem" onclick="openStoryViewer()">
+      <div class="storyRing ${allSeen?'seen':''}">
+        <div class="storyRingInner"><div class="storyAvatar">V</div></div>
+      </div>
+      ${allSeen?'':`<div class="storyTapBadge">${playIconSvg()}</div>`}
+      <div class="${allSeen?'storyLabel':'storyHint'}">${allSeen?'VIBE':'Tap to view'}</div>
+    </div>`;
+}
+let _storyIndex=0, _storyIds=[], _storyTimer=null, _storyProgressStart=0;
+const STORY_IMAGE_DURATION = 5000;
+function openStoryViewer(){ _storyIds = activeStoryIds(); if(_storyIds.length===0) return; _storyIndex=0; renderStoryViewer(); }
+function renderStoryViewer(){
+  clearTimeout(_storyTimer);
+  const modal = document.getElementById('modalRoot');
+  const id = _storyIds[_storyIndex]; const s = storiesCache[id];
+  if(!s){ closeStoryViewer(); return; }
+  const timeAgo = formatStoryTimeAgo(Date.now()-(s.createdAt||0));
+  const mediaHtml = s.mediaType==='video' ? `<video id="storyMedia" src="${s.mediaUrl}" playsinline autoplay></video>` : `<img id="storyMedia" src="${s.mediaUrl}">`;
+  const captionHtml = s.caption ? `<div class="storyCaption">${escapeHtml(s.caption)}</div>` : '';
+  modal.innerHTML = `<div class="storyViewerOverlay"><div class="storyProgressRow">${_storyIds.map((sid,i)=>`<div class="storyProgressBar"><div class="storyProgressFill" id="storyFill-${i}" style="width:${i<_storyIndex?'100':'0'}%;"></div></div>`).join('')}</div><div class="storyViewerTop"><div class="left"><div class="storyViewerAvatar">V</div><div><div class="storyViewerName">VIBE</div><div class="storyViewerTime">${timeAgo}</div></div></div><button class="storyViewerClose" onclick="closeStoryViewer()">&times;</button></div><div class="storyViewerStage"><div class="storyTapZone left" onclick="prevStory()"></div><div class="storyTapZone right" onclick="nextStory()"></div>${mediaHtml}${captionHtml}</div></div>`;
+  markStoriesSeen([id]); renderStoryRing();
+  const mediaEl = document.getElementById('storyMedia');
+  if(s.mediaType==='video'){ mediaEl.addEventListener('ended', ()=>nextStory()); startStoryProgress(()=>{}, null, mediaEl); }
+  else{ startStoryProgress(()=>nextStory(), STORY_IMAGE_DURATION, null); }
+}
+function startStoryProgress(onDone, fixedDuration, videoEl){
+  const fillEl = document.getElementById('storyFill-'+_storyIndex); if(!fillEl) return;
+  fillEl.style.transition='none'; fillEl.style.width='0%'; _storyProgressStart = Date.now();
+  function tick(){
+    let pct;
+    if(videoEl){ const dur=videoEl.duration||0; pct = dur>0 ? (videoEl.currentTime/dur)*100 : 0; }
+    else{ pct = Math.min(100, ((Date.now()-_storyProgressStart)/fixedDuration)*100); }
+    fillEl.style.width = pct+'%';
+    if(pct>=100){ if(!videoEl) onDone(); return; }
+    _storyTimer = setTimeout(tick, 100);
+  }
+  tick();
+}
+function formatStoryTimeAgo(ms){ const hrs=Math.floor(ms/3600000); if(hrs<1) return Math.max(1,Math.floor(ms/60000))+'m'; return hrs+'h'; }
+function nextStory(){ const fillEl=document.getElementById('storyFill-'+_storyIndex); if(fillEl) fillEl.style.width='100%'; if(_storyIndex<_storyIds.length-1){ _storyIndex++; renderStoryViewer(); } else { closeStoryViewer(); } }
+function prevStory(){ if(_storyIndex>0){ _storyIndex--; } renderStoryViewer(); }
+function closeStoryViewer(){ clearTimeout(_storyTimer); closeModal(); }
+
+/* ============ GLOBAL CLICK SOUND ============ */
+let _audioCtx = null;
+function getAudioCtx(){
+  if(!_audioCtx){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return null;
+    _audioCtx = new Ctx();
+  }
+  return _audioCtx;
+}
+function playClickSound(){
+  try{
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(720, now);
+    osc.frequency.exponentialRampToValueAtTime(280, now + 0.07);
+    gain.gain.setValueAtTime(0.16, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.09);
+  }catch(e){}
+}
+
+/* ============ THEME TOGGLE ============ */
+function initTheme(){
+  const saved = localStorage.getItem('vibe_theme') || 'dark';
+  applyTheme(saved);
+}
+function applyTheme(theme){
+  document.body.classList.toggle('light-theme', theme === 'light');
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('vibe_theme', theme);
+}
+function toggleTheme(){
+  const isLight = document.body.classList.contains('light-theme');
+  applyTheme(isLight ? 'dark' : 'light');
+}
+
+/* ============ SKELETON LOADERS ============ */
+function renderVideoSkeletons(){
+  const grid = document.getElementById('videoGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(6).fill(`<div class="vCard skelVCard">
+      <div class="skeleton skelThumb"></div>
+      <div class="skelMeta">
+        <div class="skeleton skelLine" style="width:85%;"></div>
+        <div class="skeleton skelLine" style="width:40%;"></div>
+      </div>
+    </div>`).join('');
+}
+function renderLiveSkeletons(){
+  const grid = document.getElementById('liveGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(3).fill(`<div class="skelLiveCard">
+      <div class="skeleton skelLiveThumb"></div>
+      <div class="skelLiveInfo">
+        <div class="skeleton skelLine" style="width:70%;"></div>
+        <div class="skeleton skelLine" style="width:45%;"></div>
+      </div>
+    </div>`).join('');
+}
+function renderFullVideoSkeletons(){
+  const grid = document.getElementById('fullVideoGrid');
+  if(!grid) return;
+  grid.innerHTML = Array(4).fill(`<div class="fvCard">
+      <div class="skeleton skelThumb" style="aspect-ratio:9/13;"></div>
+      <div class="skelMeta" style="padding:10px 12px;">
+        <div class="skeleton skelLine" style="width:80%;"></div>
+      </div>
+    </div>`).join('');
+}
+function renderPrivateChatSkeleton(){
+  const box = document.getElementById('privateChatMessages');
+  if(!box) return;
+  box.innerHTML = `
+    <div class="skeleton skelPcMsg left"></div>
+    <div class="skeleton skelPcMsg right"></div>
+    <div class="skeleton skelPcMsg left"></div>`;
+}
+
+/* ============ ONBOARDING TUTORIAL ============ */
+const ONBOARDING_STEPS = [
+  {icon:'🎬', title:'Exclusive Videos', desc:'Videos tab me premium content browse karo. Preview clips sabko dikhti hain, full video ke liye subscribe karo.'},
+  {icon:'📺', title:'Full Length Videos', desc:'Full Videos tab me lambi, full length videos milengi — yeh sirf subscribers ke liye hain.'},
+  {icon:'🔴', title:'Live Streaming', desc:'Live tab se real-time shows dekho. Pehla stream free preview ke saath mil jaata hai.'},
+  {icon:'💬', title:'Direct Chat', desc:'Chat tab se seedha message karo — text aur photo dono bhej sakte ho.'},
+  {icon:'🤝', title:'Real Meet', desc:'Personally milna chahte ho? Real Meet tab se request submit karo.'},
+  {icon:'⭐', title:'Aap Ready Ho!', desc:'Ab VIBE explore karo aur premium content enjoy karo. Neeche tap karke shuru karo.'}
+];
+let obIndex = 0;
+function maybeShowOnboarding(){
+  if(localStorage.getItem('vibe_onboarding_seen')) return;
+  obIndex = 0;
+  renderOnboardingStep();
+  document.getElementById('onboardingOverlay').classList.remove('hidden');
+}
+function renderOnboardingStep(){
+  const step = ONBOARDING_STEPS[obIndex];
+  document.getElementById('obIcon').textContent = step.icon;
+  document.getElementById('obTitle').textContent = step.title;
+  document.getElementById('obDesc').textContent = step.desc;
+  document.getElementById('obDots').innerHTML = ONBOARDING_STEPS.map((_,i)=>`<span class="${i===obIndex?'active':''}"></span>`).join('');
+  document.getElementById('obNextBtn').textContent = obIndex === ONBOARDING_STEPS.length - 1 ? 'Get Started' : 'Next';
+}
+function handleOnboardingNext(){
+  if(obIndex === ONBOARDING_STEPS.length - 1){
+    closeOnboarding();
+  } else {
+    obIndex++;
+    renderOnboardingStep();
+  }
+}
+function closeOnboarding(){
+  localStorage.setItem('vibe_onboarding_seen', '1');
+  document.getElementById('onboardingOverlay').classList.add('hidden');
+}
+
+function showAuth(){
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function setAuthMsg(msg, type){
+  const el = document.getElementById('authMsg');
+  el.textContent = msg;
+  el.className = 'authMsg ' + (type||'');
+}
+
+async function handleSignup(){
+  const val = document.getElementById('usernameInput').value.trim().toLowerCase().replace(/\s+/g,'_');
+  if(!val || val.length < 3){ setAuthMsg('Username must be at least 3 characters','err'); return; }
+  if(!/^[a-z0-9_]+$/.test(val)){ setAuthMsg('Only letters, numbers and _ allowed','err'); return; }
+  setAuthMsg('Checking availability...', '');
+  const snap = await db.ref('users/'+val).once('value');
+  if(snap.exists()){
+    setAuthMsg('Username already taken, try another','err');
+    return;
+  }
+  await db.ref('users/'+val).set({
+    username: val,
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    blocked: false,
+    deviceId: DEVICE_ID,
+    livePreviewUsed: false,
+    subscription: { active:false, plan:null, expiresAt:0 }
+  });
+  localStorage.setItem('vibe_username', val);
+  loginAs(val, true);
+}
+
+function loginAs(username, fromInit){
+  currentUser = username;
+  db.ref('presence/'+DEVICE_ID+'/username').set(username);
+  db.ref('users/'+username).on('value', snap=>{
+    if(!snap.exists()){
+      localStorage.removeItem('vibe_username');
+      showAuth();
+      return;
+    }
+    userData = snap.val();
+    if(userData.blocked){
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appShell').classList.add('hidden');
+      document.getElementById('blockedScreen').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('blockedScreen').classList.add('hidden');
+    document.getElementById('appShell').classList.remove('hidden');
+    renderUserChrome();
+    maybeShowOnboarding();
+  });
+  bindVideosListener();
+  bindFullVideosListener();
+  bindLiveListener();
+  bindPrivateChat();
+}
+
+function logout(){
+  localStorage.removeItem('vibe_username');
+  db.ref('users/'+currentUser).off();
+  currentUser = null; userData = null;
+  document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('usernameInput').value='';
+  showAuth();
+}
+
+function hasActiveSub(){
+  return !!(userData && userData.subscription && userData.subscription.active && userData.subscription.expiresAt > Date.now());
+}
+
+function renderUserChrome(){
+  document.getElementById('userChipName').textContent = '@'+currentUser;
+  const badge = document.getElementById('subBadge');
+  const active = hasActiveSub();
+  badge.textContent = active ? 'Premium' : 'Locked';
+  badge.className = 'subBadge' + (active ? '' : ' locked');
+
+  document.getElementById('avatarInitial').textContent = currentUser.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = '@'+currentUser;
+  const since = userData.createdAt ? new Date(userData.createdAt) : new Date();
+  document.getElementById('profileSince').textContent = 'Member since ' + since.toLocaleDateString('en-IN',{month:'short',year:'numeric'});
+  document.getElementById('profilePlanStatus').textContent = active ? (userData.subscription.plan || 'Premium') : 'Locked';
+  document.getElementById('profileExpiry').textContent = active ? new Date(userData.subscription.expiresAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  document.getElementById('profileSubscribeBtn').textContent = active ? 'Manage Subscription' : 'Subscribe Now';
+
+  const notSubEl = document.getElementById('notSubText');
+  if(notSubEl){
+    notSubEl.classList.toggle('hidden', active);
+    if(!active){
+      notSubEl.innerHTML = `${infoIconSvg()} You are not a subscriber yet`;
+    }
+  }
+  badge.title = active ? 'You have an active subscription' : 'You are not a subscriber yet';
+
+  const topBar = document.getElementById('topSubscribeBar');
+  if(topBar) topBar.classList.toggle('hidden', active);
+}
+
+/* ============ TABS ============ */
+function switchTab(tab){
+  document.querySelectorAll('.tabPage').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  if(tab==='chat' && currentUser){
+    db.ref('chatMeta/'+currentUser+'/unreadForUser').set(false);
+  }
+}
+
+/* ============ VIDEOS ============ */
+let _lastVideosSignature = '';
+function buildVideosSignature(cache){
+  return Object.keys(cache).sort().map(id=>{
+    const v = cache[id] || {};
+    return id+'|'+(v.title||'')+'|'+(v.thumbnailUrl||'')+'|'+(v.previewUrl||'')+'|'+(v.fullUrl||'')+'|'+(v.linkedFullVideoId||'');
+  }).join(';;');
+}
+function bindVideosListener(){
+  db.ref('videos').on('value', snap=>{
+    videosCache = snap.val() || {};
+    const sig = buildVideosSignature(videosCache);
+    if(sig !== _lastVideosSignature){
+      _lastVideosSignature = sig;
+      renderVideos();
+      renderFullVideos();
+    }
+  });
+}
+/* ============ FULL LENGTH VIDEOS (payment-gated, no preview) ============
+   Firebase structure:
+   fullVideos/{pushId} = { title, thumbnailUrl, fullUrl, durationMinutes, createdAt, linkedFullVideoId? }
+   Click par: subscribed hai to seedha full video player khulta hai.
+   Subscribed nahi hai to seedha subscribe modal khulta hai — video kabhi dikhti nahi.
+
+   LINKING: Har demo/preview video (videos/{id}) ke andar ek optional field
+   "linkedFullVideoId" set kiya ja sakta hai jo bataata hai ki uska
+   corresponding full length video fullVideos/{id} me kaunsa hai. Isse
+   Videos tab ke demo card par "Full video: <title>" tag dikhta hai aur
+   Full Videos tab ke card par "Watch free demo clip" tag dikhta hai — taaki
+   visitors ko samajh aaye ki konsi demo clip kis full video se match karti hai.
+*/
+let _lastFullVideosSignature = '';
+function buildFullVideosSignature(cache){
+  return Object.keys(cache).sort().map(id=>{
+    const v = cache[id] || {};
+    return id+'|'+(v.title||'')+'|'+(v.thumbnailUrl||'')+'|'+(v.fullUrl||'')+'|'+(v.durationMinutes||'');
+  }).join(';;');
+}
+function bindFullVideosListener(){
+  db.ref('fullVideos').on('value', snap=>{
+    fullVideosCache = snap.val() || {};
+    const sig = buildFullVideosSignature(fullVideosCache);
+    if(sig !== _lastFullVideosSignature){
+      _lastFullVideosSignature = sig;
+      renderFullVideos();
+      renderVideos();
+    }
+  });
+}
+
+function clockIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;}
+
+function formatDurationBadge(mins){
+  if(!mins) return '—';
+  if(mins < 60) return mins + ' minutes';
+  const h = Math.floor(mins/60), m = mins%60;
+  let out = h + (h===1 ? ' hour' : ' hours');
+  if(m>0) out += ' ' + m + (m===1 ? ' minute' : ' minutes');
+  return out;
+}
+
+/* ============ DEMO <-> FULL VIDEO LINKING HELPERS ============ */
+function findLinkedFullVideo(v){
+  if(!v || !v.linkedFullVideoId) return null;
+  const fv = fullVideosCache[v.linkedFullVideoId];
+  return fv ? { id: v.linkedFullVideoId, data: fv } : null;
+}
+function findPreviewForFullVideo(fullId){
+  const ids = Object.keys(videosCache);
+  for(let i=0;i<ids.length;i++){
+    const v = videosCache[ids[i]];
+    if(v && v.linkedFullVideoId === fullId){
+      return { id: ids[i], data: v };
+    }
+  }
+  return null;
+}
+
+function renderFullVideos(){
+  const grid = document.getElementById('fullVideoGrid');
+  if(!grid) return;
+  const ids = Object.keys(fullVideosCache).sort((a,b)=> (fullVideosCache[b].createdAt||0)-(fullVideosCache[a].createdAt||0));
+  const emptyEl = document.getElementById('fullVideoEmpty');
+  if(emptyEl) emptyEl.classList.toggle('hidden', ids.length>0);
+  grid.innerHTML = ids.map(id=>{
+    const v = fullVideosCache[id];
+    const previewMatch = findPreviewForFullVideo(id);
+    const demoTagHtml = previewMatch
+      ? `<button class="demoLinkTag" onclick="event.stopPropagation(); openVideoModal('${previewMatch.id}')">${playIconSvg()} Watch free demo clip</button>`
+      : '';
+    return `<div class="fvCard" onclick="openFullVideoCard('${id}')">
+      <div class="fvThumbWrap">
+        <img src="${v.thumbnailUrl||''}" loading="lazy">
+        <div class="fvDurBadge">${clockIconSvg()} ${formatDurationBadge(v.durationMinutes)}</div>
+        <div class="fvLockCenter">
+          <div class="lockCircle">${lockIconSvg()}</div>
+          <div class="fvHint">Subscribe to watch</div>
+        </div>
+      </div>
+      <div class="fvMeta">
+        <div class="fvTitle">${escapeHtml(v.title||'Untitled')}</div>
+        ${demoTagHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openFullVideoCard(id){
+  const v = fullVideosCache[id];
+  if(!v) return;
+  if(hasActiveSub()){
+    openFullVideoPlayer(id, v);
+  } else {
+    openSubscribeModal();
+  }
+}
+
+function openFullVideoPlayer(id, v){
+  const modal = document.getElementById('modalRoot');
+  modal.innerHTML = `
+  <div class="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modalCard">
+      <button class="modalClose" onclick="closeModal()">&times;</button>
+      <div class="modalTitle">${escapeHtml(v.title||'')}</div>
+      <div class="videoPlayerWrap">
+        <video src="${v.fullUrl}" controls playsinline autoplay></video>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">${clockIconSvg()} Full length · Duration: ${formatDurationBadge(v.durationMinutes)}</div>
+    </div>
+  </div>`;
+}
+
+function renderVideos(){
+  const grid = document.getElementById('videoGrid');
+  const ids = Object.keys(videosCache).sort((a,b)=> (videosCache[b].createdAt||0)-(videosCache[a].createdAt||0));
+  document.getElementById('videoEmpty').classList.toggle('hidden', ids.length>0);
+  grid.innerHTML = ids.map(id=>{
+    const v = videosCache[id];
+    const likesCount = v.likes ? Object.keys(v.likes).length : 0;
+    const linkedFull = findLinkedFullVideo(v);
+    let ribbonHtml = '';
+    if(!hasActiveSub()){
+      ribbonHtml = linkedFull
+        ? `<div class="previewRibbon">${filmIconSvg()} Full video inside: "${escapeHtml(linkedFull.data.title||'')}"</div>`
+        : `<div class="previewRibbon">${filmIconSvg()} Short clip only — full video inside</div>`;
+    }
+    const linkTagHtml = linkedFull
+      ? `<button class="fullVideoLinkTag" onclick="event.stopPropagation(); openFullVideoCard('${linkedFull.id}')">${filmIconSvg()} Full video: ${escapeHtml(linkedFull.data.title||'Watch full')}</button>`
+      : '';
+    return `<div class="vCard" onclick="openVideoModal('${id}')">
+      <div class="vThumbWrap">
+        <img src="${v.thumbnailUrl||''}" loading="lazy">
+        <div class="lockTag">${lockIconSvg()} ${hasActiveSub() ? 'Unlocked' : 'Preview'}</div>
+        <div class="playOverlay">${playIconSvg()}</div>
+        ${ribbonHtml}
+      </div>
+      <div class="vMeta">
+        <div class="vTitle">${escapeHtml(v.title||'Untitled')}</div>
+        <div class="vStats">${heartIconSvg()} <span id="likecount-${id}">${likesCount}</span></div>
+        ${linkTagHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function lockIconSvg(){return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>`;}
+function filmIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="7" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="17" y2="20"/><line x1="2" y1="9" x2="7" y2="9"/><line x1="2" y1="15" x2="7" y2="15"/><line x1="17" y1="9" x2="22" y2="9"/><line x1="17" y1="15" x2="22" y2="15"/></svg>`;}
+function playIconSvg(){return `<svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>`;}
+function heartIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9C.5 8 2 4 6 4c2 0 3.5 1.2 4 2 .5-.8 2-2 4-2 4 0 5.5 4 3.5 8-2.5 4.5-9.5 9-9.5 9z"/></svg>`;}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function openVideoModal(id){
+  const v = videosCache[id];
+  const unlocked = hasActiveSub();
+  const src = unlocked ? v.fullUrl : v.previewUrl;
+  const liked = v.likes && v.likes[currentUser];
+  const modal = document.getElementById('modalRoot');
+  modal.innerHTML = `
+  <div class="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modalCard">
+      <button class="modalClose" onclick="closeModal()">&times;</button>
+      <div class="modalTitle">${escapeHtml(v.title||'')}</div>
+      ${unlocked ? '' : `<div class="previewBanner">${infoIconSvg()} <span>You're watching a <b>short preview clip</b> — the full video is much longer. Subscribe to unlock the complete video.</span></div>`}
+      <div class="videoPlayerWrap">
+        <video id="playerVid" src="${src}" controls playsinline ${unlocked?'':'autoplay'}></video>
+      </div>
+      <div class="likeRow">
+        <button class="likeBtn ${liked?'liked':''}" id="likeBtnEl" onclick="toggleLike('${id}')">${heartIconSvg()} <span id="likeBtnCount">${v.likes?Object.keys(v.likes).length:0}</span></button>
+        <span style="font-size:12px;color:var(--muted);">${unlocked ? 'daily Full videos unlocked' : 'Preview only — not the full video'}</span>
+      </div>
+    </div>
+  </div>`;
+  if(!unlocked){
+    db.ref('previewViews/'+id+'/'+DEVICE_ID).set(true);
+    const vid = document.getElementById('playerVid');
+    vid.addEventListener('ended', ()=>{ showPreviewEndedTeaser(v); });
+  }
+}
+
+function showPreviewEndedTeaser(v){
+  const modal = document.getElementById('modalRoot');
+  const linked = findLinkedFullVideo(v);
+  const durSource = linked ? linked.data.durationMinutes : null;
+  const durHtml = durSource ? `<div class="teaserDur">${clockIconSvg()} Full video · ${formatDurationBadge(durSource)}</div>` : '';
+  const linkedTitleHtml = linked ? `<div style="font-size:12.5px;color:var(--gold2);margin-bottom:2px;font-weight:700;">"${escapeHtml(linked.data.title||'')}"</div>` : '';
+  const btnOnclick = linked ? `openFullVideoCard('${linked.id}')` : 'openSubscribeModal()';
+  const btnLabel = linked ? 'Watch Full Video' : 'Subscribe to Watch Full Video';
+  modal.innerHTML = `
+  <div class="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modalCard">
+      <button class="modalClose" onclick="closeModal()">&times;</button>
+      <div class="teaserBox">
+        <div class="teaserIco">${filmIconSvg()}</div>
+        <div class="teaserTitle">That was just the demo</div>
+        ${linkedTitleHtml}
+        <div class="teaserSub">This was a short preview clip only. The full length video is waiting for you inside — subscribe to watch the complete video.</div>
+        ${durHtml}
+        <button class="goldBtn" onclick="${btnOnclick}">${btnLabel}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleLike(id){
+  const ref = db.ref('videos/'+id+'/likes/'+currentUser);
+  ref.once('value').then(snap=>{
+    if(snap.exists()){ ref.remove(); } else { ref.set(true); }
+  });
+  db.ref('videos/'+id+'/likes').on('value', snap=>{
+    const count = snap.exists()? Object.keys(snap.val()).length : 0;
+    const el = document.getElementById('likeBtnCount'); if(el) el.textContent = count;
+    const el2 = document.getElementById('likecount-'+id); if(el2) el2.textContent = count;
+    const btn = document.getElementById('likeBtnEl');
+    if(btn){ const mine = snap.exists() && snap.val()[currentUser]; btn.classList.toggle('liked', !!mine); }
+  });
+}
+
+/* ============ SUBSCRIPTION FLOW ============
+   COUPON CODES: Firebase structure
+   coupons/{CODE} = { active:true, amount:20, days:7, usedBy:{ username:true, ... } }
+   Admin panel se coupons/{CODE} node create karke amount aur days set karo.
+   Ek coupon ek user ek hi baar use kar sakta hai (usedBy me track hota hai).
+
+   Subscribe modal me ab saare ACTIVE coupons chip ke roop me dikhte hain
+   (jo currentUser use nahi kar chuka), taaki user ko type nahi karna pade —
+   sirf tap karo aur code auto-fill + auto-apply ho jaata hai.
+
+   PLANS: Ab sirf do plans hain — 30 Days (₹799) aur 15 Days (₹399).
+   7 Days ₹50 wala plan hata diya gaya hai.
+*/
+let selectedPlan = null;
+let appliedCoupon = null; // { code, amount, days }
+
+function openSubscribeModal(){
+  selectedPlan = null;
+  appliedCoupon = null;
+  const modal = document.getElementById('modalRoot');
+  modal.innerHTML = `
+  <div class="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modalCard">
+      <button class="modalClose" onclick="closeModal()">&times;</button>
+      <div class="modalTitle">Unlock Full Access</div>
+      <div class="benefitsList">
+        <div class="benefitItem">${checkIconSvg()} daily Full videos unlock</div>
+        <div class="benefitItem">${checkIconSvg()} daily Live streaming access</div>
+        <div class="benefitItem">${checkIconSvg()} Private chat unlocked</div>
+      </div>
+      <div class="planOptions">
+        <div class="planCard" id="plan30" onclick="selectPlan('30')">
+          <div class="price">₹799</div>
+          <div class="dur">30 Days</div>
+        </div>
+        <div class="planCard" id="plan15" onclick="selectPlan('15')">
+          <div class="price">₹399</div>
+          <div class="dur">15 Days</div>
+        </div>
+      </div>
+      <div class="planCard demoCard" id="plan7" onclick="selectPlan('7')">
+        <div class="demoBadgeTag">DEMO OFFER</div>
+        <div class="price">15 days demo=₹99</div>
+        <div class="dur">15 Days Demo Access</div>
+      </div>
+      <div id="qrArea"></div>
+      <button class="goldBtn hidden" id="proceedBtn" onclick="proceedToPay()">Continue</button>
+    </div>
+  </div>`;
+  setTimeout(attachModalScrollHint, 50);
+}
+
+function checkIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;}
+
+function attachModalScrollHint(){
+  const modal = document.getElementById('modalRoot');
+  const card = modal.querySelector('.modalCard');
+  if(!card) return;
+  const old = modal.querySelector('.modalScrollHint'); if(old) old.remove();
+  if(card.scrollHeight <= card.clientHeight + 10) return;
+  const hint = document.createElement('div');
+  hint.className = 'modalScrollHint';
+  hint.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>`;
+  modal.appendChild(hint);
+  const onScroll = ()=>{
+    const atBottom = card.scrollHeight - card.scrollTop - card.clientHeight < 20;
+    hint.style.opacity = atBottom ? '0' : '1';
+  };
+  card.addEventListener('scroll', onScroll);
+  onScroll();
+}
+
+/* ============ ACTIVE COUPON CHIPS (tap-to-fill) ============
+   coupons/{CODE} jo active:true hai aur currentUser ne pehle use nahi kiya,
+   unko tappable chip ki tarah dikhaya jaata hai. Tap karte hi code input me
+   fill ho jaata hai aur turant apply bhi ho jaata hai — user ko type/copy-paste
+   kuch nahi karna padta.
+*/
+async function loadActiveCoupons(){
+  const area = document.getElementById('activeCouponsArea');
+  if(!area) return;
+  try{
+    const snap = await db.ref('coupons').once('value');
+    const data = snap.val() || {};
+    const codes = Object.keys(data).filter(c=>{
+      const cd = data[c];
+      if(!cd || cd.active === false) return false;
+      if(cd.usedBy && cd.usedBy[currentUser]) return false;
+      return true;
+    });
+    if(codes.length === 0){ area.innerHTML = ''; return; }
+    area.innerHTML = codes.map(c=>{
+      const cd = data[c];
+      return `<button type="button" class="couponChip" onclick="fillCoupon('${c}')">🏷️ ${escapeHtml(c)} — ₹${cd.amount||20} / ${cd.days||7}d</button>`;
+    }).join('');
+  }catch(err){
+    area.innerHTML = '';
+  }
+}
+
+function fillCoupon(code){
+  const input = document.getElementById('couponInput');
+  if(input) input.value = code;
+  applyCoupon();
+}
+
+function selectPlan(p){
+  selectedPlan = p;
+  appliedCoupon = null;
+  document.getElementById('plan30').classList.toggle('selected', p==='30');
+  document.getElementById('plan15').classList.toggle('selected', p==='15');
+  document.getElementById('plan7').classList.toggle('selected', p==='7');
+  document.getElementById('proceedBtn').classList.remove('hidden');
+}
+
+async function applyCoupon(){
+  const input = document.getElementById('couponInput');
+  const msgEl = document.getElementById('couponMsg');
+  const code = (input.value || '').trim().toUpperCase();
+  if(!code){
+    msgEl.textContent = 'Please enter a coupon code';
+    msgEl.className = 'couponMsg err';
+    return;
+  }
+  msgEl.textContent = 'Checking coupon...';
+  msgEl.className = 'couponMsg';
+  try{
+    const snap = await db.ref('coupons/'+code).once('value');
+    const data = snap.val();
+    if(!data || data.active === false){
+      msgEl.textContent = 'Invalid or expired coupon code';
+      msgEl.className = 'couponMsg err';
+      appliedCoupon = null;
+      return;
+    }
+    if(data.usedBy && data.usedBy[currentUser]){
+      msgEl.textContent = 'You have already used this coupon';
+      msgEl.className = 'couponMsg err';
+      appliedCoupon = null;
+      return;
+    }
+    appliedCoupon = { code, amount: data.amount || 20, days: data.days || 7 };
+    selectedPlan = null;
+    ['plan30','plan15'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('selected');
+    });
+    msgEl.textContent = `Coupon applied! ₹${appliedCoupon.amount} for ${appliedCoupon.days} days`;
+    msgEl.className = 'couponMsg ok';
+
+    const qrArea = document.getElementById('qrArea');
+    if(qrArea && qrArea.innerHTML.trim() !== ''){
+      // QR pehle se dikh raha tha (plan select karke Continue dabaya tha) —
+      // ab naye coupon amount ke saath QR turant refresh karo
+      proceedToPay();
+    } else {
+      document.getElementById('proceedBtn').classList.remove('hidden');
+    }
+  }catch(err){
+    msgEl.textContent = 'Something went wrong, please try again';
+    msgEl.className = 'couponMsg err';
+  }
+}
+
+async function proceedToPay(){
+  if(!selectedPlan && !appliedCoupon) return;
+  db.ref('qrPageViews/' + currentUser).update({
+    firstViewAt: firebase.database.ServerValue.TIMESTAMP,
+    lastViewAt: firebase.database.ServerValue.TIMESTAMP,
+    views: firebase.database.ServerValue.increment(1)
+  });
+  const settingsSnap = await db.ref('settings').once('value');
+  const settings = settingsSnap.val() || {};
+  const amount = appliedCoupon ? appliedCoupon.amount : (selectedPlan==='30' ? 799 : selectedPlan==='15' ? 399 : 99);
+  const qrArea = document.getElementById('qrArea');
+  qrArea.innerHTML = `
+    <div class="qrBox">
+      <img src="${settings.qrUrl||''}" alt="Payment QR" onclick="openQrFullscreen('${settings.qrUrl||''}', ${amount}, '${(settings.upiId||'').replace(/'/g,"\\'")}')">
+      <div class="upiText">Scan & pay <b>₹${amount}</b>${settings.upiId?(' to <b>'+escapeHtml(settings.upiId)+'</b>'):''}</div>
+      <div class="qrTapHint">${expandIconSvg()} Tap QR to view full screen</div>
+    </div>
+    <label class="fieldLabel">Upload Payment Screenshot</label>
+    <label class="rmPhotoUpload" id="paymentScreenshotLabel" for="paymentScreenshotInput">📷 Tap to upload payment screenshot</label>
+    <input type="file" id="paymentScreenshotInput" accept="image/*" class="hidden" onchange="handlePaymentScreenshotSelect()">
+    <button class="goldBtn" id="submitPaymentBtn" onclick="submitPayment(${amount})">Submit for Approval</button>
+  `;
+  document.getElementById('proceedBtn').classList.add('hidden');
+  setTimeout(attachModalScrollHint, 50);
+}
+
+function expandIconSvg(){return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>`;}
+
+function openQrFullscreen(qrUrl, amount, upiId){
+  const wrap = document.createElement('div');
+  wrap.className = 'qrFullscreenOverlay';
+  wrap.id = 'qrFullscreenOverlay';
+  wrap.innerHTML = `
+    <button class="qrFullscreenClose" onclick="closeQrFullscreen()">&times;</button>
+    <img src="${qrUrl}" alt="Payment QR">
+    <div class="qrFullscreenText">Scan & pay <b>₹${amount}</b>${upiId ? ' to <b>'+escapeHtml(upiId)+'</b>' : ''}</div>
+  `;
+  wrap.addEventListener('click', e=>{ if(e.target===wrap) closeQrFullscreen(); });
+  document.body.appendChild(wrap);
+}
+
+function closeQrFullscreen(){
+  const el = document.getElementById('qrFullscreenOverlay');
+  if(el) el.remove();
+}
+let _paymentScreenshotFile = null;
+function handlePaymentScreenshotSelect(){
+  const file = document.getElementById('paymentScreenshotInput').files[0];
+  _paymentScreenshotFile = file || null;
+  const label = document.getElementById('paymentScreenshotLabel');
+  if(_paymentScreenshotFile){
+    label.textContent = '📷 ' + _paymentScreenshotFile.name + ' selected — tap submit';
+  } else {
+    label.textContent = '📷 Tap to upload payment screenshot';
+  }
+}
+async function submitPayment(amount){
+  if(!_paymentScreenshotFile){ alert('Please upload your payment screenshot'); return; }
+
+  const btn = document.getElementById('submitPaymentBtn');
+  if(btn){ btn.textContent = 'Submitting...'; btn.disabled = true; }
+
+  let screenshotUrl = null;
+  try{
+    screenshotUrl = await uploadToCloudinary(_paymentScreenshotFile);
+  }catch(err){
+    alert('Screenshot upload failed, please try again');
+    if(btn){ btn.textContent = 'Submit for Approval'; btn.disabled = false; }
+    return;
+  }
+
+  const payId = db.ref('payments').push().key;
+  const days = appliedCoupon ? appliedCoupon.days : (selectedPlan==='30' ? 30 : selectedPlan==='15' ? 15 : 7);
+  const planLabel = selectedPlan==='30' ? '30 Days' : selectedPlan==='15' ? '15 Days' : '7 Days Demo';
+  db.ref('payments/'+payId).set({
+    username: currentUser,
+    plan: planLabel,
+    days: days,
+    amount: amount,
+    screenshotUrl: screenshotUrl,
+    couponCode: appliedCoupon ? appliedCoupon.code : null,
+    status: 'pending',
+    createdAt: firebase.database.ServerValue.TIMESTAMP
+  }).then(()=>{
+    if(appliedCoupon){
+      db.ref('coupons/'+appliedCoupon.code+'/usedBy/'+currentUser).set(true);
+    }
+    _paymentScreenshotFile = null;
+    showPendingState();
+  });
+}
+function showPendingState(){
+  const modal = document.getElementById('modalRoot');
+  modal.innerHTML = `
+  <div class="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modalCard">
+      <button class="modalClose" onclick="closeModal()">&times;</button>
+      <div class="pendingBox">
+        <div class="ico">⏳</div>
+        <div style="font-weight:700;margin-bottom:6px;">Payment Submitted</div>
+        <div style="color:var(--muted);font-size:13px;">Your payment is being verified. Access unlocks automatically once approved — usually within a few hours.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+/* ============ LIVE ============ */
+function bindLiveListener(){
+  db.ref('liveSchedules').on('value', snap=>{
+    schedulesCache = snap.val() || {};
+    renderLive();
+  });
+  setInterval(renderLive, 15000);
+  startLiveCountdownTicker();
+}
+
+function scheduleState(s){
+  const now = Date.now();
+  const start = new Date(s.startTime).getTime();
+  const end = start + (s.durationMinutes||30)*60000;
+  if(now < start) return {state:'upcoming', start, end};
+  if(now >= start && now <= end) return {state:'live', start, end};
+  return {state:'ended', start, end};
+}
+
+/* ============ COUNTDOWN ============ */
+function formatCountdown(ms){
+  if(ms <= 0) return 'Starting...';
+  const totalSec = Math.floor(ms/1000);
+  const days = Math.floor(totalSec/86400);
+  const hours = Math.floor((totalSec%86400)/3600);
+  const mins = Math.floor((totalSec%3600)/60);
+  const secs = totalSec%60;
+  const pad = n=>n.toString().padStart(2,'0');
+  if(days>0) return `Starts in ${days}d ${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+  return `Starts in ${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+}
+
+let _liveCountdownTicker = null;
+function startLiveCountdownTicker(){
+  if(_liveCountdownTicker) clearInterval(_liveCountdownTicker);
+  _liveCountdownTicker = setInterval(()=>{
+    let needsFullRerender = false;
+    Object.keys(schedulesCache).forEach(id=>{
+      const st = scheduleState(schedulesCache[id]);
+      const el = document.getElementById('countdown-'+id);
+      if(st.state === 'upcoming' && el){
+        el.textContent = formatCountdown(st.start - Date.now());
+      } else if(st.state !== 'upcoming' && el){
+        // stream just went live or ended mid-tick — refresh the list structure
+        needsFullRerender = true;
+      }
+    });
+    if(needsFullRerender) renderLive();
+  }, 1000);
+}
+
+function renderLive(){
+  const ids = Object.keys(schedulesCache);
+  const visible = ids.filter(id=> scheduleState(schedulesCache[id]).state !== 'ended');
+  visible.sort((a,b)=> new Date(schedulesCache[a].startTime) - new Date(schedulesCache[b].startTime));
+  document.getElementById('liveEmpty').classList.toggle('hidden', visible.length>0);
+  document.getElementById('liveGrid').innerHTML = visible.map(id=>{
+    const s = schedulesCache[id];
+    const st = scheduleState(s);
+    let sub;
+    if(st.state==='live') sub = 'LIVE NOW · ' + (s.type||'Stream');
+    else sub = `<span class="countdownTxt" id="countdown-${id}">${formatCountdown(st.start-Date.now())}</span>`;
+    return `<div class="liveCard">
+      <div class="liveThumb">
+        ${st.state==='live'?'<div class="liveDot">LIVE</div>':''}
+        <img src="${s.thumbnailUrl||''}">
+      </div>
+      <div class="liveInfo">
+        <div class="t">${escapeHtml(s.title||'Live Stream')}</div>
+        <div class="s">${sub}</div>
+      </div>
+      <button class="liveGo ${st.state==='live'?'now':''}" onclick="openLive('${id}')">${st.state==='live'?'Watch':'Remind'}</button>
+    </div>`;
+  }).join('');
+
+  renderCompletedShows();
+}
+
+/* ============ COMPLETED SHOWS ============ */
+function formatDurationMin(mins){
+  if(mins < 60) return mins + ' min';
+  const h = Math.floor(mins/60), m = mins%60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
+function eyeIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`;}
+
+// Deterministic pseudo-random number in [min,max] based on a string seed (same id always gives same number)
+function seededRandomInRange(seedStr, min, max){
+  let hash = 0;
+  for(let i=0;i<seedStr.length;i++){
+    hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+    hash |= 0;
+  }
+  const normalized = Math.abs(hash % 10000) / 10000;
+  return Math.floor(min + normalized * (max - min + 1));
+}
+
+function renderCompletedShows(){
+  const ids = Object.keys(schedulesCache).filter(id=> scheduleState(schedulesCache[id]).state === 'ended');
+  ids.sort((a,b)=> new Date(schedulesCache[b].startTime) - new Date(schedulesCache[a].startTime));
+  document.getElementById('completedEmpty').classList.toggle('hidden', ids.length>0);
+  document.getElementById('completedGrid').innerHTML = ids.map(id=>{
+    const s = schedulesCache[id];
+    const dateStr = new Date(s.startTime).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const viewCount = seededRandomInRange(id+'-views', 20, 30);
+    const reactionCount = seededRandomInRange(id+'-reactions', 30, 40);
+    return `<div class="completedCard">
+      <img class="completedThumb" src="${s.thumbnailUrl||''}">
+      <div class="completedInfo">
+        <div class="t">${escapeHtml(s.title||'Live Stream')}</div>
+        <div class="d">${dateStr} · ${formatDurationMin(s.durationMinutes||30)}${s.type ? ' · '+escapeHtml(s.type) : ''}</div>
+        <div class="completedStats">
+          <span>${eyeIconSvg()} ${viewCount} watched</span>
+          <span>${heartIconSvg()} ${reactionCount} reactions</span>
+        </div>
+      </div>
+      <span class="completedPill">ENDED</span>
+    </div>`;
+  }).join('');
+}
+
+const REACTIONS = [
+  {key:'heart', emoji:'❤️'},
+  {key:'fire', emoji:'🔥'},
+  {key:'wow', emoji:'😍'},
+  {key:'clap', emoji:'👏'},
+  {key:'diamond', emoji:'💎'}
+];
+const AVATAR_COLORS = ['#e0b25e','#c1425a','#7fd99a','#6fa8dc','#d98ecf','#f4a261'];
+const RANDOM_CHAT_NAMES = ['Abhishek','Arjun','Adish','Alok','Aman','Rohit','Priya','Simran','Kabir','Neha','Rahul','Anjali','Vikram','Sneha','Karan'];
+const RANDOM_CHAT_LINES = ['Hii','Wow','🔥🔥🔥','Love you so much❤️','kitna sundar ho aap','next kab milega','superb👏','omg amazing','yeh best hai','😍😍😍','real meet kroge','waiting for this','nice content','👏👏👏','osm'];
+
+function avatarColorFor(name){
+  let sum=0; for(let i=0;i<name.length;i++) sum += name.charCodeAt(i);
+  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
+}
+function chatRowHtml(username, message){
+  const initial = (username||'?').charAt(0).toUpperCase();
+  return `<div class="chatRow">
+    <div class="chatAvatar" style="background:${avatarColorFor(username)}">${initial}</div>
+    <div class="chatBody"><div class="cname" style="color:${avatarColorFor(username)}">${escapeHtml(username)}</div><div class="ctext">${escapeHtml(message)}</div></div>
+  </div>`;
+}
+
+/* ============ PRIVATE CHAT (User <-> Admin) ============
+   Firebase structure:
+   privateChats/{username}/{pushId} = { sender:'user'|'admin', text?, imageUrl?, timestamp }
+   chatMeta/{username} = { lastMessage, lastMessageAt, lastSender, unreadForAdmin, unreadForUser }
+*/
+let _privateChatSelectedFile = null;
+
+function bindPrivateChat(){
+  const box = document.getElementById('privateChatMessages');
+  box.innerHTML = '';
+  db.ref('privateChats/'+currentUser).limitToLast(200).on('child_added', snap=>{
+    box.insertAdjacentHTML('beforeend', privateChatBubbleHtml(snap.val()));
+    box.scrollTop = box.scrollHeight;
+  });
+  db.ref('chatMeta/'+currentUser).on('value', snap=>{
+    const meta = snap.val() || {};
+    document.getElementById('chatNavDot').classList.toggle('hidden', !meta.unreadForUser);
+  });
+}
+
+function privateChatBubbleHtml(m){
+  const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
+  const isUser = m.sender === 'user';
+  const imgHtml = m.imageUrl ? `<img src="${m.imageUrl}">` : '';
+  const textHtml = m.text ? `<div>${escapeHtml(m.text)}</div>` : '';
+  return `<div class="pcMsg ${isUser?'fromUser':'fromAdmin'}">${textHtml}${imgHtml}<div class="pcMsgTime">${time}</div></div>`;
+}
+
+function handlePrivateChatImgSelect(){
+  const fileInput = document.getElementById('privateChatImgInput');
+  const preview = document.getElementById('privateChatImgPreview');
+  _privateChatSelectedFile = fileInput.files[0] || null;
+  if(_privateChatSelectedFile){
+    preview.textContent = '📷 ' + _privateChatSelectedFile.name + ' selected — tap send';
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function sendPrivateMessage(){
+  const input = document.getElementById('privateChatInput');
+  const text = input.value.trim();
+  const file = _privateChatSelectedFile;
+  if(!text && !file) return;
+
+  let imageUrl = null;
+  if(file){
+    try{ imageUrl = await uploadToCloudinary(file); }
+    catch(err){ alert('Image upload failed'); return; }
+  }
+
+  const msgId = db.ref('privateChats/'+currentUser).push().key;
+  const msg = { sender:'user', timestamp: firebase.database.ServerValue.TIMESTAMP };
+  if(text) msg.text = text;
+  if(imageUrl) msg.imageUrl = imageUrl;
+  await db.ref('privateChats/'+currentUser+'/'+msgId).set(msg);
+
+  await db.ref('chatMeta/'+currentUser).update({
+    lastMessage: text || '📷 Photo',
+    lastMessageAt: firebase.database.ServerValue.TIMESTAMP,
+    lastSender: 'user',
+    unreadForAdmin: true,
+    unreadForUser: false
+  });
+
+  input.value = '';
+  _privateChatSelectedFile = null;
+  document.getElementById('privateChatImgInput').value = '';
+  document.getElementById('privateChatImgPreview').style.display = 'none';
+}
+
+document.getElementById('privateChatInput')?.addEventListener('keydown', e=>{ if(e.key==='Enter') sendPrivateMessage(); });
+
+/* ============ REAL MEET ============
+   Firebase structure:
+   realMeetRequests/{pushId} = {
+     username, category:'single'|'couple', name, age, location, instagram,
+     description, photoUrl, depositAmount, depositUtr, status:'pending', createdAt
+   }
+   Reuses the same settings/{qrUrl,upiId} already used for subscription payments.
+*/
+let rmStep = 'category';
+let rmCategory = null;
+let rmPhotoFile = null;
+let rmFormData = null;
+
+function renderRealMeet(){
+  const el = document.getElementById('realMeetContent');
+  if(!el) return;
+
+  if(rmStep === 'category'){
+    el.innerHTML = `
+      <div class="rmIntro">Looking to meet in person? Fill out the form below. Our team will reach out on Instagram once your request and security deposit are verified.</div>
+      <div class="rmCategoryGrid">
+        <div class="rmCategoryCard" onclick="selectRmCategory('single')"><div class="ico">🧑</div><div class="lbl">Single</div></div>
+        <div class="rmCategoryCard" onclick="selectRmCategory('couple')"><div class="ico">🧑‍🤝‍🧑</div><div class="lbl">Couple</div></div>
+      </div>`;
+  } else if(rmStep === 'form'){
+    const nameFieldsHtml = rmCategory === 'couple' ? `
+      <label class="fieldLabel">Male Name</label>
+      <input id="rmNameMale" class="authInput" placeholder="Male partner's name" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Male Age</label>
+      <input id="rmAgeMale" class="authInput" type="number" min="18" placeholder="Male partner's age" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Female Name</label>
+      <input id="rmNameFemale" class="authInput" placeholder="Female partner's name" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Female Age</label>
+      <input id="rmAgeFemale" class="authInput" type="number" min="18" placeholder="Female partner's age" style="margin-bottom:14px;">
+    ` : `
+      <label class="fieldLabel">Name</label>
+      <input id="rmName" class="authInput" placeholder="Your name" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Age</label>
+      <input id="rmAge" class="authInput" type="number" min="18" placeholder="Age" style="margin-bottom:14px;">
+    `;
+    el.innerHTML = `
+      <a class="rmBackLink" onclick="rmStep='category'; renderRealMeet();">← Change category (${rmCategory==='couple'?'Couple':'Single'})</a>
+      <div class="modalTitle" style="margin:2px 0 16px;">For Real Meet — Fill Form and Submit</div>
+
+      ${nameFieldsHtml}
+
+      <label class="fieldLabel">From (Location)</label>
+      <input id="rmLocation" class="authInput" placeholder="City, State" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Photo</label>
+      <label class="rmPhotoUpload" id="rmPhotoLabel" for="rmPhotoInput">📷 Tap to upload your photo</label>
+      <input type="file" id="rmPhotoInput" accept="image/*" class="hidden" onchange="handleRmPhotoSelect()">
+
+      <label class="fieldLabel">Instagram ID (for contact)</label>
+      <input id="rmInstagram" class="authInput" placeholder="@yourusername" style="margin-bottom:14px;">
+
+      <label class="fieldLabel">Description</label>
+      <textarea id="rmDescription" class="authInput" rows="4" placeholder="Tell us what you're looking for..." style="margin-bottom:18px;resize:vertical;"></textarea>
+
+      <button class="goldBtn" onclick="submitRmForm()">Continue to Security Deposit</button>
+    `;
+  } else if(rmStep === 'payment'){
+    el.innerHTML = `
+      <a class="rmBackLink" onclick="rmStep='form'; renderRealMeet();">← Back to form</a>
+      <div class="modalTitle" style="margin:2px 0 16px;">Security Deposit</div>
+      <div id="rmQrArea">Loading payment details...</div>
+    `;
+    loadRmPaymentQr();
+  } else if(rmStep === 'pending'){
+    el.innerHTML = `
+      <div class="pendingBox">
+        <div class="ico">⏳</div>
+        <div style="font-weight:700;margin-bottom:6px;">Request Submitted</div>
+        <div style="color:var(--muted);font-size:13px;">Your real meet request and deposit are under review. We'll contact you on Instagram once approved.</div>
+      </div>
+      <button class="goldBtn" style="margin-top:16px;" onclick="resetRealMeetForm()">Submit Another Request</button>
+    `;
+  }
+}
+
+function selectRmCategory(cat){
+  rmCategory = cat;
+  rmStep = 'form';
+  renderRealMeet();
+}
+
+function handleRmPhotoSelect(){
+  const file = document.getElementById('rmPhotoInput').files[0];
+  rmPhotoFile = file || null;
+  const label = document.getElementById('rmPhotoLabel');
+  if(rmPhotoFile){
+    const url = URL.createObjectURL(rmPhotoFile);
+    label.innerHTML = `<img src="${url}">Photo selected — tap to change`;
+  } else {
+    label.innerHTML = '📷 Tap to upload your photo';
+  }
+}
+
+function submitRmForm(){
+  const location = document.getElementById('rmLocation').value.trim();
+  const instagram = document.getElementById('rmInstagram').value.trim();
+  const description = document.getElementById('rmDescription').value.trim();
+
+  let personData = {};
+  if(rmCategory === 'couple'){
+    const nameMale = document.getElementById('rmNameMale').value.trim();
+    const ageMale = document.getElementById('rmAgeMale').value.trim();
+    const nameFemale = document.getElementById('rmNameFemale').value.trim();
+    const ageFemale = document.getElementById('rmAgeFemale').value.trim();
+    if(!nameMale || !ageMale || !nameFemale || !ageFemale){ alert('Please fill both partners\' names and ages'); return; }
+    personData = { nameMale, ageMale, nameFemale, ageFemale };
+  } else {
+    const name = document.getElementById('rmName').value.trim();
+    const age = document.getElementById('rmAge').value.trim();
+    if(!name || !age){ alert('Please fill your name and age'); return; }
+    personData = { name, age };
+  }
+
+  if(!location || !instagram || !rmPhotoFile){
+    alert('Please fill all fields and upload a photo');
+    return;
+  }
+  rmFormData = { ...personData, location, instagram, description };
+  rmStep = 'payment';
+  renderRealMeet();
+}
+
+async function loadRmPaymentQr(){
+  const settingsSnap = await db.ref('settings').once('value');
+  const settings = settingsSnap.val() || {};
+  const area = document.getElementById('rmQrArea');
+  if(!area) return;
+  area.innerHTML = `
+    <div class="depositNote">
+      <div class="dnTitle">${infoIconSvg()} Please read before paying</div>
+      <ul>
+        <li><b>Real Meet is completely free</b> across all India — we don't charge for the meet itself.</li>
+        <li>This ₹200 is only a <b>security deposit for the online verification process</b>, so we can confirm you're genuine.</li>
+        <li>It also helps us <b>filter serious requests</b> from timepass form-fillers.</li>
+        <li><b>Fully refunded to you at the time of the meet.</b></li>
+      </ul>
+    </div>
+    <div class="qrBox">
+      <img src="${settings.qrUrl||''}" alt="Payment QR" onclick="openQrFullscreen('${settings.qrUrl||''}', 200, '${(settings.upiId||'').replace(/'/g,"\\'")}')">
+      <div class="upiText">Scan & pay <b>₹200</b> security deposit${settings.upiId?(' to <b>'+escapeHtml(settings.upiId)+'</b>'):''}</div>
+      <div class="qrTapHint">${expandIconSvg()} Tap QR to view full screen</div>
+    </div>
+    <label class="fieldLabel">Upload Payment Screenshot</label>
+    <label class="rmPhotoUpload" id="rmScreenshotLabel" for="rmScreenshotInput">📷 Tap to upload payment screenshot</label>
+    <input type="file" id="rmScreenshotInput" accept="image/*" class="hidden" onchange="handleRmScreenshotSelect()">
+    <button class="goldBtn" id="rmSubmitBtn" onclick="submitRmFinal()">Submit for Approval</button>
+  `;
+}
+
+function infoIconSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;}
+
+async function submitRmFinal(){
+  const utr = document.getElementById('rmUtrInput').value.trim();
+  if(utr.length < 4){ alert('Please enter a valid UTR number'); return; }
+  if(!rmPhotoFile || !rmFormData){ alert('Something went wrong, please start over'); resetRealMeetForm(); return; }
+
+  const btn = document.getElementById('rmSubmitBtn');
+  if(btn){ btn.textContent = 'Submitting...'; btn.disabled = true; }
+
+  try{
+    const photoUrl = await uploadToCloudinary(rmPhotoFile);
+    const reqId = db.ref('realMeetRequests').push().key;
+    await db.ref('realMeetRequests/'+reqId).set({
+      username: currentUser,
+      category: rmCategory,
+      name: rmFormData.name || null,
+      age: rmFormData.age || null,
+      nameMale: rmFormData.nameMale || null,
+      ageMale: rmFormData.ageMale || null,
+      nameFemale: rmFormData.nameFemale || null,
+      ageFemale: rmFormData.ageFemale || null,
+      location: rmFormData.location,
+      instagram: rmFormData.instagram,
+      description: rmFormData.description,
+      photoUrl,
+      depositAmount: 200,
+      depositUtr: utr,
+      status: 'pending',
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    rmStep = 'pending';
+    renderRealMeet();
+  }catch(err){
+    console.error(err);
+    alert('Something went wrong submitting your form. Please try again.');
+    if(btn){ btn.textContent = 'Submit for Approval'; btn.disabled = false; }
+  }
+}
+
+function resetRealMeetForm(){
+  rmStep = 'category';
+  rmCategory = null;
+  rmPhotoFile = null;
+  rmFormData = null;
+  renderRealMeet();
+}
+
+renderRealMeet();
+
+/* ============ LIVE PREVIEW LOCK ============
+   Ab yeh lock USER-LEVEL par Firebase me store hota hai:
+   users/{username}/livePreviewUsed = true/false
+   Jab admin panel se kisi user ka subscription cancel/expire kiya jayega,
+   tab is flag ko bhi false reset karna hoga taaki use dobara free preview mile.
+*/
+function openLive(id){
+  const s = schedulesCache[id];
+  const st = scheduleState(s);
+  if(st.state !== 'live'){
+    alert('This stream hasn\'t started yet. Starts ' + new Date(st.start).toLocaleString('en-IN'));
+    return;
+  }
+  db.ref('liveViews/'+id+'/'+DEVICE_ID).set(true);
+
+  if(hasActiveSub()){
+    openFullLiveViewer(id, s, st);
+    return;
+  }
+
+  db.ref('liveViews/'+id+'/previewSeen/'+DEVICE_ID).set(true);
+
+  // Firebase-based check (user-level, not device/localStorage)
+  const alreadyUsed = !!(userData && userData.livePreviewUsed);
+
+  if(alreadyUsed){
+    openSubscribeModal();
+    return;
+  }
+  openLivePreview(id, s, st);
+}
+
+function startElapsedTimer(elId){
+  let secs = 0;
+  const el = document.getElementById(elId);
+  if(el) el.textContent = '00:00';
+  return setInterval(()=>{
+    secs++;
+    const el2 = document.getElementById(elId);
+    if(!el2) return;
+    const m = Math.floor(secs/60).toString().padStart(2,'0');
+    const sSec = (secs%60).toString().padStart(2,'0');
+    el2.textContent = `${m}:${sSec}`;
+  },1000);
+}
+
+function startRandomChat(chatElId){
+  function tick(){
+    const box = document.getElementById(chatElId);
+    if(!box) return;
+    const name = RANDOM_CHAT_NAMES[Math.floor(Math.random()*RANDOM_CHAT_NAMES.length)];
+    const line = RANDOM_CHAT_LINES[Math.floor(Math.random()*RANDOM_CHAT_LINES.length)];
+    box.insertAdjacentHTML('beforeend', chatRowHtml(name, line));
+    box.scrollTop = box.scrollHeight;
+  }
+  tick();
+  return setInterval(tick, 2500 + Math.random()*2500);
+}
+
+function bindReactions(id){
+  db.ref('liveReactions/'+id).on('value', snap=>{
+    const val = snap.val() || {};
+    REACTIONS.forEach(r=>{
+      const el = document.getElementById('rcnt-'+r.key);
+      if(el) el.textContent = val[r.key] || 0;
+    });
+  });
+}
+
+function tapReaction(id, key){
+  db.ref('liveReactions/'+id+'/'+key).transaction(cur => (cur||0)+1);
+}
+
+function reactionRowHtml(id){
+  return REACTIONS.map(r=>`<button class="reactionChip" onclick="tapReaction('${id}','${r.key}')">${r.emoji} <span class="cnt" id="rcnt-${r.key}">0</span></button>`).join('');
+}
+
+let _liveTimerHandle = null, _randomChatHandle = null;
+
+function openLivePreview(id, s, st){
+  const modal = document.getElementById('modalRoot');
+  const offsetSec = Math.max(0, Math.floor((Date.now()-st.start)/1000));
+  modal.innerHTML = `
+  <div class="liveFull">
+    <div class="liveFullTop">
+      <div class="left">
+        <div class="titleTxt">${escapeHtml(s.title||'Live Stream')}</div>
+        <div class="subRow"><span class="liveBadgePill"><span class="dot"></span>LIVE</span><span class="watchingPill">👁 Preview</span></div>
+      </div>
+      <button class="homeBtn" onclick="closeModal()">← Home</button>
+    </div>
+    <div class="liveFullStage">
+      <div class="liveBadgeOverlay"><span class="dot"></span>LIVE</div>
+      <div class="stageTimerPill" id="previewTimer">00:00</div>
+      <video id="previewVid" src="${s.videoUrl}" playsinline autoplay muted loop></video>
+    </div>
+    <div class="reactionRow">${reactionRowHtml(id)}</div>
+    <div class="liveChatLabel">💬 LIVE CHAT</div>
+    <div class="liveFullChat" id="previewChatBox"></div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));">Free preview ends in <span id="pcount">5</span>s</div>
+  </div>`;
+  const vid = document.getElementById('previewVid');
+  const startAt = ()=>{
+    const dur = vid.duration || 0;
+    vid.currentTime = dur > 0 ? (offsetSec % dur) : 0;
+    vid.play().catch(()=>{});
+  };
+  if(vid.readyState >= 1) startAt(); else vid.addEventListener('loadedmetadata', startAt, {once:true});
+  setTimeout(()=>{ vid.muted = false; }, 300);
+
+  bindReactions(id);
+  _liveTimerHandle = startElapsedTimer('previewTimer');
+  _randomChatHandle = startRandomChat('previewChatBox');
+
+  let t = 5;
+  const timer = setInterval(()=>{
+    t--;
+    const el = document.getElementById('pcount'); if(el) el.textContent = t;
+    if(t<=0){
+      clearInterval(timer);
+      clearInterval(_liveTimerHandle);
+      clearInterval(_randomChatHandle);
+      db.ref('liveReactions/'+id).off();
+      // ✅ Firebase me user-level flag set, localStorage nahi
+      db.ref('users/'+currentUser+'/livePreviewUsed').set(true);
+      openSubscribeModal();
+    }
+  },1000);
+}
+
+function speakerOnSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17.5 8.5a5 5 0 010 7"/><path d="M20 6a9 9 0 010 12"/></svg>`;}
+function speakerMutedSvg(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>`;}
+function sendArrowSvg(){return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>`;}
+
+function openFullLiveViewer(id, s, st){
+  const modal = document.getElementById('modalRoot');
+  const offsetSec = Math.max(0, Math.floor((Date.now()-st.start)/1000));
+  modal.innerHTML = `
+  <div class="liveFull">
+    <div class="liveFullTop">
+      <div class="left">
+        <div class="titleTxt">${escapeHtml(s.title||'Live Stream')}</div>
+        <div class="subRow"><span class="liveBadgePill"><span class="dot"></span>LIVE</span><span class="watchingPill" id="memberCountEl">👁 0 watching</span></div>
+      </div>
+      <button class="homeBtn" onclick="closeLiveViewer('${id}')">← Home</button>
+    </div>
+    <div class="liveFullStage">
+      <div class="liveBadgeOverlay"><span class="dot"></span>LIVE</div>
+      <div class="stageTimerPill" id="liveTimer">00:00</div>
+      <video id="liveVid" src="${s.videoUrl}" playsinline autoplay muted loop></video>
+    </div>
+    <div class="reactionRow">${reactionRowHtml(id)}</div>
+    <div class="liveChatLabel">💬 LIVE CHAT</div>
+    <div class="liveFullChat" id="chatBox"></div>
+    <div class="liveFullInputRow">
+      <input id="chatInput" placeholder="Message likhao...">
+      <button class="sendCircleBtn" onclick="sendChat('${id}')">${sendArrowSvg()}</button>
+    </div>
+  </div>`;
+  const vid = document.getElementById('liveVid');
+  const startAt = ()=>{
+    const dur = vid.duration || 0;
+    vid.currentTime = dur > 0 ? (offsetSec % dur) : 0;
+    vid.play().catch(()=>{});
+  };
+  if(vid.readyState >= 1) startAt(); else vid.addEventListener('loadedmetadata', startAt, {once:true});
+  setTimeout(()=>{ vid.muted = false; }, 300);
+
+  bindReactions(id);
+  _liveTimerHandle = startElapsedTimer('liveTimer');
+  _randomChatHandle = startRandomChat('chatBox');
+
+  db.ref('liveViews/'+id).on('value', snap=>{
+    const val = snap.val()||{};
+    const count = Object.keys(val).filter(k=>k!=='previewSeen').length;
+    const el = document.getElementById('memberCountEl');
+    if(el) el.textContent = '👁 ' + count + ' watching';
+  });
+
+  const chatBox = document.getElementById('chatBox');
+  db.ref('liveChat/'+id).limitToLast(50).on('child_added', snap=>{
+    const m = snap.val();
+    chatBox.insertAdjacentHTML('beforeend', chatRowHtml(m.username, m.message));
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+  document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(id); });
+}
+
+function sendChat(id){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  db.ref('liveChat/'+id).push({ username: currentUser, message: msg, timestamp: firebase.database.ServerValue.TIMESTAMP });
+  input.value = '';
+}
+
+function closeLiveViewer(id){
+  db.ref('liveViews/'+id).off();
+  db.ref('liveChat/'+id).off();
+  db.ref('liveReactions/'+id).off();
+  if(_liveTimerHandle) clearInterval(_liveTimerHandle);
+  if(_randomChatHandle) clearInterval(_randomChatHandle);
+  closeModal();
+}
+</script>
+</body>
+</html>
