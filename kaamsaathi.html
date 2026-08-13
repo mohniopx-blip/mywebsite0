@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>KaamSaathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Poppins:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F4EDD8;
+    --bg-2:#ECE1BE;
+    --ink:#1A2340;
+    --ink-soft:#5B6389;
+    --accent:#F0A63A;       /* marigold */
+    --accent-dark:#D6483A;  /* dhaba red */
+    --accent-dark2:#AD3325;
+    --teal:#0E7C86;         /* employer mode signal */
+    --teal-dark:#0A5F67;
+    --card:#FFFDF6;
+    --line:#E1D3A4;
+    --green:#1E8A5C;
+    --radius:18px;
+    --stamp:var(--accent-dark);
+    --stamp-dark:var(--accent-dark2);
+  }
+  body[data-role="employer"]{
+    --stamp:var(--teal);
+    --stamp-dark:var(--teal-dark);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(26,35,64,.07) 1px, transparent 0) 0 0/16px 16px,
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 480px, var(--bg) 900px);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:"Inter","Noto Sans Devanagari",sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    min-height:100vh;
+    padding-bottom:92px;
+  }
+  h1,h2,h3,.display{
+    font-family:"Space Grotesk","Poppins","Noto Sans Devanagari",sans-serif;
+    color:var(--ink);
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  ::selection{background:var(--accent); color:#1A1200;}
+  .screen{display:none; max-width:520px; margin:0 auto; padding:20px 18px 24px;}
+  .screen.active{display:block; animation:riseIn .32s cubic-bezier(.2,.8,.25,1);}
+  @keyframes riseIn{from{opacity:0; transform:translateY(10px) scale(.99)} to{opacity:1; transform:translateY(0) scale(1)}}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+  @keyframes shimmer{0%{background-position:-120px 0} 100%{background-position:120px 0}}
+  @keyframes stampPop{0%{opacity:0; transform:scale(1.4) rotate(-14deg)} 60%{opacity:1; transform:scale(.94) rotate(-8deg)} 100%{opacity:1; transform:scale(1) rotate(-8deg)}}
+  @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(214,72,58,.45)} 100%{box-shadow:0 0 0 14px rgba(214,72,58,0)}}
+  body[data-role="employer"] .fab-post{animation:pulseRingTeal 2.4s ease-out infinite;}
+  @keyframes pulseRingTeal{0%{box-shadow:0 0 0 0 rgba(14,124,134,.45)} 100%{box-shadow:0 0 0 14px rgba(14,124,134,0)}}
+
+  /* ---------- top brand bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:520px; margin:0 auto; padding:16px 18px 0;
+  }
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(155deg,var(--accent),var(--accent-dark));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff; font-family:"Space Grotesk"; font-weight:700; font-size:15px;
+    box-shadow:0 3px 0 rgba(26,35,64,.2), inset 0 1px 0 rgba(255,255,255,.35);
+    transform:rotate(-4deg);
+  }
+  .brand-name{font-family:"Space Grotesk"; font-weight:700; font-size:17px; letter-spacing:-.01em;}
+  .lang-pill{
+    font-size:12px; font-weight:600; color:var(--ink-soft);
+    border:1.5px solid var(--line); background:var(--card);
+    padding:5px 11px; border-radius:999px; cursor:pointer;
+    transition:.15s;
+  }
+  .lang-pill:active{transform:scale(.94);}
+
+  /* ---------- language screen ---------- */
+  .lang-hero{text-align:center; padding:50px 6px 8px;}
+  .lang-hero .brand-mark{width:68px;height:68px;font-size:26px;margin:0 auto 20px;box-shadow:0 6px 0 rgba(26,35,64,.18), inset 0 1px 0 rgba(255,255,255,.35); border-radius:20px;}
+  .lang-hero h1{font-size:27px; font-weight:700;}
+  .lang-hero p{color:var(--ink-soft); margin-top:8px; font-size:14.5px;}
+  .lang-choices{display:grid; gap:14px; margin-top:36px;}
+  .lang-card{
+    background:var(--card); border:2px solid var(--line); border-radius:var(--radius);
+    padding:20px; text-align:left; cursor:pointer; display:flex; align-items:center; gap:14px;
+    transition:.15s; box-shadow:0 2px 0 var(--line);
+  }
+  .lang-card:active{transform:translateY(2px) scale(.99); box-shadow:0 0 0 var(--line);}
+  .lang-card .flag{
+    width:46px;height:46px;border-radius:13px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center; font-size:20px; font-weight:800;
+    font-family:"Space Grotesk"; color:var(--accent-dark); border:1.5px dashed var(--line);
+  }
+  .lang-card .big{font-family:"Space Grotesk"; font-weight:700; font-size:18px;}
+  .lang-card .small{color:var(--ink-soft); font-size:13px; margin-top:2px;}
+
+  /* ---------- form elements ---------- */
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-weight:700; font-size:12.5px; margin-bottom:7px; color:var(--ink); text-transform:uppercase; letter-spacing:.03em;}
+  .field .hint{font-size:12px; color:var(--ink-soft); margin-top:5px;}
+  input[type=text],input[type=number],select,textarea{
+    width:100%; padding:12px 13px; border-radius:12px; border:1.5px solid var(--line);
+    background:var(--card); font-size:15px; font-family:inherit; color:var(--ink);
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--accent-dark); box-shadow:0 0 0 3px rgba(214,72,58,.13);}
+  textarea{resize:vertical; min-height:80px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .chip-group{display:flex; gap:10px; flex-wrap:wrap;}
+  .chip{
+    padding:10px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card);
+    font-weight:600; font-size:13.5px; cursor:pointer; color:var(--ink-soft); transition:.15s;
+  }
+  .chip.sel{background:var(--ink); border-color:var(--ink); color:#fff; transform:scale(1.03);}
+  .chip:active{transform:scale(.95);}
+
+  .role-cards{display:grid; gap:12px; margin-top:4px;}
+  .role-card{
+    border:2px solid var(--line); border-radius:var(--radius); background:var(--card);
+    padding:16px; display:flex; gap:13px; align-items:center; cursor:pointer; transition:.15s;
+    position:relative; overflow:hidden;
+  }
+  .role-card.sel{border-color:var(--accent-dark); background:#FFF4E4; box-shadow:0 0 0 3px rgba(214,72,58,.1);}
+  .role-card.sel::after{content:'✓'; position:absolute; top:10px; right:12px; width:20px; height:20px; border-radius:50%; background:var(--accent-dark); color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center;}
+  .role-card .ic{
+    width:44px;height:44px;border-radius:12px; background:var(--bg); display:flex;align-items:center;justify-content:center; font-size:20px; flex-shrink:0; border:1.5px dashed var(--line);
+  }
+  .role-card .t{font-family:"Space Grotesk"; font-weight:700; font-size:15px;}
+  .role-card .d{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+
+  /* photos */
+  .photo-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px;}
+  .photo-slot{
+    aspect-ratio:1/1; border-radius:13px; border:1.5px dashed var(--line); background:var(--card);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; font-size:22px; color:var(--ink-soft);
+    transition:.15s;
+  }
+  .photo-slot img{width:100%;height:100%;object-fit:cover; animation:fadeIn .3s ease;}
+  .photo-slot .prog{position:absolute; bottom:0; left:0; height:4px; background:var(--accent-dark); width:0%; transition:width .2s;}
+  .upload-btn{
+    display:inline-flex; align-items:center; gap:8px; margin-top:10px;
+    background:var(--ink); color:#fff; border:none; padding:11px 17px; border-radius:12px;
+    font-weight:600; font-size:14px; cursor:pointer; transition:.15s;
+  }
+  .upload-btn:active{transform:scale(.96);}
+
+  .btn-primary{
+    width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer;
+    background:linear-gradient(180deg, var(--accent-dark) 0%, var(--accent-dark2) 100%); color:#fff; font-family:"Space Grotesk"; font-weight:700; font-size:15.5px;
+    box-shadow:0 4px 0 #7E2517; margin-top:10px; transition:transform .1s, box-shadow .1s; letter-spacing:.01em;
+  }
+  .btn-primary:active{transform:translateY(3px); box-shadow:0 1px 0 #7E2517;}
+  .btn-primary:disabled{opacity:.5; box-shadow:none; cursor:not-allowed;}
+  .btn-ghost{
+    width:100%; padding:12px; border-radius:14px; border:1.5px solid var(--line); background:transparent;
+    color:var(--ink-soft); font-weight:600; font-size:14px; cursor:pointer; margin-top:8px; transition:.15s;
+  }
+  .btn-ghost:active{transform:scale(.98); background:var(--card);}
+  .error-box{background:#FCE9E4; color:var(--accent-dark2); border:1.5px solid #F3BFAE; padding:11px 13px; border-radius:12px; font-size:13px; margin-bottom:12px; display:none; font-weight:600;}
+
+  /* ---------- ticket-style job card (signature element) ---------- */
+  .ticket{
+    background:var(--card); border-radius:var(--radius); position:relative; margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(26,35,64,.06), 0 8px 18px -8px rgba(26,35,64,.18); overflow:hidden; border:1px solid var(--line);
+    animation:fadeIn .35s ease;
+  }
+  .ticket::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:6px;
+    background:repeating-linear-gradient(-45deg, var(--stamp), var(--stamp) 5px, var(--stamp-dark) 5px, var(--stamp-dark) 10px);
+  }
+  .ticket-top{padding:17px 16px 14px 22px;}
+  .ticket-cat{
+    display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:#fff; background:var(--stamp); padding:5px 10px 5px 9px; border-radius:5px 999px 999px 5px; margin-bottom:9px;
+    font-family:"Space Grotesk";
+  }
+  .ticket-title{font-family:"Space Grotesk"; font-weight:700; font-size:16.5px; letter-spacing:-.01em;}
+  .ticket-meta{color:var(--ink-soft); font-size:13px; margin-top:4px;}
+  .ticket-desc{font-size:13.5px; color:var(--ink-soft); margin-top:8px;}
+  .ticket-divider{
+    position:relative; border-top:2px dashed var(--line); margin:2px 0 2px 6px;
+  }
+  .ticket-divider::before,.ticket-divider::after{
+    content:''; position:absolute; top:-9px; width:18px; height:18px; border-radius:50%; background:var(--bg);
+  }
+  .ticket-divider::before{left:-9px;}
+  .ticket-divider::after{right:-9px;}
+  .ticket-bottom{padding:13px 16px 16px 22px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .ticket-pay{
+    font-family:"Space Grotesk"; font-weight:700; color:var(--green); font-size:14.5px;
+    border:1.5px dashed #B7DCC7; background:#EEF9F2; padding:5px 10px; border-radius:8px; transform:rotate(-1.2deg); display:inline-block;
+  }
+  .ticket-btn{
+    background:var(--ink); color:#fff; border:none; padding:9px 15px; border-radius:11px; font-weight:600; font-size:12.5px; cursor:pointer; transition:.12s;
+  }
+  .ticket-btn:active{transform:scale(.94);}
+  .ticket-contact{
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink); display:none;
+  }
+  .ticket-contact.show{display:block;}
+  .ticket-contact b{color:var(--accent-dark);}
+
+  /* worker card in applicants list */
+  .applicant{
+    display:flex; gap:10px; align-items:center; padding:11px 4px; border-bottom:1px solid var(--line); border-radius:10px; transition:.12s;
+  }
+  .applicant:last-child{border-bottom:none;}
+  .applicant:active{background:var(--bg);}
+  .applicant img{width:44px;height:44px;border-radius:10px;object-fit:cover; background:var(--bg);}
+  .applicant .n{font-weight:700; font-size:14px;}
+  .applicant .p{font-size:12.5px; color:var(--ink-soft);}
+
+  .section-title{font-family:"Space Grotesk"; font-weight:700; font-size:19px; margin:20px 0 13px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px;}
+  .section-title::before{content:''; width:5px; height:18px; border-radius:3px; background:var(--stamp); display:inline-block;}
+  .empty-state{
+    text-align:center; padding:50px 14px; color:var(--ink-soft); background:var(--card); border:1.5px dashed var(--line); border-radius:var(--radius);
+  }
+  .empty-state .ic{font-size:36px; margin-bottom:10px; opacity:.7;}
+
+  .profile-card{
+    background:var(--card); border-radius:var(--radius); padding:20px; border:1px solid var(--line); text-align:center;
+    box-shadow:0 8px 18px -10px rgba(26,35,64,.2);
+  }
+  .profile-photos{display:flex; gap:8px; overflow-x:auto; margin:14px 0 4px; padding-bottom:4px;}
+  .profile-photos img{width:78px;height:78px;border-radius:12px;object-fit:cover; flex-shrink:0; border:1.5px solid var(--line);}
+  .badge-role{
+    display:inline-block; margin-top:8px; font-size:11px; font-weight:700; letter-spacing:.04em;
+    padding:6px 13px; border-radius:999px; background:var(--stamp); color:#fff; text-transform:uppercase;
+  }
+  .info-row{display:flex; justify-content:space-between; font-size:13.5px; padding:10px 0; border-bottom:1px solid var(--line); text-align:left;}
+  .info-row span:first-child{color:var(--ink-soft);}
+  .info-row span:last-child{font-weight:600;}
+
+  /* bottom nav */
+  .bottom-nav{
+    position:fixed; bottom:12px; left:14px; right:14px; background:var(--ink); border-top:none; border-radius:22px;
+    display:none; max-width:492px; margin:0 auto; padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+    box-shadow:0 10px 24px -6px rgba(26,35,64,.4);
+  }
+  .bottom-nav.show{display:flex; justify-content:space-around;}
+  .nav-item{
+    background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:rgba(255,255,255,.55); font-size:10.5px; font-weight:600; cursor:pointer; padding:6px 12px; font-family:inherit;
+    position:relative; border-radius:14px; transition:.15s;
+  }
+  .nav-item .ic{font-size:19px;}
+  .nav-item.active{color:#fff; background:rgba(255,255,255,.12);}
+  .nav-dot{
+    position:absolute; top:2px; right:8px; width:9px; height:9px; border-radius:50%;
+    background:var(--accent-dark); border:2px solid var(--ink); display:none;
+  }
+  .nav-dot.show{display:block;}
+
+  .fab-post{
+    position:fixed; bottom:98px; right:50%; transform:translateX(190px);
+    background:linear-gradient(155deg,var(--stamp),var(--stamp-dark)); color:#fff; border:none; width:56px;height:56px; border-radius:18px;
+    font-size:26px; box-shadow:0 6px 16px -4px rgba(26,35,64,.4); cursor:pointer; display:none; align-items:center; justify-content:center;
+    animation:pulseRing 2.4s ease-out infinite; transition:transform .12s;
+  }
+  .fab-post:active{transform:translateX(190px) scale(.92);}
+  .fab-post.show{display:flex;}
+  @media(max-width:560px){.fab-post{right:22px; transform:none;} .fab-post:active{transform:scale(.92);}}
+
+  .toast{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+    padding:11px 20px; border-radius:999px; font-size:13.5px; font-weight:600; z-index:999; opacity:0; pointer-events:none; transition:.25s;
+    box-shadow:0 8px 20px -6px rgba(26,35,64,.4);
+  }
+  .toast.show{opacity:1; top:20px;}
+
+  /* poster identity on job ticket */
+  .ticket-employer{display:flex; align-items:center; gap:8px; margin-top:7px;}
+  .ticket-employer img{width:26px;height:26px;border-radius:8px;object-fit:cover; background:var(--bg); border:1.5px solid var(--line);}
+  .ticket-employer span{font-size:12.5px; color:var(--ink-soft); font-weight:600;}
+  .ticket-actions{display:flex; gap:7px; flex-wrap:wrap;}
+  .ticket-btn.outline{background:transparent; border:1.5px solid var(--ink); color:var(--ink);}
+  .applicant{cursor:pointer;}
+  .applicant:active{opacity:.7;}
+  .chat-badge{
+    background:var(--accent-dark); color:#fff; font-size:10.5px; font-weight:700; border-radius:999px;
+    padding:1px 7px; margin-left:6px;
+  }
+
+  /* ---------- chat screen ---------- */
+  #screen-chat{padding:0; max-width:520px;}
+  .chat-header{
+    display:flex; align-items:center; gap:10px; padding:15px 16px; background:var(--card);
+    border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5;
+  }
+  .chat-back{background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink); padding:4px 6px 4px 0;}
+  .chat-header img{width:38px;height:38px;border-radius:10px;object-fit:cover; background:var(--bg);}
+  .chat-header .cn{font-family:"Space Grotesk"; font-weight:700; font-size:15px;}
+  .chat-header .cj{font-size:11.5px; color:var(--ink-soft);}
+  .chat-body{padding:16px; min-height:calc(100vh - 250px); display:flex; flex-direction:column; gap:9px;}
+  .msg-row{display:flex;}
+  .msg-row.mine{justify-content:flex-end;}
+  .msg-bubble{
+    max-width:75%; padding:10px 14px; border-radius:15px; font-size:14px; line-height:1.4; animation:fadeIn .2s ease;
+  }
+  .msg-row.mine .msg-bubble{background:var(--ink); color:#fff; border-bottom-right-radius:4px;}
+  .msg-row.theirs .msg-bubble{background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px;}
+  .msg-time{font-size:10px; opacity:.65; margin-top:3px; display:block;}
+  .chat-input-bar{
+    position:fixed; bottom:0; left:0; right:0; max-width:520px; margin:0 auto; background:var(--card);
+    border-top:1px solid var(--line); padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:flex; gap:8px;
+  }
+  .chat-input-bar input{flex:1; border-radius:999px; padding:11px 16px;}
+  .chat-send{
+    background:linear-gradient(155deg,var(--stamp),var(--stamp-dark)); color:#fff; border:none; width:44px;height:44px; border-radius:50%;
+    font-size:17px; cursor:pointer; flex-shrink:0; transition:.12s;
+  }
+  .chat-send:active{transform:scale(.9);}
+  .chat-empty{text-align:center; color:var(--ink-soft); font-size:13px; padding:30px 10px;}
+
+  /* ---------- chats list ---------- */
+  .chat-list-item{
+    display:flex; gap:12px; align-items:center; padding:13px 6px; border-bottom:1px solid var(--line); cursor:pointer;
+    position:relative; border-radius:12px; transition:.12s;
+  }
+  .chat-list-item:active{background:var(--card);}
+  .chat-list-item img{width:48px;height:48px;border-radius:12px;object-fit:cover; background:var(--card); flex-shrink:0;}
+  .chat-list-item .cn{font-weight:700; font-size:14.5px; display:flex; align-items:center;}
+  .chat-list-item .cj{font-size:12px; color:var(--stamp); font-weight:600; margin-top:1px;}
+  .chat-list-item .cl{font-size:12.5px; color:var(--ink-soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .item-unread-dot{
+    width:10px; height:10px; border-radius:50%; background:var(--accent-dark); margin-left:7px; flex-shrink:0;
+  }
+
+  /* ---------- photo lightbox ---------- */
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(10,12,20,.95); z-index:999; display:none;
+    flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(3px);
+  }
+  .lightbox-overlay.show{display:flex; animation:fadeIn .2s ease;}
+  .lightbox-overlay img{max-width:100%; max-height:72vh; object-fit:contain; border-radius:12px;}
+  .lightbox-close{
+    position:absolute; top:18px; right:18px; background:rgba(255,255,255,.15); border:none; color:#fff;
+    width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer;
+  }
+  .lightbox-like-bar{margin-top:18px;}
+  .lightbox-like-btn{
+    background:rgba(255,255,255,.12); border:1.5px solid rgba(255,255,255,.3); color:#fff;
+    padding:10px 22px; border-radius:999px; font-size:16px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+  }
+  .lightbox-like-btn:active{transform:scale(.96);}
+
+  /* ---------- employers browse ---------- */
+  .ebrowse-card{
+    background:var(--card); border-radius:var(--radius); border:1px solid var(--line); padding:14px;
+    display:flex; gap:12px; margin-bottom:14px; box-shadow:0 1px 2px rgba(26,35,64,.06), 0 8px 18px -10px rgba(26,35,64,.18);
+  }
+  .ebrowse-card img{width:62px;height:62px;border-radius:14px;object-fit:cover; background:var(--bg); flex-shrink:0; cursor:pointer; border:1.5px solid var(--line);}
+  .ebrowse-card .en{font-family:"Space Grotesk"; font-weight:700; font-size:15px;}
+  .ebrowse-card .el{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .ebrowse-card .ea{font-size:12.5px; color:var(--ink-soft); margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .ebrowse-card .ebtns{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+
+  /* ---------- ban screen ---------- */
+  .ban-screen{
+    position:fixed; inset:0; background:#1A2340; color:#fff; z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px; text-align:center;
+    background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,.06) 1px, transparent 0);
+    background-size:16px 16px;
+  }
+  .ban-screen .ic{
+    font-size:30px; margin-bottom:18px; color:var(--accent-dark); border:4px solid var(--accent-dark);
+    width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    transform:rotate(-8deg); animation:stampPop .4s ease-out;
+  }
+  .ban-screen h2{color:#fff; font-size:21px; margin-bottom:10px; font-family:"Space Grotesk";}
+  .ban-screen p{color:#C9D0E4; font-size:14px; max-width:340px; line-height:1.6;}
+  .ban-screen .reason{
+    margin-top:16px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    border-radius:12px; padding:10px 16px; font-size:13px; color:#fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ PHOTO LIGHTBOX ============ -->
+<div class="lightbox-overlay" id="lightbox-overlay" onclick="closeLightboxBg(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="">
+  <div class="lightbox-like-bar">
+    <button class="lightbox-like-btn" id="lightbox-like-btn" onclick="toggleLike()">
+      <span id="lightbox-heart">🤍</span> <span id="lightbox-like-count">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ LANGUAGE SCREEN ============ -->
+<div class="screen active" id="screen-lang">
+  <div class="lang-hero">
+    <div class="brand-mark">KS</div>
+    <h1>KaamSaathi</h1>
+    <p>Apni bhasha chuniye / Choose your language</p>
+  </div>
+  <div class="lang-choices">
+    <div class="lang-card" onclick="setLang('hi')">
+      <div class="flag">अ</div>
+      <div><div class="big">हिंदी</div><div class="small">Hindi mein aage badhein</div></div>
+    </div>
+    <div class="lang-card" onclick="setLang('en')">
+      <div class="flag">A</div>
+      <div><div class="big">English</div><div class="small">Continue in English</div></div>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:22px;">
+    <span style="color:var(--ink-soft); font-size:13.5px; cursor:pointer; text-decoration:underline;" onclick="openLoginScreen()">पहले से account hai? Login karein / Already have an account? Login</span>
+  </div>
+</div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="screen" id="screen-login">
+  <div class="topbar" style="padding:0 0 6px; justify-content:space-between;">
+    <div class="brand"><div class="brand-mark" style="width:28px;height:28px;font-size:12px;">KS</div><div class="brand-name" style="font-size:15px;" id="lg-title"></div></div>
+    <span class="lang-pill" onclick="toggleLoginLang()" id="lg-lang-pill"></span>
+  </div>
+  <p id="lg-sub" style="color:var(--ink-soft); font-size:13.5px; margin:8px 0 20px;"></p>
+
+  <div class="error-box" id="lg-error"></div>
+
+  <div class="field">
+    <label id="lbl-lg-username"></label>
+    <input type="text" id="in-lg-username" autocapitalize="off" placeholder="username">
+  </div>
+  <div class="field">
+    <label id="lbl-lg-pin"></label>
+    <input type="password" id="in-lg-pin" inputmode="numeric" maxlength="6" placeholder="••••••">
+  </div>
+
+  <button class="btn-primary" id="btn-login" onclick="attemptLogin()"></button>
+  <button class="btn-ghost" id="btn-login-back" onclick="showScreen('screen-lang')"></button>
+</div>
+
+<!-- ============ PROFILE FORM SCREEN ============ -->
+<div class="screen" id="screen-profile">
+  <div class="topbar" style="padding:0 0 6px;">
+    <div class="brand"><div class="brand-mark" style="width:28px;height:28px;font-size:12px;">KS</div><div class="brand-name" style="font-size:15px;" id="p-title"></div></div>
+  </div>
+  <p id="p-sub" style="color:var(--ink-soft); font-size:13.5px; margin:0 0 18px;"></p>
+
+  <div class="error-box" id="p-error"></div>
+
+  <div class="field">
+    <label id="lbl-username"></label>
+    <input type="text" id="in-username" autocapitalize="off" placeholder="ramesh_kumar">
+    <div class="hint" id="hint-username"></div>
+  </div>
+  <div class="field">
+    <label id="lbl-pin"></label>
+    <input type="password" id="in-pin" inputmode="numeric" maxlength="6" placeholder="••••••">
+    <div class="hint" id="hint-pin"></div>
+  </div>
+
+  <div class="field">
+    <label id="lbl-name"></label>
+    <input type="text" id="in-name" placeholder="">
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label id="lbl-age"></label>
+      <input type="number" id="in-age" min="14" max="80" placeholder="25">
+    </div>
+    <div class="field">
+      <label id="lbl-height"></label>
+      <input type="number" id="in-height" min="100" max="230" placeholder="165 cm">
+    </div>
+  </div>
+
+  <div class="field">
+    <label id="lbl-location"></label>
+    <input type="text" id="in-location" placeholder="">
+  </div>
+
+  <div class="field">
+    <label id="lbl-telegram"></label>
+    <input type="text" id="in-telegram" placeholder="@username">
+  </div>
+
+  <div class="field">
+    <label id="lbl-gender"></label>
+    <div class="chip-group" id="gender-group"></div>
+  </div>
+
+  <div class="field">
+    <label id="lbl-about"></label>
+    <textarea id="in-about" placeholder=""></textarea>
+  </div>
+
+  <div class="field">
+    <label id="lbl-photos"></label>
+    <div class="photo-grid" id="photo-grid"></div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoSelect(event)">
+    <button class="upload-btn" onclick="document.getElementById('file-input').click()"><span>📷</span><span id="lbl-upload-btn"></span></button>
+    <div class="hint" id="hint-photos"></div>
+  </div>
+
+  <div class="field">
+    <label id="lbl-role"></label>
+    <div class="role-cards" id="role-cards"></div>
+  </div>
+
+  <button class="btn-primary" id="btn-save-profile" onclick="saveProfile()"></button>
+</div>
+
+<!-- ============ WORKER HOME (browse jobs) ============ -->
+<div class="screen" id="screen-worker-home">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark" style="width:28px;height:28px;font-size:12px;">KS</div><div class="brand-name" style="font-size:15px;" id="wh-title"></div></div>
+  </div>
+  <h2 class="section-title" id="wh-heading" style="margin-top:16px;"></h2>
+  <div id="jobs-list"></div>
+</div>
+
+<!-- ============ EMPLOYER HOME (my jobs) ============ -->
+<div class="screen" id="screen-employer-home">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark" style="width:28px;height:28px;font-size:12px;">KS</div><div class="brand-name" style="font-size:15px;" id="eh-title"></div></div>
+  </div>
+  <h2 class="section-title" id="eh-heading" style="margin-top:16px;"></h2>
+  <div id="myjobs-list"></div>
+</div>
+
+<!-- ============ POST JOB SCREEN ============ -->
+<div class="screen" id="screen-post-job">
+  <h2 class="section-title" id="pj-heading" style="margin-top:8px;"></h2>
+  <div class="error-box" id="pj-error"></div>
+
+  <div class="field">
+    <label id="lbl-jtitle"></label>
+    <input type="text" id="in-jtitle" placeholder="">
+  </div>
+  <div class="field">
+    <label id="lbl-jcat"></label>
+    <select id="in-jcat"></select>
+  </div>
+  <div class="field">
+    <label id="lbl-jloc"></label>
+    <input type="text" id="in-jloc" placeholder="">
+  </div>
+  <div class="field">
+    <label id="lbl-jpay"></label>
+    <input type="text" id="in-jpay" placeholder="₹500 / din">
+  </div>
+  <div class="field">
+    <label id="lbl-jdesc"></label>
+    <textarea id="in-jdesc" placeholder=""></textarea>
+  </div>
+  <button class="btn-primary" id="btn-post-job" onclick="postJob()"></button>
+  <button class="btn-ghost" id="btn-cancel-job" onclick="showScreen('screen-employer-home')"></button>
+</div>
+
+<!-- ============ CHATS LIST SCREEN ============ -->
+<div class="screen" id="screen-chats">
+  <h2 class="section-title" id="cl-heading" style="margin-top:8px;"></h2>
+  <div id="chats-list"></div>
+</div>
+
+<!-- ============ CHAT SCREEN ============ -->
+<div class="screen" id="screen-chat">
+  <div class="chat-header">
+    <button class="chat-back" onclick="closeChat()">←</button>
+    <div id="chat-other-photo-wrap" style="width:38px;height:38px;border-radius:10px;overflow:hidden;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">👤</div>
+    <div>
+      <div class="cn" id="chat-other-name"></div>
+      <div class="cj" id="chat-job-title"></div>
+    </div>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+  <div class="chat-input-bar">
+    <input type="text" id="chat-input" placeholder="">
+    <button class="chat-send" onclick="sendChatMsg()">➤</button>
+  </div>
+</div>
+
+<!-- ============ MY PROFILE SCREEN ============ -->
+<div class="screen" id="screen-my-profile">
+  <h2 class="section-title" id="mp-heading" style="margin-top:8px;"></h2>
+  <div class="profile-card" id="mp-card"></div>
+  <button class="btn-ghost" id="btn-switch-account" onclick="switchAccount()" style="margin-top:20px;"></button>
+</div>
+
+<!-- ============ EMPLOYERS BROWSE SCREEN (workers can see all employers) ============ -->
+<div class="screen" id="screen-employers-browse">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark" style="width:28px;height:28px;font-size:12px;">KS</div><div class="brand-name" style="font-size:15px;" id="eb-title"></div></div>
+  </div>
+  <h2 class="section-title" id="eb-heading" style="margin-top:16px;"></h2>
+  <div id="employers-list"></div>
+</div>
+
+<!-- ============ VIEW OTHER'S PROFILE SCREEN ============ -->
+<div class="screen" id="screen-view-profile">
+  <div class="topbar" style="padding:0 0 6px; justify-content:flex-start; gap:10px;">
+    <button class="chat-back" onclick="closeViewProfile()" style="padding:0;">←</button>
+    <h2 class="section-title" id="vp-heading" style="margin:0;"></h2>
+  </div>
+  <div class="profile-card" id="vp-card" style="margin-top:14px;"></div>
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-item" id="nav-home" onclick="goHome()"><span class="ic">🏠</span><span id="nav-home-lbl"></span></button>
+  <button class="nav-item" id="nav-employers" style="display:none;" onclick="showScreen('screen-employers-browse'); loadEmployersBrowse(); setActiveNav('nav-employers'); document.getElementById('fab-post').classList.remove('show');"><span class="ic">👥</span><span id="nav-employers-lbl"></span></button>
+  <button class="nav-item" id="nav-chats" onclick="showScreen('screen-chats'); loadChatsList(); setActiveNav('nav-chats'); document.getElementById('fab-post').classList.remove('show');"><span class="ic">💬</span><span id="nav-chats-lbl"></span><span class="nav-dot" id="nav-chats-dot"></span></button>
+  <button class="nav-item" id="nav-profile" onclick="showScreen('screen-my-profile'); refreshMyProfile(); setActiveNav('nav-profile'); document.getElementById('fab-post').classList.remove('show');"><span class="ic">👤</span><span id="nav-profile-lbl"></span></button>
+</div>
+<button class="fab-post" id="fab-post" onclick="openPostJob()">+</button>
+
+
+<!-- ============================================================
+     FIREBASE + CLOUDINARY SETUP
+     ============================================================ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyCbsJdwyFXHW-NY1w6j3fS26_7JXDE_x4I",
+  authDomain:        "vibe-v2-94f63.firebaseapp.com",
+  databaseURL:       "https://vibe-v2-94f63-default-rtdb.firebaseio.com",
+  projectId:         "vibe-v2-94f63",
+  storageBucket:     "vibe-v2-94f63.firebasestorage.app",
+  messagingSenderId: "55743932257",
+  appId:             "1:55743932257:web:baab152e46c13ec7100720",
+  measurementId:     "G-MP828T2Q3N"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const CLOUDINARY_CLOUD  = "iuxum1ag";
+const CLOUDINARY_PRESET = "vibe_uploads";
+const CLOUDINARY_URL    = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`;
+
+function uploadToCloudinary(file, onProgress){
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', CLOUDINARY_URL);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100)); };
+    xhr.onload = () => {
+      try { const res = JSON.parse(xhr.responseText); res.secure_url ? resolve(res.secure_url) : reject(res); }
+      catch(err){ reject(err); }
+    };
+    xhr.onerror = reject;
+    xhr.send(fd);
+  });
+}
+</script>
+
+<!-- ============================================================
+     APP LOGIC
+     ============================================================ -->
+<script>
+/* ---------------- i18n ---------------- */
+const T = {
+  hi: {
+    ptitle:"Apni Profile Banayein", psub:"Bas 1 minute lagega, sahi jaankari bharein",
+    name:"Aapka naam", age:"Umar (saal)", height:"Height (cm)", location:"Aap kaha se hain",
+    telegram:"Telegram ID (optional)", gender:"Aap kya hain", about:"Apne baare mein thoda batayein",
+    photos:"Kam se kam 4 photo dalein", uploadBtn:"Photo Chunein", hintPhotos:"Chehra saaf dikhna chahiye",
+    role:"Aap kya karna chahte hain", save:"Profile Save Karein",
+    genders:["Purush","Mahila","Anya"],
+    roleWorker:"Kaam Chahiye", roleWorkerD:"Naukri/kaam dhundhna hai",
+    roleEmployer:"Kaam Dena Hai", roleEmployerD:"Kisi ko kaam par rakhna hai",
+    errName:"Naam likhein", errAge:"Sahi umar likhein", errHeight:"Height likhein",
+    errLocation:"Jagah likhein", errGender:"Gender chunein",
+    errAbout:"Apne baare mein 1-2line likhein", errPhotos:"Kam se kam 4 photo daalein", errRole:"Ek option chunein",
+    whTitle:"KaamSaathi", whHeading:"Aapke aas-paas ke kaam",
+    ehTitle:"KaamSaathi", ehHeading:"Aapke daale gaye kaam",
+    navHome:"Home", navProfile:"Profile",
+    pjHeading:"Naya Kaam Post Karein", jtitle:"Kaam ka naam", jcat:"Kaam ki category",
+    jloc:"Jagah", jpay:"Paisa (jaise ₹500/din)", jdesc:"Kaam ke baare mein likhein",
+    postBtn:"Kaam Post Karein", cancelBtn:"Cancel", errJTitle:"Kaam ka naam likhein",
+    errJLoc:"Jagah likhein", errJPay:"Paisa likhein", errJDesc:"Thoda detail likhein",
+    contactBtn:"Sampark Karein", contactShown:"Telegram:", interestedMsg:"Aapne interest bhej diya hai ✅",
+    noJobs:"Abhi koi kaam nahi hai. Baad mein check karein.", noApplicants:"Abhi tak koi interested nahi hua.",
+    applicantsFor:"Interested log:", mpHeading:"Meri Profile", switchAcc:"Logout Karein",
+    ageLbl:"Umar", heightLbl:"Height", genderLbl:"Gender", locLbl:"Jagah", telegramLbl:"Telegram ID", aboutLbl:"Bio",
+    postedOn:"Post kiya:", by:"Post kiya:", toastSaved:"Profile save ho gayi!", toastPosted:"Kaam post ho gaya!",
+    applyBtn:"Apply Karein", chatBtn:"💬 Baat Karein", navChats:"Baatein", chatsHeading:"Meri Baatcheet",
+    noChats:"Abhi koi baatcheet nahi hui.", typeMsg:"Message likhein...", appliedBadge:"Applied",
+    tapToChat:"Baat karne ke liye tap karein", noMsgs:"Baat shuru karein 👋",
+    username:"Username banayein (unique, kam se kam 6 letters)", pin:"6-digit PIN banayein",
+    hintUsername:"Isi se aap dobara login karenge, sirf English letters/numbers", hintPin:"Yaad rakhein, login ke liye chahiye hoga",
+    errUsername:"Username likhein (kam se kam 6 letters)", errUsernameFormat:"Sirf letters, numbers, _ likhein",
+    errUsernameTaken:"Yeh username pehle se liya gaya hai, dusra try karein", errPin:"6 ank ka PIN banayein",
+    errPinTaken:"Yeh PIN pehle se kisi aur ne liya hai, dusra PIN try karein",
+    lgTitle:"Login Karein", lgSub:"Apna username aur PIN dalein", lblLgUsername:"Username", lblLgPin:"PIN",
+    loginBtn:"Login Karein", backBtn:"Wapas", errLgUsername:"Username likhein", errLgPin:"PIN likhein",
+    errLgNotFound:"Yeh username nahi mila", errLgWrongPin:"Galat PIN, dobara try karein", toastLoggedIn:"Login ho gaya!",
+    viewProfileBtn:"👤 Profile", vpHeading:"Profile",
+    navEmployers:"Employers", ebHeading:"Kaam Denewale", noEmployers:"Abhi koi employer nahi hai.",
+    directChatTitle:"Sidha Sampark",
+    banTitle:"Aapko block kar diya gaya hai", banMsg:"Aapko is app ka istemal karne se hamesha ke liye rok diya gaya hai. Yeh faisla wapas nahi liya ja sakta.", banReasonLbl:"Karan:",
+    categories:["Nirmaan (Construction)","Driver","Rasoiya (Cook)","Safai (Cleaning)","Electrician","Plumber",
+      "Painter","Silai (Tailoring)","Delivery","Anya (Other)"]
+  },
+  en: {
+    ptitle:"Create Your Profile", psub:"Takes just a minute, fill in correct details",
+    name:"Your name", age:"Age (years)", height:"Height (cm)", location:"Where are you from",
+    telegram:"Telegram ID (optional)", gender:"You are", about:"Tell us a bit about yourself",
+    photos:"Add at least 4 photos", uploadBtn:"Choose Photos", hintPhotos:"Face should be clearly visible",
+    role:"What do you want to do", save:"Save Profile",
+    genders:["Male","Female","Other"],
+    roleWorker:"Looking for Work", roleWorkerD:"Find a job or gig",
+    roleEmployer:"Hiring Someone", roleEmployerD:"Post work you need done",
+    errName:"Please enter your name", errAge:"Enter a valid age", errHeight:"Enter your height",
+    errLocation:"Enter your location", errGender:"Select a gender",
+    errAbout:"Write 1-2 lines about yourself", errPhotos:"Please add at least 4 photos", errRole:"Select an option",
+    whTitle:"KaamSaathi", whHeading:"Work near you",
+    ehTitle:"KaamSaathi", ehHeading:"Jobs you posted",
+    navHome:"Home", navProfile:"Profile",
+    pjHeading:"Post New Work", jtitle:"Job title", jcat:"Category",
+    jloc:"Location", jpay:"Pay (e.g. ₹500/day)", jdesc:"Describe the work",
+    postBtn:"Post Job", cancelBtn:"Cancel", errJTitle:"Enter job title",
+    errJLoc:"Enter location", errJPay:"Enter pay details", errJDesc:"Add a short description",
+    contactBtn:"Contact", contactShown:"Telegram:", interestedMsg:"Your interest has been sent ✅",
+    noJobs:"No work posted yet. Check back soon.", noApplicants:"No one has shown interest yet.",
+    applicantsFor:"Interested people:", mpHeading:"My Profile", switchAcc:"Logout",
+    ageLbl:"Age", heightLbl:"Height", genderLbl:"Gender", locLbl:"Location", telegramLbl:"Telegram ID", aboutLbl:"Bio",
+    postedOn:"Posted:", by:"Posted by:", toastSaved:"Profile saved!", toastPosted:"Job posted!",
+    applyBtn:"Apply", chatBtn:"💬 Chat", navChats:"Chats", chatsHeading:"My Chats",
+    noChats:"No conversations yet.", typeMsg:"Type a message...", appliedBadge:"Applied",
+    tapToChat:"Tap to chat", noMsgs:"Start the conversation 👋",
+    username:"Create a username (unique, min 6 letters)", pin:"Create a 6-digit PIN",
+    hintUsername:"You'll use this to log back in, letters/numbers only", hintPin:"Remember this, you'll need it to log in",
+    errUsername:"Enter a username (min 6 letters)", errUsernameFormat:"Only letters, numbers, _ allowed",
+    errUsernameTaken:"This username is already taken, try another", errPin:"Create a 6-digit PIN",
+    errPinTaken:"This PIN is already used by someone else, try a different PIN",
+    lgTitle:"Log In", lgSub:"Enter your username and PIN", lblLgUsername:"Username", lblLgPin:"PIN",
+    loginBtn:"Log In", backBtn:"Back", errLgUsername:"Enter your username", errLgPin:"Enter your PIN",
+    errLgNotFound:"Username not found", errLgWrongPin:"Wrong PIN, try again", toastLoggedIn:"Logged in!",
+    viewProfileBtn:"👤 Profile", vpHeading:"Profile",
+    navEmployers:"Employers", ebHeading:"Employers", noEmployers:"No employers yet.",
+    directChatTitle:"Direct Message",
+    banTitle:"You have been blocked", banMsg:"You have been permanently blocked from using this app. This decision cannot be reversed.", banReasonLbl:"Reason:",
+    categories:["Construction","Driver","Cook","Cleaning","Electrician","Plumber",
+      "Painter","Tailoring","Delivery","Other"]
+  }
+};
+
+/* ---------------- state ---------------- */
+let lang = localStorage.getItem('ks_lang') || null;
+let uid = localStorage.getItem('ks_uid') || null;
+let myProfile = null;
+let photosArr = [];
+let selectedGenderIdx = null;
+let selectedRole = null; // 'worker' | 'employer'
+let jobsCache = {};
+let deviceFp = null;
+
+function uuid(){ return 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ---------------- device fingerprint + ban enforcement ---------------- */
+async function getDeviceFingerprint(){
+  try{
+    const c = document.createElement('canvas');
+    const ctx = c.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('KaamSaathi-fp-' + navigator.userAgent.length, 2, 2);
+    const canvasData = c.toDataURL();
+    const raw = [
+      navigator.userAgent, navigator.language, navigator.platform,
+      screen.width + 'x' + screen.height, screen.colorDepth,
+      (Intl.DateTimeFormat().resolvedOptions().timeZone || ''),
+      (navigator.hardwareConcurrency || ''),
+      canvasData
+    ].join('|');
+    const enc = new TextEncoder().encode(raw);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  } catch(e){
+    let fp = localStorage.getItem('ks_fp_fallback');
+    if (!fp) { fp = 'fpf_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('ks_fp_fallback', fp); }
+    return fp;
+  }
+}
+
+async function checkIfBanned(fp, currentUid){
+  try{
+    if (fp) {
+      const fpSnap = await db.ref('bannedFingerprints/' + fp).once('value');
+      if (fpSnap.exists()) return fpSnap.val();
+    }
+    if (currentUid) {
+      const uSnap = await db.ref('bannedUsers/' + currentUid).once('value');
+      if (uSnap.exists()) return uSnap.val();
+    }
+    return null;
+  } catch(e){ return null; }
+}
+
+function showBannedScreen(info){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('bottom-nav').classList.remove('show');
+  document.getElementById('fab-post').classList.remove('show');
+  const l = lang || 'hi';
+  const t = T[l];
+  const div = document.createElement('div');
+  div.className = 'ban-screen';
+  const reason = info && info.reason ? info.reason : '';
+  div.innerHTML = `
+    <div class="ic">⛔</div>
+    <h2>${t.banTitle}</h2>
+    <p>${t.banMsg}</p>
+    ${reason ? `<div class="reason">${t.banReasonLbl} ${escapeHtml(reason)}</div>` : ''}
+  `;
+  document.body.appendChild(div);
+}
+
+/* ---------------- language ---------------- */
+function setLang(l){
+  lang = l;
+  localStorage.setItem('ks_lang', l);
+  document.documentElement.lang = l;
+  renderProfileFormLabels();
+  showScreen('screen-profile');
+}
+
+/* ---------------- init on load ---------------- */
+window.addEventListener('DOMContentLoaded', async () => {
+  deviceFp = await getDeviceFingerprint();
+
+  const banInfo = await checkIfBanned(deviceFp, uid);
+  if (banInfo) { showBannedScreen(banInfo); return; }
+
+  if (!uid) { uid = uuid(); localStorage.setItem('ks_uid', uid); }
+
+  if (lang) {
+    // returning user with a language set — check if profile exists
+    db.ref('users/' + uid).once('value').then(snap => {
+      const data = snap.val();
+      if (data && data.role) {
+        myProfile = data;
+        lang = data.lang || lang;
+        db.ref('users/' + uid + '/fingerprint').set(deviceFp);
+        enterApp();
+      } else {
+        renderProfileFormLabels();
+        showScreen('screen-profile');
+      }
+    }).catch(()=>{ renderProfileFormLabels(); showScreen('screen-profile'); });
+  } else {
+    showScreen('screen-lang');
+  }
+});
+
+/* ---------------- profile form ---------------- */
+function renderProfileFormLabels(){
+  const t = T[lang];
+  document.getElementById('p-title').textContent = t.ptitle;
+  document.getElementById('p-sub').textContent = t.psub;
+  document.getElementById('lbl-username').textContent = t.username;
+  document.getElementById('hint-username').textContent = t.hintUsername;
+  document.getElementById('lbl-pin').textContent = t.pin;
+  document.getElementById('hint-pin').textContent = t.hintPin;
+  document.getElementById('lbl-name').textContent = t.name;
+  document.getElementById('in-name').placeholder = lang==='hi' ? 'जैसे: Ramesh Kumar' : 'e.g. Ramesh Kumar';
+  document.getElementById('lbl-age').textContent = t.age;
+  document.getElementById('lbl-height').textContent = t.height;
+  document.getElementById('lbl-location').textContent = t.location;
+  document.getElementById('in-location').placeholder = lang==='hi' ? 'jaise: Lucknow, UP' : 'e.g. Lucknow, UP';
+  document.getElementById('lbl-telegram').textContent = t.telegram;
+  document.getElementById('lbl-gender').textContent = t.gender;
+  document.getElementById('lbl-about').textContent = t.about;
+  document.getElementById('in-about').placeholder = lang==='hi' ? 'Apna experience aur kaam ke baare mein likhein...' : 'Write about your experience and work...';
+  document.getElementById('lbl-photos').textContent = t.photos;
+  document.getElementById('lbl-upload-btn').textContent = t.uploadBtn;
+  document.getElementById('hint-photos').textContent = t.hintPhotos;
+  document.getElementById('lbl-role').textContent = t.role;
+  document.getElementById('btn-save-profile').textContent = t.save;
+
+  // gender chips
+  const gg = document.getElementById('gender-group');
+  gg.innerHTML = '';
+  t.genders.forEach((g, i) => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (selectedGenderIdx===i ? ' sel' : '');
+    c.textContent = g;
+    c.onclick = () => { selectedGenderIdx = i; renderProfileFormLabels(); };
+    gg.appendChild(c);
+  });
+
+  // role cards
+  const rc = document.getElementById('role-cards');
+  rc.innerHTML = '';
+  const roles = [
+    {key:'worker', ic:'🧰', t:t.roleWorker, d:t.roleWorkerD},
+    {key:'employer', ic:'📋', t:t.roleEmployer, d:t.roleEmployerD}
+  ];
+  roles.forEach(r => {
+    const c = document.createElement('div');
+    c.className = 'role-card' + (selectedRole===r.key ? ' sel' : '');
+    c.innerHTML = `<div class="ic">${r.ic}</div><div><div class="t">${r.t}</div><div class="d">${r.d}</div></div>`;
+    c.onclick = () => { selectedRole = r.key; renderProfileFormLabels(); };
+    rc.appendChild(c);
+  });
+
+  renderPhotoGrid();
+}
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  const slots = Math.max(4, photosArr.length);
+  for (let i=0; i<slots; i++){
+    const slot = document.createElement('div');
+    slot.className = 'photo-slot';
+    const p = photosArr[i];
+    if (p && p.url) {
+      slot.innerHTML = `<img src="${p.url}">`;
+    } else if (p && p.uploading) {
+      slot.innerHTML = `<span>⏳</span><div class="prog" style="width:${p.progress||0}%"></div>`;
+    } else {
+      slot.innerHTML = `<span>+</span>`;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function handlePhotoSelect(e){
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const idx = photosArr.length;
+    photosArr.push({uploading:true, progress:0});
+    renderPhotoGrid();
+    uploadToCloudinary(file, pct => {
+      if (photosArr[idx]) { photosArr[idx].progress = pct; renderPhotoGrid(); }
+    }).then(url => {
+      photosArr[idx] = {url};
+      renderPhotoGrid();
+    }).catch(() => {
+      photosArr[idx] = null;
+      showToast(lang==='hi' ? 'Photo upload nahi hui, dobara try karein' : 'Upload failed, please try again');
+      renderPhotoGrid();
+    });
+  });
+  e.target.value = '';
+}
+
+function showError(elId, msg){
+  const el = document.getElementById(elId);
+  el.textContent = msg; el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function hideError(elId){ document.getElementById(elId).style.display='none'; }
+
+function saveProfile(){
+  const t = T[lang];
+  hideError('p-error');
+  const username = document.getElementById('in-username').value.trim().toLowerCase();
+  const pin = document.getElementById('in-pin').value.trim();
+  const name = document.getElementById('in-name').value.trim();
+  const age = document.getElementById('in-age').value.trim();
+  const height = document.getElementById('in-height').value.trim();
+  const location = document.getElementById('in-location').value.trim();
+  const telegram = document.getElementById('in-telegram').value.trim();
+  const about = document.getElementById('in-about').value.trim();
+  const uploadedPhotos = photosArr.filter(p => p && p.url).map(p => p.url);
+
+  if (!username || username.length < 6) return showError('p-error', t.errUsername);
+  if (!/^[a-z0-9_]+$/.test(username)) return showError('p-error', t.errUsernameFormat);
+  if (!/^\d{6}$/.test(pin)) return showError('p-error', t.errPin);
+  if (!name) return showError('p-error', t.errName);
+  if (!age || age < 14 || age > 80) return showError('p-error', t.errAge);
+  if (!height || height < 100 || height > 230) return showError('p-error', t.errHeight);
+  if (!location) return showError('p-error', t.errLocation);
+  if (selectedGenderIdx === null) return showError('p-error', t.errGender);
+  if (!about) return showError('p-error', t.errAbout);
+  if (uploadedPhotos.length < 4) return showError('p-error', t.errPhotos);
+  if (!selectedRole) return showError('p-error', t.errRole);
+
+  const btn = document.getElementById('btn-save-profile');
+  btn.disabled = true; btn.textContent = '...';
+
+  checkIfBanned(deviceFp, null).then(banInfo => {
+    if (banInfo) { showBannedScreen(banInfo); return; }
+
+    db.ref('usernames/' + username).once('value').then(async unameSnap => {
+      if (unameSnap.exists()) {
+        btn.disabled = false; btn.textContent = t.save;
+        return showError('p-error', t.errUsernameTaken);
+      }
+      const pinHash = await hashPin(pin);
+      const pinSnap = await db.ref('pins/' + pinHash).once('value');
+      if (pinSnap.exists()) {
+        btn.disabled = false; btn.textContent = t.save;
+        return showError('p-error', t.errPinTaken);
+      }
+      const profile = {
+        username, pinHash, name, age:Number(age), height:Number(height), location, telegram,
+        gender: T[lang].genders[selectedGenderIdx],
+        about, photos: uploadedPhotos, role: selectedRole, lang,
+        fingerprint: deviceFp,
+        createdAt: Date.now()
+      };
+      db.ref('users/' + uid).set(profile).then(() => {
+        return Promise.all([
+          db.ref('usernames/' + username).set(uid),
+          db.ref('pins/' + pinHash).set(uid)
+        ]);
+      }).then(() => {
+        myProfile = profile;
+        showToast(t.toastSaved);
+        enterApp();
+      }).catch(() => {
+        btn.disabled = false; btn.textContent = t.save;
+        showError('p-error', lang==='hi' ? 'Kuch gadbad hui, dobara try karein' : 'Something went wrong, try again');
+      });
+    });
+  });
+}
+
+/* ---------------- login ---------------- */
+function openLoginScreen(){
+  if (!lang) lang = 'hi';
+  renderLoginLabels();
+  showScreen('screen-login');
+}
+function toggleLoginLang(){
+  lang = lang === 'hi' ? 'en' : 'hi';
+  renderLoginLabels();
+}
+function renderLoginLabels(){
+  const t = T[lang];
+  document.getElementById('lg-title').textContent = t.lgTitle;
+  document.getElementById('lg-sub').textContent = t.lgSub;
+  document.getElementById('lbl-lg-username').textContent = t.lblLgUsername;
+  document.getElementById('lbl-lg-pin').textContent = t.lblLgPin;
+  document.getElementById('btn-login').textContent = t.loginBtn;
+  document.getElementById('btn-login-back').textContent = t.backBtn;
+  document.getElementById('lg-lang-pill').textContent = lang === 'hi' ? 'English' : 'हिंदी';
+}
+async function hashPin(pin){
+  const enc = new TextEncoder().encode('ks_salt_' + pin);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function attemptLogin(){
+  const t = T[lang];
+  hideError('lg-error');
+  const username = document.getElementById('in-lg-username').value.trim().toLowerCase();
+  const pin = document.getElementById('in-lg-pin').value.trim();
+  if (!username) return showError('lg-error', t.errLgUsername);
+  if (!/^\d{6}$/.test(pin)) return showError('lg-error', t.errLgPin);
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = '...';
+
+  db.ref('usernames/' + username).once('value').then(async snap => {
+    if (!snap.exists()) {
+      btn.disabled = false; btn.textContent = t.loginBtn;
+      return showError('lg-error', t.errLgNotFound);
+    }
+    const foundUid = snap.val();
+    const profSnap = await db.ref('users/' + foundUid).once('value');
+    const profile = profSnap.val();
+    const pinHash = await hashPin(pin);
+    btn.disabled = false; btn.textContent = t.loginBtn;
+    if (!profile || profile.pinHash !== pinHash) {
+      return showError('lg-error', t.errLgWrongPin);
+    }
+
+    const banInfo = await checkIfBanned(deviceFp, foundUid);
+    if (banInfo) { showBannedScreen(banInfo); return; }
+
+    uid = foundUid;
+    localStorage.setItem('ks_uid', uid);
+    lang = profile.lang || lang;
+    localStorage.setItem('ks_lang', lang);
+    myProfile = profile;
+    db.ref('users/' + uid + '/fingerprint').set(deviceFp);
+    showToast(T[lang].toastLoggedIn);
+    enterApp();
+  });
+}
+
+/* ---------------- app entry / nav ---------------- */
+function enterApp(){
+  const t = T[lang];
+  document.body.dataset.role = myProfile.role;
+  document.getElementById('bottom-nav').classList.add('show');
+  document.getElementById('nav-home-lbl').textContent = t.navHome;
+  document.getElementById('nav-employers-lbl').textContent = t.navEmployers;
+  document.getElementById('nav-chats-lbl').textContent = t.navChats;
+  document.getElementById('nav-profile-lbl').textContent = t.navProfile;
+  document.getElementById('nav-employers').style.display = (myProfile.role === 'worker') ? 'flex' : 'none';
+  listenGlobalUnread();
+  goHome();
+}
+
+function goHome(){
+  document.getElementById('bottom-nav').classList.add('show');
+  setActiveNav('nav-home');
+  if (myProfile.role === 'worker') {
+    document.getElementById('fab-post').classList.remove('show');
+    loadWorkerHome();
+  } else {
+    document.getElementById('fab-post').classList.add('show');
+    loadEmployerHome();
+  }
+}
+function setActiveNav(id){
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+/* ---------------- unread message tracking ---------------- */
+let unreadListenerRef = null;
+function listenGlobalUnread(){
+  const field = myProfile.role === 'worker' ? 'workerId' : 'employerId';
+  const unreadField = myProfile.role === 'worker' ? 'unreadForWorker' : 'unreadForEmployer';
+  if (unreadListenerRef) { unreadListenerRef.off(); }
+  const ref = db.ref('chats').orderByChild(field).equalTo(uid);
+  unreadListenerRef = ref;
+  ref.on('value', snap => {
+    const data = snap.val() || {};
+    const anyUnread = Object.values(data).some(c => c && c[unreadField]);
+    const dot = document.getElementById('nav-chats-dot');
+    if (dot) dot.classList.toggle('show', !!anyUnread);
+  });
+}
+
+/* ---------------- worker: browse jobs ---------------- */
+function loadWorkerHome(){
+  const t = T[lang];
+  document.getElementById('wh-title').textContent = t.whTitle;
+  document.getElementById('wh-heading').textContent = t.whHeading;
+  showScreen('screen-worker-home');
+
+  Promise.all([
+    db.ref('jobs').orderByChild('createdAt').once('value'),
+    db.ref('bannedUsers').once('value')
+  ]).then(([snap, bannedSnap]) => {
+    const data = snap.val() || {};
+    const banned = bannedSnap.val() || {};
+    Object.keys(data).forEach(id => { if (data[id].employerId && banned[data[id].employerId]) delete data[id]; });
+    jobsCache = data;
+    const list = document.getElementById('jobs-list');
+    const ids = Object.keys(data).sort((a,b)=> data[b].createdAt - data[a].createdAt);
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="ic">🗒️</div>${t.noJobs}</div>`;
+      return;
+    }
+    list.innerHTML = ids.map(id => renderJobTicket(id, data[id])).join('');
+  });
+}
+
+function renderJobTicket(id, job){
+  const t = T[lang];
+  const already = myProfile && job.applicants && job.applicants[uid];
+  const avatar = job.employerPhoto || '';
+  return `
+    <div class="ticket" id="ticket-${id}">
+      <div class="ticket-top">
+        <span class="ticket-cat">${job.category || ''}</span>
+        <div class="ticket-title">${escapeHtml(job.title)}</div>
+        <div class="ticket-meta">📍 ${escapeHtml(job.location)}</div>
+        <div class="ticket-employer">
+          ${avatar ? `<img src="${avatar}" onerror="imgFallback(this)" style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox('${escapeJs(avatar)}','${job.employerId}',0)">` : ''}
+          <span>${t.by} ${escapeHtml(job.employerName||'')}</span>
+        </div>
+        <div class="ticket-desc">${escapeHtml(job.description||'')}</div>
+      </div>
+      <div class="ticket-divider"></div>
+      <div class="ticket-bottom">
+        <div class="ticket-pay">${escapeHtml(job.pay||'')}</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn ${already?'outline':''}" onclick="expressInterest('${id}')">${already ? t.appliedBadge+' ✓' : t.applyBtn}</button>
+          <button class="ticket-btn outline" onclick="viewProfile('${job.employerId}', 'screen-worker-home')">${t.viewProfileBtn}</button>
+          <button class="ticket-btn outline" onclick="openChat('${id}','${job.employerId}','${escapeJs(job.employerName||'')}','${escapeJs(avatar)}','${escapeJs(job.title)}')">${t.chatBtn}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function expressInterest(jobId, silent){
+  const t = T[lang];
+  return db.ref(`jobs/${jobId}/applicants/${uid}`).set({
+    name: myProfile.name, age: myProfile.age, telegram: myProfile.telegram || '',
+    photo: (myProfile.photos && myProfile.photos[0]) || '', appliedAt: Date.now()
+  }).then(() => {
+    if (!silent) showToast(t.interestedMsg);
+    if (jobsCache[jobId]) { jobsCache[jobId].applicants = jobsCache[jobId].applicants || {}; jobsCache[jobId].applicants[uid] = true; }
+    const btn = document.querySelector(`#ticket-${jobId} .ticket-actions .ticket-btn`);
+    if (btn) { btn.textContent = t.appliedBadge + ' ✓'; btn.classList.add('outline'); }
+  });
+}
+
+/* ---------------- workers: browse all employers directly ---------------- */
+function loadEmployersBrowse(){
+  const t = T[lang];
+  document.getElementById('eb-title').textContent = t.whTitle;
+  document.getElementById('eb-heading').textContent = t.ebHeading;
+  const list = document.getElementById('employers-list');
+  list.innerHTML = `<div class="empty-state"><div class="ic">⏳</div></div>`;
+
+  Promise.all([
+    db.ref('users').orderByChild('role').equalTo('employer').once('value'),
+    db.ref('bannedUsers').once('value')
+  ]).then(([snap, bannedSnap]) => {
+    const data = snap.val() || {};
+    const banned = bannedSnap.val() || {};
+    const ids = Object.keys(data).filter(id => id !== uid && !banned[id]).sort((a,b)=> (data[b].createdAt||0) - (data[a].createdAt||0));
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="ic">👥</div>${t.noEmployers}</div>`;
+      return;
+    }
+    list.innerHTML = ids.map(id => renderEmployerBrowseCard(id, data[id])).join('');
+  });
+}
+
+function renderEmployerBrowseCard(id, emp){
+  const t = T[lang];
+  const avatar = (emp.photos && emp.photos[0]) || '';
+  return `
+    <div class="ebrowse-card">
+      ${avatar ? `<img src="${avatar}" onerror="imgFallback(this)" onclick="openLightbox('${escapeJs(avatar)}','${id}',0)">` : `<div style="width:62px;height:62px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">👤</div>`}
+      <div style="flex:1; min-width:0;">
+        <div class="en">${escapeHtml(emp.name||'')}</div>
+        <div class="el">📍 ${escapeHtml(emp.location||'')}</div>
+        <div class="ea">${escapeHtml(emp.about||'')}</div>
+        <div class="ebtns">
+          <button class="ticket-btn outline" onclick="viewProfile('${id}', 'screen-employers-browse')">${t.viewProfileBtn}</button>
+          <button class="ticket-btn" onclick="openChat('direct_${id}','${id}','${escapeJs(emp.name||'')}','${escapeJs(avatar)}','${escapeJs(t.directChatTitle)}')">${t.chatBtn}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------------- employer: my jobs ---------------- */
+function loadEmployerHome(){
+  const t = T[lang];
+  document.getElementById('eh-title').textContent = t.ehTitle;
+  document.getElementById('eh-heading').textContent = t.ehHeading;
+  showScreen('screen-employer-home');
+
+  db.ref('jobs').orderByChild('employerId').equalTo(uid).once('value').then(snap => {
+    const data = snap.val() || {};
+    const list = document.getElementById('myjobs-list');
+    const ids = Object.keys(data).sort((a,b)=> data[b].createdAt - data[a].createdAt);
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="ic">📋</div>${t.noJobs}</div>`;
+      return;
+    }
+    list.innerHTML = ids.map(id => renderMyJobCard(id, data[id])).join('');
+  });
+}
+
+function renderMyJobCard(id, job){
+  const t = T[lang];
+  const applicantEntries = job.applicants ? Object.entries(job.applicants) : [];
+  const appHtml = applicantEntries.length
+    ? applicantEntries.map(([wid, a]) => `
+        <div class="applicant" onclick="openChat('${id}','${wid}','${escapeJs(a.name)}','${escapeJs(a.photo||'')}','${escapeJs(job.title)}')">
+          ${a.photo ? `<img src="${a.photo}" onerror="imgFallback(this)" onclick="event.stopPropagation(); openLightbox('${escapeJs(a.photo)}','${wid}',0)">` : `<div style="width:44px;height:44px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>`}
+          <div style="flex:1;"><div class="n">${escapeHtml(a.name)} · ${a.age}</div><div class="p">${a.telegram ? '✈️ '+escapeHtml(a.telegram)+' · ' : ''}${t.tapToChat}</div></div>
+          <span style="font-size:16px;">💬</span>
+        </div>`).join('')
+    : `<div style="font-size:13px;color:var(--ink-soft); padding:6px 0;">${t.noApplicants}</div>`;
+
+  return `
+    <div class="ticket">
+      <div class="ticket-top">
+        <span class="ticket-cat">${job.category||''}</span>
+        <div class="ticket-title">${escapeHtml(job.title)}</div>
+        <div class="ticket-meta">📍 ${escapeHtml(job.location)} &nbsp;·&nbsp; ${escapeHtml(job.pay||'')}</div>
+      </div>
+      <div class="ticket-divider"></div>
+      <div class="ticket-bottom" style="display:block;">
+        <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${t.applicantsFor} (${applicantEntries.length})</div>
+        ${appHtml}
+      </div>
+    </div>`;
+}
+
+/* ---------------- post job ---------------- */
+function openPostJob(){
+  const t = T[lang];
+  document.getElementById('pj-heading').textContent = t.pjHeading;
+  document.getElementById('lbl-jtitle').textContent = t.jtitle;
+  document.getElementById('in-jtitle').placeholder = lang==='hi' ? 'jaise: Ghar ki safai chahiye' : 'e.g. Need house cleaning';
+  document.getElementById('lbl-jcat').textContent = t.jcat;
+  document.getElementById('lbl-jloc').textContent = t.jloc;
+  document.getElementById('in-jloc').placeholder = lang==='hi' ? 'jaise: Andheri, Mumbai' : 'e.g. Andheri, Mumbai';
+  document.getElementById('lbl-jpay').textContent = t.jpay;
+  document.getElementById('lbl-jdesc').textContent = t.jdesc;
+  document.getElementById('in-jdesc').placeholder = lang==='hi' ? 'Kaam ki poori jaankari likhein...' : 'Write full details of the work...';
+  document.getElementById('btn-post-job').textContent = t.postBtn;
+  document.getElementById('btn-cancel-job').textContent = t.cancelBtn;
+
+  const sel = document.getElementById('in-jcat');
+  sel.innerHTML = t.categories.map(c => `<option>${c}</option>`).join('');
+
+  document.getElementById('in-jtitle').value = '';
+  document.getElementById('in-jloc').value = '';
+  document.getElementById('in-jpay').value = '';
+  document.getElementById('in-jdesc').value = '';
+  hideError('pj-error');
+
+  showScreen('screen-post-job');
+}
+
+function postJob(){
+  const t = T[lang];
+  hideError('pj-error');
+  const title = document.getElementById('in-jtitle').value.trim();
+  const category = document.getElementById('in-jcat').value;
+  const location = document.getElementById('in-jloc').value.trim();
+  const pay = document.getElementById('in-jpay').value.trim();
+  const description = document.getElementById('in-jdesc').value.trim();
+
+  if (!title) return showError('pj-error', t.errJTitle);
+  if (!location) return showError('pj-error', t.errJLoc);
+  if (!pay) return showError('pj-error', t.errJPay);
+  if (!description) return showError('pj-error', t.errJDesc);
+
+  const btn = document.getElementById('btn-post-job');
+  btn.disabled = true; btn.textContent = '...';
+
+  const newRef = db.ref('jobs').push();
+  newRef.set({
+    title, category, location, pay, description,
+    employerId: uid, employerName: myProfile.name, employerTelegram: myProfile.telegram || '',
+    employerPhoto: (myProfile.photos && myProfile.photos[0]) || '',
+    createdAt: Date.now()
+  }).then(() => {
+    showToast(t.toastPosted);
+    btn.disabled = false; btn.textContent = t.postBtn;
+    loadEmployerHome();
+  }).catch(() => {
+    btn.disabled = false; btn.textContent = t.postBtn;
+    showError('pj-error', lang==='hi' ? 'Kuch gadbad hui, dobara try karein' : 'Something went wrong, try again');
+  });
+}
+
+/* ---------------- my profile view ---------------- */
+function refreshMyProfile(){
+  const t = T[lang];
+  document.getElementById('mp-heading').textContent = t.mpHeading;
+  document.getElementById('btn-switch-account').textContent = t.switchAcc;
+  const p = myProfile;
+  const photosHtml = (p.photos||[]).map((u,i) => `<img src="${u}" onclick="openLightbox('${escapeJs(u)}','${uid}',${i})">`).join('');
+  document.getElementById('mp-card').innerHTML = `
+    <div style="width:70px;height:70px;border-radius:16px;overflow:hidden;margin:0 auto;cursor:pointer;" onclick="openLightbox('${escapeJs(p.photos[0])}','${uid}',0)">
+      <img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;">
+    </div>
+    <h3 style="margin-top:12px;">${escapeHtml(p.name)}</h3>
+    <span class="badge-role">${p.role === 'worker' ? t.roleWorker : t.roleEmployer}</span>
+    <div class="profile-photos">${photosHtml}</div>
+    <div style="margin-top:8px;">
+      <div class="info-row"><span>${t.ageLbl}</span><span>${p.age}</span></div>
+      <div class="info-row"><span>${t.heightLbl}</span><span>${p.height} cm</span></div>
+      <div class="info-row"><span>${t.genderLbl}</span><span>${escapeHtml(p.gender)}</span></div>
+      <div class="info-row"><span>${t.locLbl}</span><span>${escapeHtml(p.location)}</span></div>
+      <div class="info-row"><span>${t.telegramLbl}</span><span>${p.telegram ? escapeHtml(p.telegram) : '—'}</span></div>
+      <div class="info-row" style="border-bottom:none;"><span>${t.aboutLbl}</span><span style="text-align:right; max-width:60%;">${escapeHtml(p.about)}</span></div>
+    </div>`;
+}
+
+function switchAccount(){
+  localStorage.removeItem('ks_uid');
+  localStorage.removeItem('ks_lang');
+  location.reload();
+}
+
+/* ---------------- view someone else's profile ---------------- */
+let viewProfileReturnScreen = 'screen-worker-home';
+function viewProfile(otherUid, returnScreen){
+  const t = T[lang];
+  viewProfileReturnScreen = returnScreen || 'screen-worker-home';
+  document.getElementById('vp-heading').textContent = t.vpHeading;
+  document.getElementById('vp-card').innerHTML = `<div class="empty-state"><div class="ic">⏳</div></div>`;
+  showScreen('screen-view-profile');
+  document.getElementById('bottom-nav').classList.remove('show');
+  document.getElementById('fab-post').classList.remove('show');
+
+  db.ref('users/' + otherUid).once('value').then(snap => {
+    const p = snap.val();
+    if (!p) { document.getElementById('vp-card').innerHTML = `<div class="empty-state"><div class="ic">🙈</div></div>`; return; }
+    const photosHtml = (p.photos||[]).map((u,i) => `<img src="${u}" onclick="openLightbox('${escapeJs(u)}','${otherUid}',${i})">`).join('');
+    document.getElementById('vp-card').innerHTML = `
+      <div style="width:70px;height:70px;border-radius:16px;overflow:hidden;margin:0 auto;cursor:pointer;" onclick="${p.photos && p.photos[0] ? `openLightbox('${escapeJs(p.photos[0])}','${otherUid}',0)` : ''}">
+        <img src="${p.photos ? p.photos[0] : ''}" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <h3 style="margin-top:12px;">${escapeHtml(p.name)}</h3>
+      <span class="badge-role">${p.role === 'worker' ? t.roleWorker : t.roleEmployer}</span>
+      <div class="profile-photos">${photosHtml}</div>
+      <div style="margin-top:8px;">
+        <div class="info-row"><span>${t.ageLbl}</span><span>${p.age}</span></div>
+        <div class="info-row"><span>${t.heightLbl}</span><span>${p.height} cm</span></div>
+        <div class="info-row"><span>${t.genderLbl}</span><span>${escapeHtml(p.gender)}</span></div>
+        <div class="info-row"><span>${t.locLbl}</span><span>${escapeHtml(p.location)}</span></div>
+        <div class="info-row"><span>${t.telegramLbl}</span><span>${p.telegram ? escapeHtml(p.telegram) : '—'}</span></div>
+        <div class="info-row" style="border-bottom:none;"><span>${t.aboutLbl}</span><span style="text-align:right; max-width:60%;">${escapeHtml(p.about)}</span></div>
+      </div>`;
+  });
+}
+function closeViewProfile(){
+  document.getElementById('bottom-nav').classList.add('show');
+  if (myProfile.role === 'employer') document.getElementById('fab-post').classList.add('show');
+  showScreen(viewProfileReturnScreen);
+}
+
+/* ---------------- photo lightbox ---------------- */
+let lightboxOwner = null, lightboxIndex = null, lightboxLikesRef = null;
+function openLightbox(url, ownerUid, index){
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox-overlay').classList.add('show');
+  lightboxOwner = ownerUid; lightboxIndex = index;
+  if (lightboxLikesRef) lightboxLikesRef.off();
+  lightboxLikesRef = db.ref('photoLikes/' + ownerUid + '/' + index);
+  lightboxLikesRef.on('value', snap => {
+    const data = snap.val() || {};
+    const count = Object.keys(data).length;
+    const liked = !!data[uid];
+    document.getElementById('lightbox-like-count').textContent = count;
+    document.getElementById('lightbox-heart').textContent = liked ? '❤️' : '🤍';
+  });
+}
+function toggleLike(){
+  if (lightboxOwner === null || lightboxIndex === null) return;
+  const ref = db.ref('photoLikes/' + lightboxOwner + '/' + lightboxIndex + '/' + uid);
+  ref.once('value').then(snap => { snap.exists() ? ref.remove() : ref.set(true); });
+}
+function closeLightbox(){
+  document.getElementById('lightbox-overlay').classList.remove('show');
+  if (lightboxLikesRef) { lightboxLikesRef.off(); lightboxLikesRef = null; }
+  lightboxOwner = null; lightboxIndex = null;
+}
+function closeLightboxBg(e){ if (e.target.id === 'lightbox-overlay') closeLightbox(); }
+
+/* ---------------- utils ---------------- */
+function escapeHtml(str){
+  if (str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeJs(str){
+  if (str === undefined || str === null) return '';
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+function imgFallback(el){
+  const w = el.offsetWidth || 44;
+  const div = document.createElement('div');
+  div.style.cssText = `width:${w}px;height:${w}px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;`;
+  div.textContent = '👤';
+  el.replaceWith(div);
+}
+
+/* ---------------- chat ---------------- */
+let currentChatId = null;
+let currentChatListener = null;
+let currentChatReturnScreen = 'screen-worker-home';
+
+function chatIdFor(jobId, otherPartyId){
+  // deterministic id: job + the worker's uid (works whichever side opens it)
+  const workerId = myProfile.role === 'worker' ? uid : otherPartyId;
+  return jobId + '__' + workerId;
+}
+
+function openChat(jobId, otherPartyId, otherPartyName, otherPartyPhoto, jobTitle){
+  const activeEl = document.querySelector('.screen.active');
+  currentChatReturnScreen = activeEl ? activeEl.id : (myProfile.role === 'worker' ? 'screen-worker-home' : 'screen-employer-home');
+  const t = T[lang];
+  const chatId = chatIdFor(jobId, otherPartyId);
+  currentChatId = chatId;
+
+  document.getElementById('chat-other-name').textContent = otherPartyName || '';
+  document.getElementById('chat-job-title').textContent = jobTitle || '';
+  document.getElementById('chat-other-photo-wrap').innerHTML = otherPartyPhoto
+    ? `<img src="${otherPartyPhoto}" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" onerror="this.parentNode.innerHTML='👤'" onclick="openLightbox('${escapeJs(otherPartyPhoto)}','${otherPartyId}',0)">`
+    : '👤';
+  document.getElementById('chat-input').placeholder = t.typeMsg;
+  document.getElementById('chat-body').innerHTML = '';
+
+  // if a worker opens the chat for an actual job, this also counts as applying/expressing interest
+  // (direct chats started from the Employers list aren't tied to a job, so skip that)
+  const isDirect = jobId.indexOf('direct_') === 0;
+  const setupRoot = (myProfile.role === 'worker' && !isDirect)
+    ? expressInterest(jobId, true).then(() => ensureChatRoot(chatId, jobId, jobTitle, otherPartyId, otherPartyName, otherPartyPhoto))
+    : ensureChatRoot(chatId, jobId, jobTitle, otherPartyId, otherPartyName, otherPartyPhoto);
+
+  setupRoot.then(() => {
+    const myUnreadField = myProfile.role === 'worker' ? 'unreadForWorker' : 'unreadForEmployer';
+    return db.ref('chats/' + chatId).update({ [myUnreadField]: false });
+  }).then(() => {
+    showScreen('screen-chat');
+    document.getElementById('bottom-nav').classList.remove('show');
+    document.getElementById('fab-post').classList.remove('show');
+    listenToChat(chatId);
+  });
+}
+
+function ensureChatRoot(chatId, jobId, jobTitle, otherPartyId, otherPartyName, otherPartyPhoto){
+  const rootData = (myProfile.role === 'worker')
+    ? { jobId, jobTitle, workerId: uid, workerName: myProfile.name, workerPhoto: (myProfile.photos&&myProfile.photos[0])||'',
+        employerId: otherPartyId, employerName: otherPartyName, employerPhoto: otherPartyPhoto || '' }
+    : { jobId, jobTitle, employerId: uid, employerName: myProfile.name, employerPhoto: (myProfile.photos&&myProfile.photos[0])||'',
+        workerId: otherPartyId, workerName: otherPartyName, workerPhoto: otherPartyPhoto || '' };
+  return db.ref('chats/' + chatId).update(rootData);
+}
+
+function listenToChat(chatId){
+  if (currentChatListener) { currentChatListener.off(); }
+  const ref = db.ref('chats/' + chatId + '/messages');
+  currentChatListener = ref;
+  ref.on('value', snap => {
+    const data = snap.val() || {};
+    const body = document.getElementById('chat-body');
+    const ids = Object.keys(data).sort((a,b)=> data[a].at - data[b].at);
+    if (ids.length === 0) {
+      body.innerHTML = `<div class="chat-empty">${T[lang].noMsgs}</div>`;
+      return;
+    }
+    body.innerHTML = ids.map(id => {
+      const m = data[id];
+      const mine = m.sender === uid;
+      const time = new Date(m.at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return `<div class="msg-row ${mine?'mine':'theirs'}"><div class="msg-bubble">${escapeHtml(m.text)}<span class="msg-time">${time}</span></div></div>`;
+    }).join('');
+    body.scrollTop = body.scrollHeight;
+
+    // mark my side as read while the chat is open
+    const myUnreadField = myProfile.role === 'worker' ? 'unreadForWorker' : 'unreadForEmployer';
+    db.ref('chats/' + chatId).update({ [myUnreadField]: false });
+  });
+}
+
+function sendChatMsg(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !currentChatId) return;
+  input.value = '';
+  const otherUnreadField = myProfile.role === 'worker' ? 'unreadForEmployer' : 'unreadForWorker';
+  db.ref('chats/' + currentChatId + '/messages').push({ sender: uid, text, at: Date.now() });
+  const update = { lastMessage: text, lastAt: Date.now() };
+  update[otherUnreadField] = true;
+  db.ref('chats/' + currentChatId).update(update);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('chat-input');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMsg(); });
+});
+
+function closeChat(){
+  if (currentChatListener) { currentChatListener.off(); currentChatListener = null; }
+  currentChatId = null;
+  document.getElementById('bottom-nav').classList.add('show');
+  if (myProfile.role === 'employer') document.getElementById('fab-post').classList.add('show');
+  showScreen(currentChatReturnScreen);
+}
+
+function loadChatsList(){
+  const t = T[lang];
+  document.getElementById('cl-heading').textContent = t.chatsHeading;
+  const field = myProfile.role === 'worker' ? 'workerId' : 'employerId';
+  const unreadField = myProfile.role === 'worker' ? 'unreadForWorker' : 'unreadForEmployer';
+  db.ref('chats').orderByChild(field).equalTo(uid).once('value').then(snap => {
+    const data = snap.val() || {};
+    const list = document.getElementById('chats-list');
+    const ids = Object.keys(data).sort((a,b)=> (data[b].lastAt||0) - (data[a].lastAt||0));
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="ic">💬</div>${t.noChats}</div>`;
+      return;
+    }
+    list.innerHTML = ids.map(id => {
+      const c = data[id];
+      const otherName = myProfile.role === 'worker' ? c.employerName : c.workerName;
+      const otherPhoto = myProfile.role === 'worker' ? c.employerPhoto : c.workerPhoto;
+      const otherId = myProfile.role === 'worker' ? c.employerId : c.workerId;
+      const unread = !!c[unreadField];
+      return `
+        <div class="chat-list-item" onclick="openChat('${c.jobId}','${otherId}','${escapeJs(otherName||'')}','${escapeJs(otherPhoto||'')}','${escapeJs(c.jobTitle||'')}')">
+          ${otherPhoto ? `<img src="${otherPhoto}" onerror="imgFallback(this)">` : `<div style="width:48px;height:48px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>`}
+          <div style="flex:1; min-width:0;">
+            <div class="cn">${escapeHtml(otherName||'')}${unread ? '<span class="item-unread-dot"></span>' : ''}</div>
+            <div class="cj">${escapeHtml(c.jobTitle||'')}</div>
+            <div class="cl">${escapeHtml(c.lastMessage || t.noMsgs)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  });
+}
+</script>
+</body>
+</html>
