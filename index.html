@@ -1430,7 +1430,65 @@ function switchTab(tab){
 
   // Playboy now opens the new luxury profiles website instead of the old embedded page.
   if(tab==='kaamsaathi'){
-    window.location.href = 'index_luxury_v2_clean(1).html';
+    (async function(){
+      // Load the luxury profiles page directly from the GitHub repository.
+      // This avoids relying on the custom-domain path for the HTML file.
+      const luxuryUrl = 'https://raw.githubusercontent.com/mohniopx-blip/mywebsite0/main/index_luxury_v2_clean_fixed.html';
+      try{
+        const response = await fetch(luxuryUrl, {cache:'no-store'});
+        if(!response.ok) throw new Error('Luxury page HTTP '+response.status);
+        let html = await response.text();
+
+        /*  callboy profile-page fixes/customizations injected here so the live
+           luxury page stays connected to the same Firebase project.
+           1) Modal close button stays correctly pinned inside the profile sheet.
+           2) City filter buttons are loaded from settings/profileCities, so the
+              admin panel can add/remove unlimited cities. */
+        const profilePatch = `<style id="callboyProfilePatch">
+          .sheet{position:relative!important;}
+          .sheet > .close{position:absolute!important;top:12px!important;right:12px!important;z-index:30!important;float:none!important;width:42px!important;height:42px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;border-radius:50%!important;background:rgba(35,35,38,.94)!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 6px 20px rgba(0,0,0,.35)!important;font-size:20px!important;line-height:1!important;}
+          .sheet > .close:active{transform:scale(.92);}
+          .luxFilters{scrollbar-width:none;}
+        </style>
+        <script>
+        (function(){
+          function initPrimeDynamicCities(){
+            if(typeof db==='undefined') return;
+            const wrap=document.querySelector('.luxFilters');
+            if(!wrap || typeof renderProfiles!=='function') return;
+            db.ref('settings/profileCities').on('value', function(snap){
+              let cities=snap.val();
+              if(!Array.isArray(cities)) cities=[];
+              cities=cities.map(function(c){return String(c||'').trim();}).filter(Boolean);
+              if(!cities.length) cities=['Delhi','Dehradun','Chandigarh'];
+              const seen=new Set(), unique=cities.filter(function(c){const k=c.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true;});
+              wrap.innerHTML='<button class="filterBtn active" data-filter="all">All</button>'+unique.map(function(c){
+                return '<button class="filterBtn" data-filter="'+String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'">'+String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')+'</button>';
+              }).join('');
+              wrap.querySelectorAll('.filterBtn').forEach(function(btn){
+                btn.addEventListener('click',function(){
+                  wrap.querySelectorAll('.filterBtn').forEach(function(x){x.classList.remove('active');});
+                  btn.classList.add('active');
+                  activeLocation=btn.dataset.filter;
+                  renderProfiles();
+                });
+              });
+              activeLocation='all';
+              renderProfiles();
+            });
+          }
+          if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initPrimeDynamicCities); else setTimeout(initPrimeDynamicCities,0);
+        })();
+        <\/script>`;
+        html = html.replace('</body>', profilePatch + '</body>');
+        const blobUrl = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
+        window.location.href = blobUrl;
+      }catch(err){
+        console.error('Luxury profile page load failed:', err);
+        // Fallback: try the GitHub Pages URL if it is enabled for this repository.
+        window.location.href = 'https://mohniopx-blip.github.io/mywebsite0/index_luxury_v2_clean_fixed.html';
+      }
+    })();
     return;
   }
 
