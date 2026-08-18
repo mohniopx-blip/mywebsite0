@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profiles</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b0b10;color:#fff}
+.hidden{display:none!important}.screen{min-height:100vh;padding:24px}
+.gate{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(circle at top,#29203a,#0b0b10 55%)}
+.card{width:min(430px,100%);background:#15151d;border:1px solid #292936;border-radius:24px;padding:25px;box-shadow:0 20px 70px #0008}
+h1{margin:0 0 8px}.muted{color:#aaa;font-size:14px}input,select{width:100%;padding:14px;margin:8px 0;background:#0d0d13;border:1px solid #343442;border-radius:12px;color:#fff;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#111;font-weight:700;font-size:15px;cursor:pointer;margin-top:10px}
+.error{color:#ff7d7d;font-size:14px;margin-top:8px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.profile{background:#15151d;border:1px solid #292936;border-radius:18px;overflow:hidden;cursor:pointer}
+.profile img{width:100%;aspect-ratio:1/1.15;object-fit:cover;display:block;background:#222}
+.profile .pbody{padding:7px 8px}.profile .pbody b{font-size:14px;line-height:1.2;display:block}.loc{color:#aaa;font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:flex-end;justify-content:center;padding:12px;z-index:1000!important}
+.sheet{position:relative;width:min(700px,100%);max-height:94vh;overflow-y:auto;background:#15151d;border-radius:24px;padding:68px 16px 16px;scroll-behavior:smooth}
+.scroll-hint{
+position:fixed;
+left:50%;
+bottom:32px;
+transform:translateX(-50%);
+z-index:999;
+display:flex;
+align-items:center;
+gap:10px;
+min-width:205px;
+justify-content:center;
+padding:12px 18px;
+border:1px solid #ffffff55;
+border-radius:18px;
+background:#11111bd9;
+backdrop-filter:blur(10px);
+color:#fff;
+font-size:16px;
+font-weight:800;
+letter-spacing:.3px;
+box-shadow:0 8px 30px #000b,0 0 0 1px #ffffff18;
+animation:hintPulse 1.5s ease-in-out infinite;
+cursor:pointer;
+}
+.scroll-hint.hidden{display:none}
+.scroll-hint .hint-arrow{
+display:flex;
+flex-direction:column;
+align-items:center;
+line-height:8px;
+font-size:22px;
+font-weight:900;
+animation:arrowDrop 1s ease-in-out infinite;
+}
+.scroll-hint .hint-text{white-space:nowrap}
+@keyframes hintPulse{
+0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 8px 30px #000b,0 0 0 1px #ffffff18}
+50%{transform:translateX(-50%) scale(1.06);box-shadow:0 10px 34px #000c,0 0 0 5px #ffffff12}
+}
+@keyframes arrowDrop{
+0%,100%{transform:translateY(-3px);opacity:.65}
+50%{transform:translateY(5px);opacity:1}
+}
+.close{position:fixed!important;right:14px!important;top:14px!important;z-index:10001!important;width:46px!important;height:46px!important;padding:0!important;margin:0!important;display:grid!important;place-items:center;background:#292936!important;color:#fff!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:14px!important;font-size:24px!important;line-height:1!important;box-shadow:0 8px 24px rgba(0,0,0,.35);float:none!important}
+.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;clear:both;padding-top:10px}
+.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:13px}
+.details{padding:12px 2px}.details h2{margin:0 0 5px}.pill{display:inline-block;padding:7px 10px;background:#242430;border-radius:20px;margin:4px 4px 4px 0;font-size:13px}
+.telegram{background:#229ED9;color:#fff;margin-top:14px}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:20000!important;display:flex;align-items:center;justify-content:center;padding:18px}
+.lightbox.hidden{display:none}
+.lightbox img{max-width:96vw;max-height:88vh;width:auto;height:auto;object-fit:contain;border-radius:10px}
+.lightboxClose{position:absolute;z-index:20001!important;right:16px;top:16px;width:auto!important;background:#292936!important;color:#fff!important;padding:10px 14px!important;margin:0!important;font-size:24px!important}
+
+
+/* ===== PRIME LUXURY V2 ===== */
+body{background:#080807;color:#f7f5ef;overflow-x:hidden}
+.screen{padding:0;min-height:100vh}
+.luxHeader{height:70px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:rgba(8,8,7,.86);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07)}
+.luxBrand{display:flex;align-items:center;gap:10px}.luxLogo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#f4e6b0,#a98d4b);color:#17140c;font-weight:950;font-size:18px;box-shadow:0 8px 24px rgba(201,170,91,.16)}.luxTitle{font-size:14px;font-weight:950;letter-spacing:2.4px}.luxTiny{font-size:7px;letter-spacing:1.8px;color:#77746c;margin-top:2px}
+.luxRight{display:flex;align-items:center;gap:9px}.luxOnline{font-size:10px;color:#9d9a91;border:1px solid #24231e;background:#10100e;padding:8px 10px;border-radius:99px}.luxOnline i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#7ed89a;box-shadow:0 0 9px #7ed89a;margin-right:5px}.luxLogout{width:auto!important;margin:0!important;padding:9px 13px!important;border-radius:11px!important;background:#f4f1e9!important;color:#111!important;border:0!important;font-size:11px!important;font-weight:800}
+.luxHome{max-width:1120px;margin:auto;padding:0 20px 28px}
+.welcomeBar{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:42px 35px 38px;margin:18px 0 20px;border:1px solid #25241f;border-radius:24px;background:linear-gradient(120deg,#151511 0%,#0d0d0b 52%,#17140c 100%);box-shadow:0 20px 70px rgba(0,0,0,.28)}
+.welcomeBar:after{content:"";position:absolute;width:330px;height:330px;right:-110px;top:-170px;border-radius:50%;border:1px solid rgba(220,191,113,.14);box-shadow:0 0 90px rgba(220,191,113,.08)}.welcomeText{position:relative;z-index:2}.miniLabel{font-size:9px;letter-spacing:2.4px;color:#9d8a5a;font-weight:900}.welcomeText h1{font-size:clamp(38px,6vw,62px);line-height:1;margin:12px 0 10px;letter-spacing:-2.8px}.welcomeText h1 span{font-weight:400;color:#b8b5ad}.welcomeText p{margin:0;max-width:530px;color:#8f8c84;font-size:13px;line-height:1.6}
+.welcomeBadge{position:relative;z-index:3;display:flex;align-items:center;gap:10px;border:1px solid #302c20;background:#11100c;padding:12px 14px;border-radius:15px;min-width:150px}.badgeIcon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#1e1a11;color:#d4b86d}.welcomeBadge b{display:block;font-size:9px;letter-spacing:1.4px}.welcomeBadge small{display:block;color:#716e66;font-size:9px;margin-top:3px}
+.luxControls{display:flex;gap:10px;align-items:center;margin-bottom:28px}.luxSearch{height:44px;display:flex;align-items:center;gap:8px;flex:1;min-width:180px;border:1px solid #25241f;background:#0f0f0d;border-radius:13px;padding:0 13px}.luxSearch span{font-size:22px;color:#7f7a70}.luxSearch input{margin:0!important;padding:0!important;border:0!important;outline:0!important;background:transparent!important;color:#f4f1e9;font-size:13px}.luxSearch input::placeholder{color:#626058}.luxFilters{display:flex;gap:7px;overflow:auto;scrollbar-width:none}.luxFilters::-webkit-scrollbar{display:none}.filterBtn{width:auto!important;margin:0!important;padding:10px 13px!important;border:1px solid #292821!important;background:#10100e!important;color:#858178!important;border-radius:11px!important;white-space:nowrap;font-size:11px!important}.filterBtn.active{background:#eee9dc!important;color:#15140f!important;border-color:#eee9dc!important}
+.luxSectionHead{display:flex;align-items:end;justify-content:space-between;margin-bottom:13px}.luxSectionHead>div:first-child>span{font-size:8px;letter-spacing:2px;color:#77736a;font-weight:900}.luxSectionHead h2{font-size:25px;letter-spacing:-.7px;margin:4px 0 0}.luxCount{text-align:right}.luxCount strong{font-size:20px}.luxCount small{display:block;color:#6e6b63;font-size:9px;margin-top:2px}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.profile{background:#121210;border-color:#282720;border-radius:18px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}.profile:hover{transform:translateY(-3px);border-color:#57503c;box-shadow:0 18px 45px rgba(0,0,0,.38)}.profile img{aspect-ratio:1/1.15}.profile .pbody{padding:8px 9px 10px}
+.emptyState{text-align:center;padding:55px 20px;border:1px dashed #292821;border-radius:18px;color:#77746c}.emptyIcon{font-size:32px;color:#a58b50}.emptyState h3{color:#ddd9d0;margin:8px 0 5px}.emptyState p{margin:0;font-size:12px}
+.luxFooter{display:flex;justify-content:space-between;gap:15px;padding:25px 2px 6px;margin-top:28px;border-top:1px solid #1d1c18;color:#55534c;font-size:9px;letter-spacing:.6px}.luxFooter b{color:#8d8a82;letter-spacing:1.5px}.luxFooter span{margin-left:6px}
+@media(max-width:700px){.luxHeader{padding:0 14px}.luxOnline{display:none}.luxHome{padding:0 13px 24px}.welcomeBar{padding:30px 22px 28px;display:block;border-radius:20px}.welcomeBadge{margin-top:20px;width:max-content}.welcomeText h1{letter-spacing:-2px}.luxControls{display:block}.luxFilters{margin-top:8px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.profile{border-radius:14px}.profile .pbody{padding:6px 7px 8px}.profile .pbody b{font-size:13px}.loc{font-size:10px}.luxFooter{display:block;line-height:2}}
+
+</style>
+</head>
+<body>
+<section id="gate" class="gate">
+  <div class="card">
+    <h1>Welcome</h1>
+    <div class="muted" id="gateSub">Login with your username or create a new account.</div>
+
+    <div id="loginBox">
+      <input id="loginUsername" placeholder="Username" maxlength="30">
+      <button id="loginBtn">Login</button>
+      <button id="showRegister" style="background:#292936;color:#fff">Create New Username</button>
+    </div>
+
+    <div id="registerBox" class="hidden">
+      <input id="username" placeholder="Create unique username" maxlength="30">
+      <select id="gender"><option value="">Gender</option><option>Male</option><option>Female</option><option>Other</option></select>
+      <input id="age" type="number" min="18" max="100" placeholder="Age">
+      <input id="location" placeholder="Location">
+      <button id="continueBtn">Create Account & Continue</button>
+      <button id="backLogin" style="background:#292936;color:#fff">Back to Login</button>
+    </div>
+
+    <div id="gateError" class="error"></div>
+  </div>
+</section>
+
+<section id="app" class="screen hidden">
+  <header class="luxHeader">
+    <div class="luxBrand">
+      <div class="luxLogo" id="siteLogoText">P</div>
+      <div>
+        <div class="luxTitle" id="siteBrandText">PRIME</div>
+        <div class="luxTiny" id="siteTinyText">PRIVATE DIRECTORY</div>
+      </div>
+    </div>
+    <div class="luxRight">
+      <div class="luxOnline"><i></i> <span id="siteOnlineText">Online</span></div>
+      <button id="logoutBtn" class="luxLogout">Logout</button>
+    </div>
+  </header>
+
+  <main class="luxHome">
+    <section class="welcomeBar">
+      <div class="welcomeText">
+        <div class="miniLabel" id="siteWelcomeLabel">WELCOME BACK</div>
+        <h1><span id="siteWelcomeTitle">Discover</span> <span id="siteWelcomeAccent">profiles.</span></h1>
+        <p id="siteWelcomeDesc"></p>
+      </div>
+    </section>
+
+    <section class="luxControls">
+      <div class="luxSearch">
+        <span>⌕</span>
+        <input id="profileSearch" type="search" placeholder="Search by name or location…" autocomplete="off">
+      </div>
+      <div class="luxFilters" id="luxFilters">
+        <button class="filterBtn active" data-filter="all">All</button>
+      </div>
+    </section>
+
+    <section class="luxSectionHead">
+      <div>
+        <span>COLLECTION</span>
+        <h2>Profiles</h2>
+      </div>
+      <div class="luxCount"><strong id="profileCount">0</strong><small id="resultCount">profiles</small></div>
+    </section>
+
+    <div id="grid" class="grid"></div>
+    <div id="emptyState" class="emptyState hidden">
+      <div class="emptyIcon">⌕</div>
+      <h3>No profiles found</h3>
+      <p>Try another name or location.</p>
+    </div>
+
+    <footer class="luxFooter">
+      <div><b id="siteFooterBrand">PRIME</b> <span id="siteFooterText">PRIVATE DIRECTORY</span></div>
+      <div id="hello"></div>
+    </footer>
+  </main>
+</section>
+
+
+<div id="modal" class="modal hidden">
+  <div class="sheet" id="detailSheet">
+    <button class="close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+    <button id="scrollHint" class="scroll-hint hidden" onclick="scrollDetails()" aria-label="Scroll down to see more">
+  <span class="hint-arrow"><span>⌄</span><span>⌄</span></span>
+  <span class="hint-text">SCROLL DOWN</span>
+</button>
+  </div>
+</div>
+
+<div id="lightbox" class="lightbox hidden" onclick="closeLightbox(event)">
+  <button class="lightboxClose" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Full photo">
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCbsJdwyFXHW-NY1w6j3fS26_7JXDE_x4I",
+  authDomain: "vibe-v2-94f63.firebaseapp.com",
+  databaseURL: "https://vibe-v2-94f63-default-rtdb.firebaseio.com",
+  projectId: "vibe-v2-94f63",
+  storageBucket: "vibe-v2-94f63.firebasestorage.app",
+  messagingSenderId: "55743932257",
+  appId: "1:55743932257:web:baab152e46c13ec7100720",
+  measurementId: "G-MP828T2Q3N"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function enterWebsite(username){
+  sessionStorage.setItem("visitorUsername", username);
+  $("gate").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("hello").textContent = "@" + username;
+  loadSiteSettings().catch(console.error);
+  loadCities().catch(console.error);
+  loadProfiles();
+}
+
+$("loginBtn").onclick = async () => {
+  const username = $("loginUsername").value.trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
+  $("gateError").textContent = "";
+  if(username.length < 3) return $("gateError").textContent="Enter your username.";
+  try{
+    const snap = await db.ref("usernames/" + username).once("value");
+    if(!snap.exists()) return $("gateError").textContent="Username not found. Create a new username first.";
+    enterWebsite(username);
+  }catch(err){
+    console.error(err);
+    $("gateError").textContent="Login failed: " + (err?.message || "Check your Firebase connection.");
+  }
+};
+
+$("showRegister").onclick = () => {
+  $("loginBox").classList.add("hidden");
+  $("registerBox").classList.remove("hidden");
+  $("gateSub").textContent="Create your unique username and profile details.";
+  $("gateError").textContent="";
+};
+
+$("backLogin").onclick = () => {
+  $("registerBox").classList.add("hidden");
+  $("loginBox").classList.remove("hidden");
+  $("gateSub").textContent="Login with your username or create a new account.";
+  $("gateError").textContent="";
+};
+
+$("continueBtn").onclick = async () => {
+  const username = $("username").value.trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"");
+  const gender = $("gender").value, age = Number($("age").value), location = $("location").value.trim();
+  $("gateError").textContent = "";
+  if(username.length < 3) return $("gateError").textContent="Username must be at least 3 characters.";
+  if(!gender || !age || age < 18 || !location) return $("gateError").textContent="Please fill all fields. Age must be 18+.";
+  try{
+    const ref = db.ref("usernames/" + username);
+    const snap = await ref.once("value");
+    if(snap.exists()) return $("gateError").textContent="This username is already taken.";
+    await ref.set({gender, age, location, createdAt:Date.now()});
+    enterWebsite(username);
+  }catch(err){
+    console.error(err);
+    $("gateError").textContent="Account creation failed: " + (err?.message || "Check your Firebase connection.");
+  }
+};
+
+// Keep the user logged in on this browser session.
+const savedUsername = sessionStorage.getItem("visitorUsername");
+if(savedUsername){
+  db.ref("usernames/" + savedUsername).once("value").then(snap => {
+    if(snap.exists()) enterWebsite(savedUsername);
+    else sessionStorage.removeItem("visitorUsername");
+  }).catch(()=>{});
+}
+
+$("logoutBtn").onclick = () => {
+  sessionStorage.removeItem("visitorUsername");
+  location.reload();
+};
+
+let allProfiles = [];
+let activeLocation = "all";
+
+async function loadSiteSettings(){
+  const snap=await db.ref("settings/site").once("value");
+  const s=snap.val()||{};
+  $("siteLogoText").textContent=s.logoText||"P";
+  $("siteBrandText").textContent=s.brandTitle||"PRIME";
+  $("siteTinyText").textContent=s.brandTiny||"PRIVATE DIRECTORY";
+  $("siteOnlineText").textContent=s.onlineText||"Online";
+  $("siteWelcomeLabel").textContent=s.welcomeLabel||"WELCOME BACK";
+  $("siteWelcomeTitle").textContent=s.welcomeTitle||"Discover";
+  $("siteWelcomeAccent").textContent=s.welcomeAccent||"profiles.";
+  $("siteWelcomeDesc").textContent=s.welcomeDescription||"";
+  $("siteFooterBrand").textContent=s.brandTitle||"PRIME";
+  $("siteFooterText").textContent=s.footerText||"PRIVATE DIRECTORY";
+}
+
+async function loadCities(){
+  const filters=$("luxFilters");
+  if(!filters) return;
+
+  // Read the exact city list saved by Admin Panel.
+  try{
+    const snap=await db.ref("settings/profileCities").once("value");
+    const raw=snap.val();
+    let cities = Array.isArray(raw)
+      ? raw.map(c=>String(c||"").trim()).filter(Boolean)
+      : [];
+
+    const unique=[];
+    cities.forEach(c=>{
+      if(!unique.some(x=>x.toLowerCase()===c.toLowerCase())) unique.push(c);
+    });
+    cities=unique;
+
+    filters.innerHTML='<button class="filterBtn active" data-filter="all">All</button>'+
+      cities.map(c=>`<button class="filterBtn" data-filter="${esc(c)}">${esc(c)}</button>`).join("");
+
+    activeLocation="all";
+    bindFilters();
+  }catch(err){
+    console.error("City list load failed:",err);
+    filters.innerHTML='<button class="filterBtn active" data-filter="all">All</button>';
+    bindFilters();
+  }
+}
+
+function bindFilters(){
+  document.querySelectorAll(".filterBtn").forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      activeLocation=btn.dataset.filter;
+      renderProfiles();
+    };
+  });
+}
+
+function renderProfiles(){
+  const q = ($("profileSearch")?.value || "").trim().toLowerCase();
+  const filtered = allProfiles.filter(([id,p])=>{
+    const location = String(p.location || "");
+    const name = String(p.name || "");
+    const matchesSearch = !q || name.toLowerCase().includes(q) || location.toLowerCase().includes(q);
+    const matchesLocation = activeLocation === "all" || location.toLowerCase() === activeLocation.toLowerCase();
+    return matchesSearch && matchesLocation;
+  });
+
+  $("grid").innerHTML = filtered.map(([id,p]) => `
+    <article class="profile" onclick='openProfile(${JSON.stringify(id)})'>
+      <img src="${esc((p.photos||[])[0] || "https://via.placeholder.com/500x600?text=Profile")}" alt="">
+      <div class="pbody"><b>${esc(p.name || "Profile")}</b><div class="loc">📍 ${esc(p.location || "")}</div></div>
+    </article>`).join("");
+
+  $("profileCount").textContent = allProfiles.length;
+  $("resultCount").textContent = `${filtered.length} ${filtered.length===1?"profile":"profiles"}`;
+  $("emptyState").classList.toggle("hidden", filtered.length !== 0);
+}
+
+function loadProfiles(){
+  db.ref("profiles").on("value", snap => {
+    const data = snap.val() || {};
+    allProfiles = Object.entries(data).filter(([id,p])=>p && p.active !== false);
+    renderProfiles();
+  });
+}
+
+$("profileSearch").addEventListener("input", renderProfiles);
+bindFilters();
+
+async function openProfile(id){
+  const snap = await db.ref("profiles/"+id).once("value"), p=snap.val();
+  if(!p) return;
+
+  // Count each logged-in username only once per profile.
+  const viewer = sessionStorage.getItem("visitorUsername") || "guest_" + Date.now();
+  const viewerKey = btoa(unescape(encodeURIComponent(viewer))).replace(/[.#$\[\]\/]/g,"_");
+  const viewerRef = db.ref("profileViews/"+id+"/"+viewerKey);
+  const seen = await viewerRef.once("value");
+  if(!seen.exists()){
+    await viewerRef.set({username:viewer, viewedAt:Date.now()});
+    await db.ref("profiles/"+id+"/viewCount").transaction(v => (Number(v)||0)+1);
+  }
+
+  const photos=(p.photos||[]);
+  const tg=p.telegramUsername||"";
+  const text=p.telegramMessage||"Hello, I am interested in your profile.";
+  const link=tg ? `https://t.me/${encodeURIComponent(tg.replace(/^@/,""))}?text=${encodeURIComponent(text)}` : "#";
+  $("modalContent").innerHTML=`
+    <div class="photos">${photos.map((u,i)=>`<img src="${esc(u)}" alt="Photo ${i+1}" onclick="openLightbox('${esc(u)}');event.stopPropagation()">`).join("")}</div>
+    <div class="details">
+      <h2>${esc(p.name||"Profile")}</h2>
+      <span class="pill">Age: ${esc(p.age)}</span><span class="pill">📍 ${esc(p.location)}</span>
+      <span class="pill">Height: ${esc(p.height||"—")}</span>
+      <p>${esc(p.bio||"")}</p>
+      ${tg?`<a href="${link}" target="_blank" rel="noopener"><button class="telegram">✈️ Telegram</button></a>`:""}
+    </div>`;
+  const sheet=$("detailSheet");
+  sheet.scrollTop=0;
+  $("modal").classList.remove("hidden");
+  requestAnimationFrame(updateScrollHint);
+}
+function updateScrollHint(){
+  const sheet=$("detailSheet"), hint=$("scrollHint");
+  if(!sheet || !hint) return;
+  const canScroll=sheet.scrollHeight > sheet.clientHeight + 8;
+  const atBottom=sheet.scrollTop + sheet.clientHeight >= sheet.scrollHeight - 35;
+  hint.classList.toggle("hidden", !canScroll || atBottom);
+}
+function scrollDetails(){
+  const sheet=$("detailSheet");
+  sheet.scrollBy({top:Math.min(430, sheet.clientHeight*0.72),behavior:"smooth"});
+  setTimeout(updateScrollHint,450);
+}
+$("detailSheet").addEventListener("scroll", updateScrollHint);
+
+function openLightbox(url){
+  $("lightboxImg").src = url;
+  $("lightbox").classList.remove("hidden");
+}
+function closeLightbox(e){
+  if(e && e.target && e.target.id==="lightboxImg") return;
+  $("lightbox").classList.add("hidden");
+  $("lightboxImg").src="";
+}
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    $("lightbox").classList.add("hidden");
+    $("lightboxImg").src="";
+  }
+});
+function closeModal(){
+  $("modal").classList.add("hidden");
+  $("detailSheet").scrollTop=0;
+  $("scrollHint").classList.add("hidden");
+}
+
+// Keep admin-controlled website settings and city filters synced live.
+db.ref("settings/site").on("value", snap=>{
+  const s=snap.val()||{};
+  if($("siteLogoText")) $("siteLogoText").textContent=s.logoText||"P";
+  if($("siteBrandText")) $("siteBrandText").textContent=s.brandTitle||"PRIME";
+  if($("siteTinyText")) $("siteTinyText").textContent=s.brandTiny||"PRIVATE DIRECTORY";
+  if($("siteOnlineText")) $("siteOnlineText").textContent=s.onlineText||"Online";
+  if($("siteWelcomeLabel")) $("siteWelcomeLabel").textContent=s.welcomeLabel||"WELCOME BACK";
+  if($("siteWelcomeTitle")) $("siteWelcomeTitle").textContent=s.welcomeTitle||"Discover";
+  if($("siteWelcomeAccent")) $("siteWelcomeAccent").textContent=s.welcomeAccent||"profiles.";
+  if($("siteWelcomeDesc")) $("siteWelcomeDesc").textContent=s.welcomeDescription||"";
+  if($("siteFooterBrand")) $("siteFooterBrand").textContent=s.brandTitle||"PRIME";
+  if($("siteFooterText")) $("siteFooterText").textContent=s.footerText||"PRIVATE DIRECTORY";
+});
+db.ref("settings/profileCities").on("value", snap=>{
+  const filters=$("luxFilters");
+  if(!filters) return;
+
+  const raw=snap.val();
+  let cities=Array.isArray(raw)
+    ? raw.map(c=>String(c||"").trim()).filter(Boolean)
+    : [];
+
+  const unique=[];
+  cities.forEach(c=>{
+    if(!unique.some(x=>x.toLowerCase()===c.toLowerCase())) unique.push(c);
+  });
+  cities=unique;
+
+  const current=activeLocation;
+  const keepCurrent = current!=="all" &&
+    cities.some(c=>c.toLowerCase()===String(current).toLowerCase());
+
+  activeLocation = keepCurrent ? current : "all";
+
+  filters.innerHTML='<button class="filterBtn" data-filter="all">All</button>'+
+    cities.map(c=>`<button class="filterBtn" data-filter="${esc(c)}">${esc(c)}</button>`).join("");
+
+  document.querySelectorAll(".filterBtn").forEach(btn=>{
+    btn.classList.toggle(
+      "active",
+      btn.dataset.filter.toLowerCase()===String(activeLocation).toLowerCase()
+    );
+  });
+
+  bindFilters();
+  renderProfiles();
+}, err=>{
+  console.error("Live city list error:",err);
+});
+</script>
+</body>
+</html>
